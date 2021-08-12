@@ -8,6 +8,7 @@ import {
   ScrollView, 
   TextInput,
   TouchableOpacity,
+  Modal,
   Alert,
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -18,13 +19,13 @@ import * as SQLite from "expo-sqlite";
 
 export default function App() {
   const [hasPermission, setHasPermission] = useState(null);
-  // const [statusText, setStatus] = setState(() =>createAlert(statusText))
+  const [modalVisible, setModalVisible] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState('Nothing Scanned! :(')
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
 
-  const createAlert = (data) =>{
+  const addDB = (data) =>{
     Alert.alert(
       "QR успешно отсканирован",
       data,
@@ -34,15 +35,15 @@ export default function App() {
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "Добавить в базу данных", onPress: () => console.log("add") }
+        { text: "Добавить в базу данных", onPress: () => analyze(data) }
       ]
     );
   } 
-    
 
 
-    // Функция загрузки базы данных в папки assets
-    // бд перетираются при одинаковых названиях (добавляется новая)
+
+  // Функция загрузки базы данных из папки assets
+  // бд перетираются при одинаковых названиях (добавляется новая)
   const download = () => {
     FileSystem.downloadAsync(
       Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
@@ -84,7 +85,8 @@ export default function App() {
       <View style={styles.container}>
         <Text style={{ margin: 10 }}>Camera cannot be accessed.</Text>
         <Button title={'Allow Your Camera!'} onPress={() => askForCameraPermission()} />
-      </View>)
+      </View>
+      )
   }
 
 
@@ -96,22 +98,27 @@ export default function App() {
   let trace = arr[2]
   let model = arr[3] // Модель
   let serNom = arr[4] // Серийный номер
-  let status, newStatusText
+  let status
   console.log("Analyzing...")
   db.transaction(
     tx => {
-      tx.executeSql('SELECT * FROM qr WHERE kod = ? AND name = ?', [kod, name], (trans, result) => {
-        console.log(result.rows.length)
-        if (!result.rows.length) {
-          status = 2 //не в учете
-          // setStatus("Предмет не в учете")
-        }else{
-          status = 1 // в учете
-          // setStatus("Предмет в учете")
-        }
-        console.log(result.rows._array)
-        add(kod, name, status, trace, model, serNom)
-    });
+      tx.executeSql(
+        'SELECT * FROM qr WHERE kod = ? AND name = ?', 
+        [kod, name], 
+        (_, result) => {
+          if (!result.rows.length) {
+            status = 2 //не в учете
+            // setStatus("Предмет не в учете")
+          }else{
+            status = 1 // в учете
+            var len = result.rows.length;
+            let row = result.rows.item(0);
+            console.log(`Вещь в списке под номером ${row.index}`)
+          }
+          add(kod, name, status, trace, model, serNom)
+        },
+        (_, error) => console.log(error)
+    );
     }
   );
  }
@@ -120,21 +127,22 @@ export default function App() {
   // 2 действие: добавление в таблицу отсканированных предметов с указанным статусом
   const add = (kod, name, status, trace, model, serNom) => {
     console.log("Adding...")
-    db.transaction(
-      tx => {
-        tx.executeSql('INSERT INTO scanned (kod, name, status, trace, model, serNom) VALUES(?, ?, ?, ?, ?, ?)', [kod, name, status, trace, model, serNom], (trans, result) => {
-          console.log(result.rows._array)
-      });
-      }
-    );
+    // db.transaction(
+    //   tx => {
+    //     tx.executeSql('INSERT INTO scanned (kod, name, status, trace, model, serNom) VALUES(?, ?, ?, ?, ?, ?)', [kod, name, status, trace, model, serNom], (trans, result) => {
+    //       console.log(result.rows._array)
+    //   });
+    //   }
+    // );
   };
-     // Scanned bar code 
+
+  // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     setText(data)
-    createAlert(data)
+    // addDB(data)
+    setModalVisible(true)
     console.log("Успешно отсканировано")
-    analyze(data)
   };
 
    return (
@@ -152,15 +160,40 @@ export default function App() {
         <>
         </>
       )}
-        <View style={styles.barcodebox}>
-          <BarCodeScanner
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-            style={{ height: 400, width: 400 }} />
-        </View>
-        <ScrollView>
-          <Text style={styles.maintext}>{text}</Text>
-        </ScrollView>
-      {scanned && <Button title={'SCAN THIS!'} onPress={() => setScanned(false)} color='lightblue' />}
+      
+      <View style={styles.barcodebox}>
+        <BarCodeScanner
+          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+          style={{ height: 400, width: 400 }} />
+      </View>
+      <View style={styles.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => { setModalVisible(!modalVisible) }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.maintext}>{text}</Text>
+              <View style={styles.buttons}>
+                <TouchableOpacity style={[styles.button, styles.accept]} onPress={() => {
+                  setModalVisible(!modalVisible)
+                  analyze(text)
+                }}>
+                  <Text style={styles.textStyle}>Анализировать</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => {
+                  setModalVisible(!modalVisible)
+                  console.log("Ничего не анализировалось")
+                }}>
+                  <Text style={styles.textStyle}>Закрыть</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+      {scanned && <Button style={styles.scanBtn} title={'SCAN THIS!'} onPress={() => setScanned(false)} color='lightblue' />}
     </View>
   );
 }
@@ -171,6 +204,44 @@ function useForceUpdate() {
 
 //Styles 
 const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  buttons:{
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "80%",
+  },
+  button: {
+    borderRadius: 5,
+    padding: 10,
+    elevation: 2,
+  },
+  accept: {
+    backgroundColor: '#28a745',
+  },
+  reject: {
+    backgroundColor: '#dc3545',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+
   container: {
     flex: 1,
     marginTop: 30,
@@ -180,8 +251,9 @@ const styles = StyleSheet.create({
   },
 
   maintext: {
-    fontSize: 22,
-    margin: 30,
+    fontSize: 20,
+    padding: 5,
+    // margin: 30,
   },
 
   baseText: {
@@ -191,6 +263,9 @@ const styles = StyleSheet.create({
     color: "black",
   },
 
+  scanBtn :{
+    marginBottom: 20,
+  },
   barcodebox: {
     alignItems: 'center',
     justifyContent: 'center',
