@@ -23,19 +23,21 @@ export default function App() {
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
 
-  const Alert = () =>
+  const createAlert = (data) =>{
     Alert.alert(
-      "Заголовок",
-      text,
+      "QR успешно отсканирован",
+      data,
       [
         {
-          text: "Cancel",
+          text: "Отменить",
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "OK", onPress: () => console.log("OK Pressed") }
+        { text: "Добавить в базу данных", onPress: () => add(data) }
       ]
     );
+  } 
+    
 
 
     // Функция загрузки базы данных в папки assets
@@ -98,7 +100,9 @@ export default function App() {
         }
       );
     }
-  const add = (arr) => {
+  const add = (data) => {
+    let arr = data.split("\n") //массив разделенный по новой строке
+
     let kod = arr[0]
     let kolvo = arr[1]
     console.log("Adding...")
@@ -113,13 +117,13 @@ export default function App() {
   };
      // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
+    
     setScanned(true);
     setText(data)
+    createAlert(data)
     console.log('Type: ' + type)
     console.log("Успешно отсканировано")
-    let arr = data.split("\n") //массив разделенный по новой строке
 
-    add(arr)
     select()
   };
 
