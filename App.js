@@ -18,6 +18,7 @@ import * as SQLite from "expo-sqlite";
 
 export default function App() {
   const [hasPermission, setHasPermission] = useState(null);
+  // const [statusText, setStatus] = setState(() =>createAlert(statusText))
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState('Nothing Scanned! :(')
   const [forceUpdate, forceUpdateId] = useForceUpdate();
@@ -33,7 +34,7 @@ export default function App() {
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "Добавить в базу данных", onPress: () => add(data) }
+        { text: "Добавить в базу данных", onPress: () => console.log("add") }
       ]
     );
   } 
@@ -54,6 +55,7 @@ export default function App() {
       console.error(error);
     });
   }
+  // download()
 
   // Подключение к бд
   db = SQLite.openDatabase('qr.db');
@@ -85,51 +87,59 @@ export default function App() {
       </View>)
   }
 
-   //Main View
 
-    // добавление в бд
- 
-    const select = () => {
-      console.log("Selecting...")
-      db.transaction(
-        tx => {
-          tx.executeSql('select * from qr', [], (trans, result) => {
-            console.log(".......................................................");
-            console.log(result)
-        });
+ const analyze = (data) => { // анализирование, если такой предмет есть в инвентаризаци
+  let arr = data.split("\n") //массив разделенный по новой строке
+  // разбор массива
+  let kod = arr[0]
+  let name = arr[1]
+  let trace = arr[2]
+  let model = arr[3] // Модель
+  let serNom = arr[4] // Серийный номер
+  let status, newStatusText
+  console.log("Analyzing...")
+  db.transaction(
+    tx => {
+      tx.executeSql('SELECT * FROM qr WHERE kod = ? AND name = ?', [kod, name], (trans, result) => {
+        console.log(result.rows.length)
+        if (!result.rows.length) {
+          status = 2 //не в учете
+          // setStatus("Предмет не в учете")
+        }else{
+          status = 1 // в учете
+          // setStatus("Предмет в учете")
         }
-      );
+        console.log(result.rows._array)
+        add(kod, name, status, trace, model, serNom)
+    });
     }
-  const add = (data) => {
-    let arr = data.split("\n") //массив разделенный по новой строке
+  );
+ }
 
-    let kod = arr[0]
-    let kolvo = arr[1]
+  // 1 действие: проверка предмета на нахождение в бд => изменение статуса
+  // 2 действие: добавление в таблицу отсканированных предметов с указанным статусом
+  const add = (kod, name, status, trace, model, serNom) => {
     console.log("Adding...")
     db.transaction(
       tx => {
-        tx.executeSql('INSERT INTO qr (kod, kolvo) VALUES(?, ?)', [kod, kolvo], (trans, result) => {
-          console.log(".......................................................");
-          console.log(result)
+        tx.executeSql('INSERT INTO scanned (kod, name, status, trace, model, serNom) VALUES(?, ?, ?, ?, ?, ?)', [kod, name, status, trace, model, serNom], (trans, result) => {
+          console.log(result.rows._array)
       });
       }
     );
   };
      // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
-    
     setScanned(true);
     setText(data)
     createAlert(data)
-    console.log('Type: ' + type)
     console.log("Успешно отсканировано")
-
-    select()
+    analyze(data)
   };
 
    return (
     <View style={styles.container}>
-      <Text style={styles.baseText}>QR - BARCODE SCANNER!</Text>
+      <Text style={styles.baseText}>Инвентаризация</Text>
       {Platform.OS === "web" ? (
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -142,11 +152,11 @@ export default function App() {
         <>
         </>
       )}
-      <View style={styles.barcodebox}>
-        <BarCodeScanner
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-          style={{ height: 400, width: 400 }} />
-      </View>
+        <View style={styles.barcodebox}>
+          <BarCodeScanner
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            style={{ height: 400, width: 400 }} />
+        </View>
         <ScrollView>
           <Text style={styles.maintext}>{text}</Text>
         </ScrollView>
@@ -163,6 +173,7 @@ function useForceUpdate() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 30,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -177,16 +188,16 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "darkblue",
+    color: "black",
   },
 
   barcodebox: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 350,
-    width: 350,
+    // height: 350,
+    // width: 200,
     overflow: 'hidden',
-    borderRadius: 50,
-    backgroundColor: 'lightblue'
+    // borderRadius: 50,
+    // backgroundColor: 'lightblue'
   },
 });
