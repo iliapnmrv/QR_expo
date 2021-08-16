@@ -8,6 +8,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+./assets/sqlite/*.db
 
 # macOS
 .DS_Store
