@@ -6,28 +6,102 @@ import {
   Button, 
   Platform,
   ScrollView, 
-  TextInput,
   TouchableOpacity,
   Modal,
-  Alert,
+  RecyclerViewBackedScrollViewBase,
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Asset } from "expo-asset";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
+import { response } from 'express';
 
 function HomeScreen({navigation}) {
-  
-  // Подключение к бд
-  db = SQLite.openDatabase('qr.db');
 
+
+  // ------ Сессии
   // Данные сессии
-  const [sessionInfo, setSessionInfo] = useState("Сессия закрыта  ");
-  const [sessionBtn, setSessionBtn] = useState("Открыть сессию");
   const [sessionStatus, setSessionStatus] = useState(false);
-  //  setState модельных окон
+  const [sessionInfo, setSessionInfo] = useState("Сессия закрыта");
+  const [sessionBtn, setSessionBtn] = useState("Открыть сессию");
+
+  // получает статус сессии
+  const getSessionStatus = async () => {
+    try {
+      const result = await AsyncStorage.getItem('session');
+      return result;
+    } catch(e) {
+      console.log('error', e);
+    };
+  };
+
+  // устанавливает статус сессии
+  const setSessionInStorage = async (sessionVal) => {
+    try {
+      const val = JSON.stringify(sessionVal)
+      await AsyncStorage.setItem('session', val)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  // по изменению статуса
+  useEffect(() => {
+    getSessionStatus()
+    .then(res => {
+      setSessionStatus(res);
+      if (res) {
+        setSessionInfo("Сессия открыта")
+        setSessionBtn("Закрыть сессию")
+      }else{
+        setSessionInfo("Сессия закрыта")
+        setSessionBtn("Открыть сессию")
+      }
+    })
+    .catch(err => {
+      console.log('error', err);
+    });
+  }, []);
+
+  const onSessionChangeHandler = (data) =>{
+    if (data) {
+      setSessionInStorage(!data)
+      setSessionStatus(!data)
+      setSessionInfo("Сессия закрыта")
+      setSessionBtn("Открыть сессию")
+    }else{
+      setSessionInStorage(!data)
+      setSessionStatus(!data)
+      setSessionInfo("Сессия открыта")
+      setSessionBtn("Закрыть сессию")
+    }
+  }
+
+  const SessionClose = () => {
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          'DELETE FROM scanned', 
+          [], 
+          (_, result) => {
+            console.log("Таблица отсканированных qr кодой успешно очищена")
+          },
+          (_, error) => console.log(error)
+      );
+      }
+    );
+  }
+
+  // ------- Сессии end
+
+
+  // Подключение к бд
+  const db = SQLite.openDatabase('qr.db');
+
+  //  setState модальных окон
   const [modalVisible, setModalVisible] = useState(false);
   const [scanModalVisible, setScanModalVisible] = useState(false);
   const [sessionModalVisible, setSessionModalVisible] = useState(false);
@@ -38,17 +112,6 @@ function HomeScreen({navigation}) {
   const [itemsRemain, setItemsRemain] = useState()
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
-  changeSession = (data) =>{
-    if (!data) {
-      setSessionStatus(!data)
-      setSessionInfo("Сессия открыта")
-      setSessionBtn("Закрыть сессию")
-    }else{
-      setSessionStatus(!data)
-      setSessionInfo("Сессия закрыта")
-      setSessionBtn("Открыть сессию")
-    }
-  }
 
   // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
@@ -58,62 +121,96 @@ function HomeScreen({navigation}) {
     console.log("Успешно отсканировано")
   };
 
-  analyze = (data) => { // анализирование, если такой предмет есть в инвентаризаци
+  const analyze = (data) => { // анализирование, если такой предмет есть в инвентаризаци
     let arr = data.split("\n") //массив разделенный по новой строке
     // разбор массива
-    let kod = arr[0] // номенкулатурный номер
-    let name = arr[1] // наименование
-    let trace = arr[2] // номер прослеживаемости
-    let model = arr[3] // Модель
-    let serNom = arr[4] // Серийный номер
+    let invNom = arr[0] // Инвентарный номер
+    let name // наименование
+    arr[1] == undefined ?  name = '' : name = arr[1] // наименование
+    let trace = arr[3] // номер прослеживаемости
+    let model = arr[4] // Модель
+    let serNom = arr[5] // Серийный номер
     let status
-    console.log("Analyzing...")
     db.transaction(
       tx => {
         tx.executeSql(
-          'SELECT * FROM qr WHERE kod = ? AND name = ? AND kolvo > 0 ORDER BY kolvo', 
-          [kod, name], 
+          'SELECT * FROM `qr` WHERE `name` = ? AND `kolvo` > 0 ORDER BY `kolvo`', 
+          [name], 
           (_, result) => {
-            if (!result.rows.length) { // если не нашлось таких записей
-              db.transaction(
-                tx => {
-                  tx.executeSql(
-                    'SELECT * FROM qr WHERE kod = ? AND name = ?', 
-                    [kod, name], 
-                    (_, result) => {
-                      if (!result.rows.length) { // если не нашлось таких записей
-                        status = 2 // не в учете
-                        setScanRes("Позиция не в учете")
-                      }else{
-                        status = 3 // сверх учета
-                        setScanRes("Позиция сверх учета")
-                      }
-                    },
-                    (_, error) => console.log(error)
-                );
+            // Промис проверки на двойное сканирование
+            let check = checkDouble(invNom)
+            check.then(response => {
+              if (response) { // если позиция еще не сканировалась
+                setScanRes(`Позиция с инвентарным номером: ${invNom} уже сканировалась`)
+              }else{
+                if (!result.rows.length) { // если не нашлось таких записей
+                  db.transaction(
+                    tx => {
+                      tx.executeSql(
+                        'SELECT * FROM qr WHERE name = ?', 
+                        [name], 
+                        (_, result) => {
+                          if (!result.rows.length) { // если не нашлось таких записей
+                            status = 2 // не в учете
+                            setScanRes("Позиция не в учете")
+                          }else{
+                            status = 3 // сверх учета
+                            setScanRes("Позиция сверх учета")
+                          }
+                        },
+                        (_, error) => console.log(error)
+                    );
+                    }
+                  );
+                }else{
+                  status = 1 // в учете
+                  let row = result.rows.item(0);
+                  setScanRes(`Позиция: ${row.id}, Место: ${row.place}`)
+                  substractItem(row.id)
                 }
-              );
-            }else{
-              status = 1 // в учете
-              let row = result.rows.item(0);
-              setScanRes(`Позиция: ${row.index}`)
-              substractItem(row.index)
-            }
-            addScan(kod, name, status, trace, model, serNom)
-            setScanModalVisible(true) // модальное окно с результатом проверки
-            setItemsRemain(null)
+                addScan(invNom, name, status, trace, model, serNom)
+                setItemsRemain(null)     
+              }
+              setScanModalVisible(true) // модальное окно с результатом проверки
+            })     
           },
           (_, error) => console.log(error)
       );
       }
     );
   }
+
   
-  substractItem = (id) => {
+  // Проверка на дубликат сканирования - промис
+
+  function checkDouble(invNom){
+    return new Promise( resolve =>  {
+       db.transaction(
+        tx => {
+          tx.executeSql(
+            'SELECT * FROM scanned WHERE invNom = ?', 
+            [invNom], 
+            (_, result) => {
+              if (result.rows.length) { // если результат = 1, то уже сканировался 
+                resolve(true)
+              }else{
+                resolve(false)
+              }
+            },
+            (_, error) => console.log(error)
+          );
+        }
+      ); 
+    })
+  }
+
+
+  // вычитание позиции из строки
+  const substractItem = (id) => {
     db.transaction(
       tx => {
         tx.executeSql(
-          'UPDATE qr SET kolvo = kolvo - 1 WHERE `index` = ?', 
+          'UPDATE qr SET kolvo = kolvo - 1 WHERE `id` = ?', 
           [id], 
           (_, result) => {
             console.log('updated')
@@ -125,14 +222,14 @@ function HomeScreen({navigation}) {
     db.transaction(
       tx => {
         tx.executeSql(
-          'SELECT * FROM qr WHERE `index` = ?', 
+          'SELECT * FROM qr WHERE `id` = ?', 
           [id], 
           (_, result) => {
             let row = result.rows.item(0);
             if (!row.kolvo) { //если не остается остатка
-              setItemsRemain(`Последняя позиция в строке ${row.index}`)
+              setItemsRemain(`Последняя позиция`)
             }else{
-              setItemsRemain(`Осталось ${row.kolvo} в строке ${row.index}`)
+              setItemsRemain(`Осталось ${row.kolvo} в строке ${row.id}`)
             }
           },
           (_, error) => console.log(error)
@@ -143,13 +240,12 @@ function HomeScreen({navigation}) {
 
   // 1 действие: проверка предмета на нахождение в бд => изменение статуса
   // 2 действие: добавление в таблицу отсканированных предметов с указанным статусом
-  addScan = (kod, name, status, trace, model, serNom) => {
-    console.log("Adding...")
+  const addScan = (invNom, name, status, trace, model, serNom) => {
     db.transaction(
       tx => {
         tx.executeSql(
-          'INSERT INTO scanned (kod, name, status, trace, model, serNom) VALUES(?, ?, ?, ?, ?, ?)', 
-          [kod, name, status, trace, model, serNom], 
+          'INSERT INTO scanned (invNom, name, status, trace, model, serNom) VALUES(?, ?, ?, ?, ?, ?)', 
+          [invNom, name, status, trace, model, serNom], 
           (_, result) => {
             console.log("Успешно добавлено")
           },
@@ -176,7 +272,7 @@ function HomeScreen({navigation}) {
         )}
         <View style={styles.sessionInfo}>
           <Text style={sessionStatus ? styles.active : styles.danger}>{sessionInfo}</Text>
-          <Button title={sessionBtn} onPress={() => { sessionStatus ? setSessionModalVisible(true) : changeSession(sessionStatus)}} />
+          <Button title={sessionBtn} onPress={() => { sessionStatus ? setSessionModalVisible(true) : onSessionChangeHandler(sessionStatus)}} />
         </View>
         <View style={styles.barcodebox}>
           <BarCodeScanner
@@ -196,7 +292,8 @@ function HomeScreen({navigation}) {
                 <View style={styles.buttons}>
                   <TouchableOpacity style={[styles.button, styles.accept] } onPress={() => {
                     setSessionModalVisible(!sessionModalVisible)
-                    changeSession(sessionStatus)
+                    onSessionChangeHandler(sessionStatus)
+                    SessionClose()
                   }}>
                     <Text style={styles.btnTextStyle}>Да, закрыть</Text>
                   </TouchableOpacity>
@@ -378,7 +475,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 20,
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: 5,
     padding: 20,
     alignItems: "center",
     shadowColor: "#000",
