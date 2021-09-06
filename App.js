@@ -7,8 +7,7 @@ import {
   Platform,
   ScrollView, 
   TouchableOpacity,
-  Modal,
-  RecyclerViewBackedScrollViewBase,
+  Modal
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Asset } from "expo-asset";
@@ -17,7 +16,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
-import { response } from 'express';
 
 function HomeScreen({navigation}) {
 
@@ -73,6 +71,7 @@ function HomeScreen({navigation}) {
       setSessionInfo("Сессия закрыта")
       setSessionBtn("Открыть сессию")
     }else{
+
       setSessionInStorage(!data)
       setSessionStatus(!data)
       setSessionInfo("Сессия открыта")
@@ -270,9 +269,14 @@ function HomeScreen({navigation}) {
           <>
           </>
         )}
+        {/* Информация о сессии */}
         <View style={styles.sessionInfo}>
           <Text style={sessionStatus ? styles.active : styles.danger}>{sessionInfo}</Text>
-          <Button title={sessionBtn} onPress={() => { sessionStatus ? setSessionModalVisible(true) : onSessionChangeHandler(sessionStatus)}} />
+          <Button title={sessionBtn} onPress={() => { if (sessionStatus) {
+            setSessionModalVisible(true)
+          }else{
+            onSessionChangeHandler(sessionStatus);
+          }}} />
         </View>
         <View style={styles.barcodebox}>
           <BarCodeScanner
@@ -376,9 +380,6 @@ function App() {
       console.error(error);
     });
   }
-  // download()
-
-
 
   // Ask user for camera permission
   const askForCameraPermission = () => {
