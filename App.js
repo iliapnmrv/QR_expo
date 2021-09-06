@@ -104,13 +104,43 @@ function HomeScreen({navigation}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [scanModalVisible, setScanModalVisible] = useState(false);
   const [sessionModalVisible, setSessionModalVisible] = useState(false);
+  const [DownloadedInfoModal, setDownloadedInfoModal] = useState(false);
 
+  const [downloadedInfo, setDownloadedInfo] = useState() // данные скачки новой бд
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState('Nothing Scanned! :(')
   const [scanRes, setScanRes] = useState() // результат сканирования
   const [scanStatus, setScanStatus] = useState() // статус сканирования
   const [itemsRemain, setItemsRemain] = useState()
   const [forceUpdate, forceUpdateId] = useForceUpdate();
+
+// Функция загрузки базы данных из папки assets
+  // бд перетираются при одинаковых названиях (добавляется новая)
+  downloadDB = () => {
+    FileSystem.downloadAsync(
+      Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
+      `${FileSystem.documentDirectory}SQLite/qr.db`
+    )
+    .then(({ uri }) => {
+      console.log('Успешная загрузка в: ', uri);
+      db.transaction(
+        tx => {
+          tx.executeSql(
+            'SELECT * FROM qr', 
+            [], 
+            (_, result) => {
+              setDownloadedInfo(`Успешно загружено! \n В инвентаризационной описи ${result.rows.length} строк`)
+              setDownloadedInfoModal(true)
+            },
+            (_, error) => console.log(error)
+        );
+        }
+      );
+    })
+    .catch(error => {
+      console.error(error);
+    });
+  }
 
 
   // Scanned bar code 
@@ -134,7 +164,7 @@ function HomeScreen({navigation}) {
     db.transaction(
       tx => {
         tx.executeSql(
-          'SELECT * FROM `qr` WHERE `name` = ? AND `kolvo` > 0 ORDER BY `kolvo`, `placePriority`', 
+          'SELECT * FROM `qr` WHERE `name` = ? AND `kolvo` > 0 ORDER BY `placePriority`, `kolvo`', 
           [name], 
           (_, result) => {
             // Промис проверки на двойное сканирование
@@ -168,7 +198,7 @@ function HomeScreen({navigation}) {
                   status = 1 // в учете
                   let row = result.rows.item(0);
                   setScanStatus(`В учете`)
-                  setScanRes(`Позиция: ${row.id}, Место: ${row.place}`)
+                  setScanRes(`Позиция: ${row.vedPos}, Место: ${row.place}`)
                   substractItem(row.id)
                 }
                 addScan(invNom, name, status, trace, model, serNom)
@@ -185,7 +215,6 @@ function HomeScreen({navigation}) {
 
   
   // Проверка на дубликат сканирования - промис
-
   function checkDouble(invNom){
     return new Promise( resolve =>  {
        db.transaction(
@@ -232,7 +261,7 @@ function HomeScreen({navigation}) {
             if (!row.kolvo) { //если не остается остатка
               setItemsRemain(`Последняя позиция`)
             }else{
-              setItemsRemain(`Осталось ${row.kolvo} в строке ${row.id}`)
+              setItemsRemain(`Осталось ${row.kolvo} в строке ${row.vedPos}`)
             }
           },
           (_, error) => console.log(error)
@@ -286,6 +315,51 @@ function HomeScreen({navigation}) {
             onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
             style={{ height: 400, width: 400 }} />
         </View>
+        {/* Информация о скачке новой базы данных */}
+        <View style={styles.centeredView}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={DownloadedInfoModal}
+            onRequestClose={() => { setDownloadedInfoModal(!DownloadedInfoModal) }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.maintext}>{downloadedInfo}</Text>
+                <View style={styles.buttons}>
+                  <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setDownloadedInfoModal(!DownloadedInfoModal) }}>
+                    <Text style={styles.btnTextStyle}>Закрыть</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        </View>
+
+
+        {/* Результаты анализирования */}
+        <View style={styles.centeredView}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={scanModalVisible}
+            onRequestClose={() => { setScanModalVisible(!scanModalVisible) }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={[styles.maintext, scanStatus == "В учете" ? styles.green :
+                                              scanStatus == "Позиция не в учете" ? styles.yellow : 
+                                              scanStatus == "Позиция сверх учета" ? styles.blue :
+                                              scanStatus == "Повторное считывание" ? styles.red :  null ]} >{scanStatus}</Text>
+                {scanRes && <Text style={styles.maintext}>{scanRes}</Text>}
+                {itemsRemain && <Text style={styles.maintext}>{itemsRemain}</Text>}
+                <View style={styles.buttons}>
+                  <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setScanModalVisible(!scanModalVisible) }}>
+                    <Text style={styles.btnTextStyle}>Закрыть</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        </View>
         {/* Подтверждение закрытия сессии */}
         <View style={styles.centeredView}>
           <Modal
@@ -312,30 +386,7 @@ function HomeScreen({navigation}) {
             </View>
           </Modal>
         </View>
-        {/* Результаты анализирования */}
-        <View style={styles.centeredView}>
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={scanModalVisible}
-            onRequestClose={() => { setScanModalVisible(!scanModalVisible) }}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <Text style={[styles.maintext, scanStatus == "В учете" ? styles.green :
-                                              scanStatus == "Позиция не в учете" ? styles.yellow : 
-                                              scanStatus == "Позиция сверх учета" ? styles.blue :
-                                              scanStatus == "Повторное считывание" ? styles.red :  null ]} >{scanStatus}</Text>
-                {scanRes && <Text style={styles.maintext}>{scanRes}</Text>}
-                {itemsRemain && <Text style={styles.maintext}>{itemsRemain}</Text>}
-                <View style={styles.buttons}>
-                  <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setScanModalVisible(!scanModalVisible) }}>
-                    <Text style={styles.btnTextStyle}>Закрыть</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal>
-        </View>
+        
         {/* Результаты сканирования QR */}
         <View style={styles.centeredView}>
           <Modal
@@ -371,22 +422,9 @@ function HomeScreen({navigation}) {
 
 function App() {
   const Stack = createNativeStackNavigator();
+  
   const [hasPermission, setHasPermission] = useState(null);
 
-  // Функция загрузки базы данных из папки assets
-  // бд перетираются при одинаковых названиях (добавляется новая)
-  downloadDB = () => {
-    FileSystem.downloadAsync(
-      Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
-      `${FileSystem.documentDirectory}SQLite/qr.db`
-    )
-    .then(({ uri }) => {
-      console.log('Успешная загрузка в: ', uri);
-    })
-    .catch(error => {
-      console.error(error);
-    });
-  }
 
   // Ask user for camera permission
   const askForCameraPermission = () => {
