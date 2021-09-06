@@ -107,7 +107,8 @@ function HomeScreen({navigation}) {
 
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState('Nothing Scanned! :(')
-  const [scanRes, setScanRes] = useState()
+  const [scanRes, setScanRes] = useState() // результат сканирования
+  const [scanStatus, setScanStatus] = useState() // статус сканирования
   const [itemsRemain, setItemsRemain] = useState()
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
@@ -133,14 +134,15 @@ function HomeScreen({navigation}) {
     db.transaction(
       tx => {
         tx.executeSql(
-          'SELECT * FROM `qr` WHERE `name` = ? AND `kolvo` > 0 ORDER BY `kolvo`', 
+          'SELECT * FROM `qr` WHERE `name` = ? AND `kolvo` > 0 ORDER BY `kolvo`, `placePriority`', 
           [name], 
           (_, result) => {
             // Промис проверки на двойное сканирование
             let check = checkDouble(invNom)
             check.then(response => {
               if (response) { // если позиция еще не сканировалась
-                setScanRes(`Позиция с инвентарным номером: ${invNom} уже сканировалась`)
+                setScanStatus(`Повторное считывание`)
+                setScanRes(`Позиция с инвентарным номером ${invNom} уже сканировалась`)
               }else{
                 if (!result.rows.length) { // если не нашлось таких записей
                   db.transaction(
@@ -151,11 +153,12 @@ function HomeScreen({navigation}) {
                         (_, result) => {
                           if (!result.rows.length) { // если не нашлось таких записей
                             status = 2 // не в учете
-                            setScanRes("Позиция не в учете")
+                            setScanStatus("Позиция не в учете")
                           }else{
                             status = 3 // сверх учета
-                            setScanRes("Позиция сверх учета")
+                            setScanStatus("Позиция сверх учета")
                           }
+                          setScanRes(null)
                         },
                         (_, error) => console.log(error)
                     );
@@ -164,12 +167,13 @@ function HomeScreen({navigation}) {
                 }else{
                   status = 1 // в учете
                   let row = result.rows.item(0);
+                  setScanStatus(`В учете`)
                   setScanRes(`Позиция: ${row.id}, Место: ${row.place}`)
                   substractItem(row.id)
                 }
                 addScan(invNom, name, status, trace, model, serNom)
-                setItemsRemain(null)     
               }
+              setItemsRemain(null)    
               setScanModalVisible(true) // модальное окно с результатом проверки
             })     
           },
@@ -272,11 +276,10 @@ function HomeScreen({navigation}) {
         {/* Информация о сессии */}
         <View style={styles.sessionInfo}>
           <Text style={sessionStatus ? styles.active : styles.danger}>{sessionInfo}</Text>
-          <Button title={sessionBtn} onPress={() => { if (sessionStatus) {
-            setSessionModalVisible(true)
-          }else{
-            onSessionChangeHandler(sessionStatus);
-          }}} />
+          <Button title={sessionBtn} onPress={() => { sessionStatus ? setSessionModalVisible(true) : (
+            downloadDB(),
+            onSessionChangeHandler(sessionStatus)
+          )}} />
         </View>
         <View style={styles.barcodebox}>
           <BarCodeScanner
@@ -318,8 +321,12 @@ function HomeScreen({navigation}) {
             onRequestClose={() => { setScanModalVisible(!scanModalVisible) }}>
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-                <Text style={styles.maintext}>{scanRes}</Text>
-                <Text style={styles.maintext}>{itemsRemain}</Text>
+                <Text style={[styles.maintext, scanStatus == "В учете" ? styles.green :
+                                              scanStatus == "Позиция не в учете" ? styles.yellow : 
+                                              scanStatus == "Позиция сверх учета" ? styles.blue :
+                                              scanStatus == "Повторное считывание" ? styles.red :  null ]} >{scanStatus}</Text>
+                {scanRes && <Text style={styles.maintext}>{scanRes}</Text>}
+                {itemsRemain && <Text style={styles.maintext}>{itemsRemain}</Text>}
                 <View style={styles.buttons}>
                   <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setScanModalVisible(!scanModalVisible) }}>
                     <Text style={styles.btnTextStyle}>Закрыть</Text>
@@ -368,7 +375,7 @@ function App() {
 
   // Функция загрузки базы данных из папки assets
   // бд перетираются при одинаковых названиях (добавляется новая)
-  const download = () => {
+  downloadDB = () => {
     FileSystem.downloadAsync(
       Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
       `${FileSystem.documentDirectory}SQLite/qr.db`
@@ -515,5 +522,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  // цвета статусов
+  green: {
+    color: '#28a745'
+  },  
+  red: {
+    color: '#dc3545'
+  },  
+  blue: {
+    color: '#85C1E9'
+  },  
+  yellow: {
+    color: '#F1C40F'
   },
 });
