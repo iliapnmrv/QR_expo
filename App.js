@@ -39,10 +39,10 @@ function HomeScreen({navigation}) {
   // устанавливает статус сессии
   const setSessionInStorage = async (sessionVal) => {
     try {
-      const val = JSON.stringify(sessionVal)
+      let val = JSON.stringify(sessionVal)
       await AsyncStorage.setItem('session', val)
     } catch (e) {
-      console.log(e)
+      console.log(`Error code 6: ${e}`)
     }
   }
 
@@ -50,11 +50,12 @@ function HomeScreen({navigation}) {
   useEffect(() => {
     getSessionStatus()
     .then(res => {
-      setSessionStatus(res);
-      if (res) {
+      let a = JSON.parse(res)
+      setSessionStatus(a);
+      if (a) {
         setSessionInfo("Сессия открыта")
         setSessionBtn("Закрыть сессию")
-      }else{
+      }else {
         setSessionInfo("Сессия закрыта")
         setSessionBtn("Открыть сессию")
       }
@@ -71,7 +72,6 @@ function HomeScreen({navigation}) {
       setSessionInfo("Сессия закрыта")
       setSessionBtn("Открыть сессию")
     }else{
-
       setSessionInStorage(!data)
       setSessionStatus(!data)
       setSessionInfo("Сессия открыта")
@@ -86,9 +86,9 @@ function HomeScreen({navigation}) {
           'DELETE FROM scanned', 
           [], 
           (_, result) => {
-            console.log("Таблица отсканированных qr кодой успешно очищена")
+            console.log("Таблица отсканированных qr кодов успешно очищена")
           },
-          (_, error) => console.log(error)
+          (_, error) => console.log(`Error code 2: ${error}`)
       );
       }
     );
@@ -129,10 +129,10 @@ function HomeScreen({navigation}) {
             'SELECT * FROM qr', 
             [], 
             (_, result) => {
-              setDownloadedInfo(`Успешно загружено! \n В инвентаризационной описи ${result.rows.length} строк`)
+              setDownloadedInfo(`Успешно загружено! \nВ инвентаризационной описи ${result.rows.length} строк`)
               setDownloadedInfoModal(true)
             },
-            (_, error) => console.log(error)
+            (_, error) => console.log(`Error code 1: ${error}`)
         );
         }
       );
@@ -190,7 +190,7 @@ function HomeScreen({navigation}) {
                           }
                           setScanRes(null)
                         },
-                        (_, error) => console.log(error)
+                        (_, error) => console.log(`Error code 5: ${error}`)
                     );
                     }
                   );
@@ -247,7 +247,7 @@ function HomeScreen({navigation}) {
           (_, result) => {
             console.log('updated')
           },
-          (_, error) => console.log(error)
+          (_, error) => console.log(`Error code 4: ${error}`)
       );
       }
     );
@@ -279,9 +279,9 @@ function HomeScreen({navigation}) {
           'INSERT INTO scanned (invNom, name, status, trace, model, serNom) VALUES(?, ?, ?, ?, ?, ?)', 
           [invNom, name, status, trace, model, serNom], 
           (_, result) => {
-            console.log("Успешно добавлено")
+            console.log("Успешно добавлено в бд сканов")
           },
-          (_, error) => console.log(error)
+          (_, error) => console.log(`Error code 3: ${error}`)
         );
       }
     );

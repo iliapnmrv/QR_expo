@@ -1,12 +1,12 @@
 {
     "expo": {
         "name": "Инвентаризация",
-        "slug": "qr-barcode-app",
-        "version": "1.0.0",
+        "slug": "Inventory",
+        "version": "0.1",
         "orientation": "portrait",
-        "icon": "./assets/icon.png",
+        "icon": "./assets/inventory.png",
         "splash": {
-            "image": "./assets/splash.png",
+            "image": "./assets/invSplash.png",
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
@@ -21,12 +21,15 @@
         },
         "android": {
             "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
+                "foregroundImage": "./assets/inventory.png",
                 "backgroundColor": "#FFFFFF"
-            }
+            },
+            "package": "com.inventory.appname"
         },
         "web": {
             "favicon": "./assets/favicon.png"
-        }
+        },
+        "description": "Company inventory",
+        "githubUrl": "https://github.com/iliapnmrv/inventory"
     }
 }
