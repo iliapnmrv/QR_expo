@@ -117,10 +117,12 @@ function HomeScreen({navigation}) {
 // Функция загрузки базы данных из папки assets
   // бд перетираются при одинаковых названиях (добавляется новая)
   downloadDB = () => {
-    FileSystem.downloadAsync(
-      Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
-      `${FileSystem.documentDirectory}SQLite/qr.db`
-    )
+    let fileUri = `${FileSystem.documentDirectory}SQLite/qr.db`;
+    FileSystem.downloadAsync("https://drive.google.com/file/d/1adK_D_F5WFg4gp8L1Aj4CWaX_ieQuag2/view?usp=sharinggg", fileUri)
+
+    // Asset.loadAsync('https://drive.google.com/file/d/1adK_D_F5WFg4gp8L1Aj4CWaX_ieQuag2/view?usp=sharing')
+      // Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
+      // `${FileSystem.documentDirectory}SQLite/qr.db`
     .then(({ uri }) => {
       console.log('Успешная загрузка в: ', uri);
       db.transaction(
@@ -539,6 +541,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 5,
+    justifyContent: 'center',
+    // alignItems: 'center'
   },
 
   maintext: {
