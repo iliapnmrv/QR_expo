@@ -101,7 +101,7 @@ function HomeScreen({navigation}) {
 
 
   // Подключение к бд
-  const db = SQLite.openDatabase('qr.db');
+  const db = SQLite.openDatabase('abc.db');
 
   //  setState модальных окон
   const [modalVisible, setModalVisible] = useState(false);
@@ -120,20 +120,26 @@ function HomeScreen({navigation}) {
 // Функция загрузки базы данных из папки assets
   // бд перетираются при одинаковых названиях (добавляется новая)
 
-  downloadDB = () => {
-    let fileUri = `${FileSystem.documentDirectory}SQLite/qr.db`; //Место скачики
-    const uri = "https://github.com/iliapnmrv/iliapnmrv.github.io/blob/02dfac2080ec9d7efdc0f131abfb52de36f88c2d/inventory/qr.db" // Ссылка, откуда скачивается
-    FileSystem.downloadAsync(uri, fileUri) 
-    
+
+  const downloadDB = async () => {
+    let fileUri = `${FileSystem.documentDirectory}/SQLite/abc.db`; //Место скачки
+    let check = await ensureDirExists(fileUri) // Должен показывать, что файла нет
+    console.log(check)
+    console.log("this")
+
+    const uri = "https://disk.yandex.ru/d/i6YI3Wlf-8dZfQ" // Ссылка, откуда скачивается
+
+    FileSystem.downloadAsync(uri, fileUri)
     .then(({ uri, status }) => {
-      console.log(`Статус загрузки: ${status}`)
-      // Проверка на статус, при неправильной ссылке, ошибка 404
-      status != 200 ? console.log(`Error code 8`) : console.log('Успешная загрузка в: ', uri)
-      saveFile(uri)
+      console.log(`Успешно загружено в: ${uri}, статус: ${status}`)
+      if (status != 200) {
+        console.log(`Ошибка при загрузке`)
+      }
+      ensureDirExists(`${FileSystem.documentDirectory}/SQLite/abc.db`)
       db.transaction(
         tx => {
           tx.executeSql(
-            'SELECT * FROM qr', 
+            'SELECT * FROM qr',
             [], 
             (_, result) => {
               setDownloadedInfo(`Успешно загружено! \nВ инвентаризационной описи ${result.rows.length} строк`)
@@ -141,9 +147,8 @@ function HomeScreen({navigation}) {
             },
             (_, error) => {
               console.log(`Error code 1: ${error}`)
-              
             }
-        );
+          );
         }
       );
     })
@@ -152,14 +157,18 @@ function HomeScreen({navigation}) {
     });
   }
 
-  let saveFile = async (fileUri) => {
-    let { status } = await MediaLibrary.requestPermissionsAsync()
-    if (status != 'granted' ) {
-      return
+  // Проверка на существование папки
+  const ensureDirExists = async (fileUri) => {
+    const dirInfo = await FileSystem.getInfoAsync(fileUri);
+    if (!dirInfo.exists) {
+      console.log("Такого файла не существует");
+    }else{
+      console.log("Такой файл существует")
     }
-    const asset = await MediaLibrary.createAssetAsync(fileUri)
-    await MediaLibrary.createAlbumAsync("Download", asset, false)
   }
+  
+  let fileUri = `${FileSystem.documentDirectory}/SQLite/abc.db`; //Место скачки
+  ensureDirExists(fileUri) // Должен показывать, что файла нет
 
   // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
@@ -247,7 +256,7 @@ function HomeScreen({navigation}) {
                 resolve(false)
               }
             },
-            (_, error) => console.log(error)
+            (_, error) => console.log(`Error code 10: ${error}`)
           );
         }
       ); 
