@@ -7,15 +7,18 @@ import {
   Platform,
   ScrollView, 
   TouchableOpacity,
-  Modal
+  Modal,
+  Alert
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Asset } from "expo-asset";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
+import * as FileSystem from "expo-file-system";
+import * as Permissions from 'expo-permissions';
+import * as MediaLibrary from 'expo-media-library';
 
 function HomeScreen({navigation}) {
 
@@ -116,15 +119,17 @@ function HomeScreen({navigation}) {
 
 // Функция загрузки базы данных из папки assets
   // бд перетираются при одинаковых названиях (добавляется новая)
-  downloadDB = () => {
-    let fileUri = `${FileSystem.documentDirectory}SQLite/qr.db`;
-    FileSystem.downloadAsync("https://drive.google.com/file/d/1adK_D_F5WFg4gp8L1Aj4CWaX_ieQuag2/view?usp=sharinggg", fileUri)
 
-    // Asset.loadAsync('https://drive.google.com/file/d/1adK_D_F5WFg4gp8L1Aj4CWaX_ieQuag2/view?usp=sharing')
-      // Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
-      // `${FileSystem.documentDirectory}SQLite/qr.db`
-    .then(({ uri }) => {
-      console.log('Успешная загрузка в: ', uri);
+  downloadDB = () => {
+    let fileUri = `${FileSystem.documentDirectory}SQLite/qr.db`; //Место скачики
+    const uri = "https://github.com/iliapnmrv/iliapnmrv.github.io/blob/02dfac2080ec9d7efdc0f131abfb52de36f88c2d/inventory/qr.db" // Ссылка, откуда скачивается
+    FileSystem.downloadAsync(uri, fileUri) 
+    
+    .then(({ uri, status }) => {
+      console.log(`Статус загрузки: ${status}`)
+      // Проверка на статус, при неправильной ссылке, ошибка 404
+      status != 200 ? console.log(`Error code 8`) : console.log('Успешная загрузка в: ', uri)
+      saveFile(uri)
       db.transaction(
         tx => {
           tx.executeSql(
@@ -134,16 +139,27 @@ function HomeScreen({navigation}) {
               setDownloadedInfo(`Успешно загружено! \nВ инвентаризационной описи ${result.rows.length} строк`)
               setDownloadedInfoModal(true)
             },
-            (_, error) => console.log(`Error code 1: ${error}`)
+            (_, error) => {
+              console.log(`Error code 1: ${error}`)
+              
+            }
         );
         }
       );
     })
-    .catch(error => {
-      console.error(error);
+    .catch(err => {
+      console.error(`Error code 7: ${err}`);
     });
   }
 
+  let saveFile = async (fileUri) => {
+    let { status } = await MediaLibrary.requestPermissionsAsync()
+    if (status != 'granted' ) {
+      return
+    }
+    const asset = await MediaLibrary.createAssetAsync(fileUri)
+    await MediaLibrary.createAlbumAsync("Download", asset, false)
+  }
 
   // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
@@ -542,7 +558,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingTop: 5,
     justifyContent: 'center',
-    // alignItems: 'center'
+    textAlign: 'center'
   },
 
   maintext: {

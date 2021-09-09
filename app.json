@@ -25,7 +25,7 @@
                 "backgroundColor": "#FFFFFF"
             },
             "package": "com.inventory.appname",
-            "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+            "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "MEDIA_LIBRARY"]
         },
         "web": {
             "favicon": "./assets/favicon.png"
