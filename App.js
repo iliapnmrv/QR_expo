@@ -19,6 +19,7 @@ import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from 'expo-media-library';
+import { deleteDatabase } from 'react-native-sqlite-storage';
 
 function HomeScreen({navigation}) {
 
@@ -117,25 +118,71 @@ function HomeScreen({navigation}) {
   const [itemsRemain, setItemsRemain] = useState()
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
+  // Проверка на существование папки/файла
+  const ensureDirExists = async (fileUri) => {
+    const dirInfo = await FileSystem.getInfoAsync(fileUri);
+    if (!dirInfo.exists) {
+      return console.log("Такого файла не существует");
+    }
+    return console.log("Такой файл существует")
+  }
+
 // Функция загрузки базы данных из папки assets
   // бд перетираются при одинаковых названиях (добавляется новая)
+  const deleteDB = async (fileUri) => {
+    const fileInfo = await FileSystem.getInfoAsync(fileUri);
+    if (fileInfo.exists) {
+      let del = await FileSystem.deleteAsync(fileUri);
+      console.log("Успешно удалена база данных")
+    }
+  }
 
+  const saveFile = async (fileUri) => {
+    const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status === 'granted') {
+      const asset = await MediaLibrary.createAssetAsync(fileUri);
+      await MediaLibrary.createAlbumAsync('<FOLDER NAME>', asset, false);
+    }
+  };
 
+  const downloadFile = async (url, fileUri) => {
+    let downloadResumable = FileSystem.createDownloadResumable(
+      url,
+      fileUri,
+      {},
+      () => {
+        // down progress monitor here
+      }
+    );
+    try {
+      const { uri } = await downloadResumable.downloadAsync().then((item) => {
+        return item;
+      });
+      await saveFile(uri)
+        .then((rs) => {
+          alert('Video saved to download folder')
+        });
+    } catch (e) {
+      console.error(e);
+    }
+  }
   const downloadDB = async () => {
-    let fileUri = `${FileSystem.documentDirectory}/SQLite/abc.db`; //Место скачки
-    let check = await ensureDirExists(fileUri) // Должен показывать, что файла нет
-    console.log(check)
-    console.log("this")
+    // Информация для скачивания
+    let fileUri = `${FileSystem.documentDirectory}1.zip`; //Место, где находится бд
+    const url = "https://disk.yandex.ru/d/N6l4fWfyzCOilQ" // Ссылка, откуда скачивается
 
-    const uri = "https://disk.yandex.ru/d/i6YI3Wlf-8dZfQ" // Ссылка, откуда скачивается
+    let check = await ensureDirExists(fileUri) // Должен показывать, что файл есть
 
-    FileSystem.downloadAsync(uri, fileUri)
-    .then(({ uri, status }) => {
+    // 1. Удаляется старая база
+    let del = await deleteDB(fileUri)
+    check = await ensureDirExists(fileUri) // Должен показывать, что файла нет
+    let res = await downloadFile(url, fileUri)
+
+    res.then(({ uri, status }) => {
       console.log(`Успешно загружено в: ${uri}, статус: ${status}`)
       if (status != 200) {
         console.log(`Ошибка при загрузке`)
       }
-      ensureDirExists(`${FileSystem.documentDirectory}/SQLite/abc.db`)
       db.transaction(
         tx => {
           tx.executeSql(
@@ -156,19 +203,6 @@ function HomeScreen({navigation}) {
       console.error(`Error code 7: ${err}`);
     });
   }
-
-  // Проверка на существование папки
-  const ensureDirExists = async (fileUri) => {
-    const dirInfo = await FileSystem.getInfoAsync(fileUri);
-    if (!dirInfo.exists) {
-      console.log("Такого файла не существует");
-    }else{
-      console.log("Такой файл существует")
-    }
-  }
-  
-  let fileUri = `${FileSystem.documentDirectory}/SQLite/abc.db`; //Место скачки
-  ensureDirExists(fileUri) // Должен показывать, что файла нет
 
   // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
