@@ -17,9 +17,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
-import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from 'expo-media-library';
-import { deleteDatabase } from 'react-native-sqlite-storage';
 
 function HomeScreen({navigation}) {
 
@@ -138,29 +136,41 @@ function HomeScreen({navigation}) {
     }
   }
 
-  // Скачать в папку assets
-  const downloadFile = async (url, dbUri) => {
-      let downloadObject = FileSystem.createDownloadResumable(
-        url,
-        dbUri
-      );
-      let response = await downloadObject.downloadAsync();
-      console.log("downloadFile function")
-  }
+  const downloadFile = (uri, fileUri) => {
+    console.log("downloadFile function")
+    FileSystem.downloadAsync(uri, fileUri)
+    .then(({ uri }) => {
+        saveFile(uri);
+      })
+      .catch(error => {
+        console.error(error);
+      })
+    }
+
+    saveFile = async (fileUri) => {
+        const { status } = await MediaLibrary.getPermissionsAsync();
+        if (status === "granted") {
+            console.log("permission is granted")
+            const asset = await MediaLibrary.createAssetAsync(fileUri)
+            console.log(asset)
+            await MediaLibrary.createAlbumAsync("Download", asset, false)
+            console.log("downloaded")
+        }
+    }
 
   const downloadDB = async () => {
     // Информация для скачивания
-    let dbUri = `${FileSystem.documentDirectory}SQLite/1.zip`; //Место, где находится бд
-    const url = "https://disk.yandex.ru/d/N6l4fWfyzCOilQ" // Ссылка, откуда скачивается - external url
+    let dbUri = `${FileSystem.documentDirectory}1.db`; //Место, где находится бд
+    const url = "https://vk.com/doc235937414_614433612?hash=57e43bba6b6fa7111d&dl=cc39550533259d4a28" // Ссылка, откуда скачивается - external url
 
     console.log(`downloadDB function`)
     let check = await ensureDirExists(dbUri) // Должен показывать, что файл есть
 
     // 1. Удаляется старая база
-    let del = await deleteDB(dbUri)
-    check = await ensureDirExists(dbUri) // Должен показывать, что файла нет
+    await deleteDB(dbUri)
+    await ensureDirExists(dbUri) // Должен показывать, что файла нет
     let download = await downloadFile(url, dbUri)
-    check = await ensureDirExists(dbUri) // Должен показывать, что файл есть
+    await ensureDirExists(dbUri) // Должен показывать, что файл есть
 
     console.log("Finish")
 
