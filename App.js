@@ -164,7 +164,11 @@ function HomeScreen({navigation}) {
     await ensureDirExists(dbUri) // Должен показывать, что файла нет
     let download = await downloadFile(url, dbUri)
     await ensureDirExists(dbUri) // Должен показывать, что файл есть
-
+    try {
+      const db = SQLite.openDatabase('ab.db');
+    } catch (e) {
+      console.log(`Error while connecting to database`)
+    }
     console.log("Finish")
 
     try {
