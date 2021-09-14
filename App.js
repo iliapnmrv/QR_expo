@@ -100,7 +100,7 @@ function HomeScreen({navigation}) {
 
 
   // Подключение к бд
-  const db = SQLite.openDatabase('abc.db');
+  const db = SQLite.openDatabase('qr1.db');
 
   //  setState модальных окон
   const [modalVisible, setModalVisible] = useState(false);
@@ -116,16 +116,19 @@ function HomeScreen({navigation}) {
   const [itemsRemain, setItemsRemain] = useState()
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
-  // Проверка на существование папки/файла
-  const ensureDirExists = async (fileUri) => {
-    const dirInfo = await FileSystem.getInfoAsync(fileUri);
-    if (!dirInfo.exists) {
-      return console.log("Такого файла не существует");
-    }
-    return console.log("Такой файл существует")
+  const download = () => {
+    FileSystem.downloadAsync(
+      Asset.fromModule(require('./assets/sqlite/qr1.db')).uri,
+      `${FileSystem.documentDirectory}SQLite/qr1.db`
+    )
+    .then(({ uri }) => {
+      console.log('Успешная загрузка в: ', uri);
+    })
+    .catch(error => {
+      console.error(error);
+    });
   }
-
-  // Функция загрузки базы данных из папки assets
+  
   const deleteDB = async (fileUri) => {
     const fileInfo = await FileSystem.getInfoAsync(fileUri);
     if (fileInfo.exists) {
@@ -134,66 +137,9 @@ function HomeScreen({navigation}) {
     }else{
       console.log("Nothing to delete from", fileUri)
     }
+    download()
   }
 
-  const downloadFile = (uri, fileUri) => {
-    console.log("downloadFile function")
-    FileSystem.downloadAsync(uri, fileUri)
-    .then(({ uri }) => {
-        saveFile(uri);
-      })
-      .catch(error => {
-        console.error(error);
-      })
-    }
-
-    saveFile = async (fileUri) => {
-        const { status } = await MediaLibrary.getPermissionsAsync();
-        if (status === "granted") {
-            console.log("permission is granted")
-            const asset = await MediaLibrary.createAssetAsync(fileUri)
-            console.log(asset)
-            await MediaLibrary.createAlbumAsync("Download", asset, false)
-            console.log("downloaded")
-        }
-    }
-
-  const downloadDB = async () => {
-    // Информация для скачивания
-    let dbUri = `${FileSystem.documentDirectory}1.db`; //Место, где находится бд
-    const url = "https://vk.com/doc235937414_614433612?hash=57e43bba6b6fa7111d&dl=cc39550533259d4a28" // Ссылка, откуда скачивается - external url
-
-    console.log(`downloadDB function`)
-    let check = await ensureDirExists(dbUri) // Должен показывать, что файл есть
-
-    // 1. Удаляется старая база
-    await deleteDB(dbUri)
-    await ensureDirExists(dbUri) // Должен показывать, что файла нет
-    let download = await downloadFile(url, dbUri)
-    await ensureDirExists(dbUri) // Должен показывать, что файл есть
-
-    console.log("Finish")
-
-    try {
-      db.transaction(
-        tx => {
-          tx.executeSql(
-            'SELECT * FROM qr',
-            [], 
-            (_, result) => {
-              setDownloadedInfo(`Успешно загружено! \nВ инвентаризационной описи ${result.rows.length} строк`)
-              setDownloadedInfoModal(true)
-            },
-            (_, error) => {
-              console.log(`Error code 1: ${error}`)
-            }
-          );
-        }
-      );
-    } catch (e) {
-      console.log(`Error code 7: ${e}`)
-    }
-  }
 
   // Scanned bar code 
   const handleBarCodeScanned = ({ type, data }) => {
@@ -259,7 +205,7 @@ function HomeScreen({navigation}) {
               setScanModalVisible(true) // модальное окно с результатом проверки
             })     
           },
-          (_, error) => console.log(error)
+          (_, error) => console.log(`Error code 10: ${error}`)
       );
       }
     );
@@ -358,7 +304,7 @@ function HomeScreen({navigation}) {
         <View style={styles.sessionInfo}>
           <Text style={sessionStatus ? styles.active : styles.danger}>{sessionInfo}</Text>
           <Button title={sessionBtn} onPress={() => { sessionStatus ? setSessionModalVisible(true) : (
-            downloadDB(),
+            deleteDB(`${FileSystem.documentDirectory}SQLite/qr.db`),
             onSessionChangeHandler(sessionStatus)
           )}} />
         </View>
