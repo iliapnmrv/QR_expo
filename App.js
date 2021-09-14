@@ -100,7 +100,7 @@ function HomeScreen({navigation}) {
 
 
   // Подключение к бд
-  const db = SQLite.openDatabase('abc.db');
+  const db = SQLite.openDatabase('ab.db');
 
   //  setState модальных окон
   const [modalVisible, setModalVisible] = useState(false);
@@ -136,32 +136,25 @@ function HomeScreen({navigation}) {
     }
   }
 
-  const downloadFile = (uri, fileUri) => {
-    console.log("downloadFile function")
-    FileSystem.downloadAsync(uri, fileUri)
-    .then(({ uri }) => {
-        saveFile(uri);
+  const downloadFile = async (uri, fileUri) => {
+    return new Promise(resolve=>{
+      console.log("downloadFile function")
+      FileSystem.downloadAsync(uri, fileUri)
+      .then(({ uri }) => {
+        console.log(`Finished downloading to ${uri}`)
+        resolve()
       })
       .catch(error => {
         console.error(error);
       })
-    }
-
-    saveFile = async (fileUri) => {
-        const { status } = await MediaLibrary.getPermissionsAsync();
-        if (status === "granted") {
-            console.log("permission is granted")
-            const asset = await MediaLibrary.createAssetAsync(fileUri)
-            console.log(asset)
-            await MediaLibrary.createAlbumAsync("Download", asset, false)
-            console.log("downloaded")
-        }
-    }
+    })
+    
+  }
 
   const downloadDB = async () => {
     // Информация для скачивания
-    let dbUri = `${FileSystem.documentDirectory}1.db`; //Место, где находится бд
-    const url = "https://vk.com/doc235937414_614433612?hash=57e43bba6b6fa7111d&dl=cc39550533259d4a28" // Ссылка, откуда скачивается - external url
+    let dbUri = `${FileSystem.documentDirectory}ab.db`; //Место, где находится бд
+    const url = "https://vk.com/doc235937414_614433612?hash=c84d5e28aca37a7801&dl=797ae6f61b35b766c2" // Ссылка, откуда скачивается - external url
 
     console.log(`downloadDB function`)
     let check = await ensureDirExists(dbUri) // Должен показывать, что файл есть
