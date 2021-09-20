@@ -100,7 +100,7 @@ function HomeScreen({navigation}) {
 
 
   // Подключение к бд
-  const db = SQLite.openDatabase('qr1.db');
+  const db = SQLite.openDatabase('qr.db');
 
   //  setState модальных окон
   const [modalVisible, setModalVisible] = useState(false);
@@ -117,9 +117,10 @@ function HomeScreen({navigation}) {
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
   const download = () => {
+    console.log("Download function")
     FileSystem.downloadAsync(
-      Asset.fromModule(require('./assets/sqlite/qr1.db')).uri,
-      `${FileSystem.documentDirectory}SQLite/qr1.db`
+      Asset.fromModule(require('./assets/sqlite/qr.db')).uri,
+      `${FileSystem.documentDirectory}SQLite/qr.db`
     )
     .then(({ uri }) => {
       console.log('Успешная загрузка в: ', uri);
@@ -134,10 +135,11 @@ function HomeScreen({navigation}) {
     if (fileInfo.exists) {
       let del = await FileSystem.deleteAsync(fileUri);
       console.log("Успешно удалена база данных")
+      download()
     }else{
       console.log("Nothing to delete from", fileUri)
+      download()
     }
-    download()
   }
 
 
