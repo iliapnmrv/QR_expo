@@ -19,6 +19,7 @@ import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from 'expo-media-library';
 
+
 function HomeScreen({navigation}) {
 
 
@@ -100,7 +101,7 @@ function HomeScreen({navigation}) {
 
 
   // Подключение к бд
-  const db = SQLite.openDatabase('ab.db');
+  const db = SQLite.openDatabase('abc.db');
 
   //  setState модальных окон
   const [modalVisible, setModalVisible] = useState(false);
@@ -137,24 +138,42 @@ function HomeScreen({navigation}) {
   }
 
   const downloadFile = async (uri, fileUri) => {
-    return new Promise(resolve=>{
-      console.log("downloadFile function")
-      FileSystem.downloadAsync(uri, fileUri)
-      .then(({ uri }) => {
-        console.log(`Finished downloading to ${uri}`)
-        resolve()
+    console.log("downloadFile function")
+    FileSystem.downloadAsync(uri, fileUri)
+    .then(({ uri }) => {
+        saveFile(uri);
+        console.log(`uri: ${uri}`)
       })
       .catch(error => {
         console.error(error);
       })
-    })
-    
-  }
+    }
+
+    saveFile = async (fileUri) => {
+      const { status } = await MediaLibrary.getPermissionsAsync();
+      if (status === "granted") {
+        const asset = await MediaLibrary.createAssetAsync(fileUri)
+        console.log(asset.uri)
+        getFileData(asset.uri)
+
+        // await MediaLibrary.createAlbumAsync("Download", asset, false)
+        console.log("downloaded")
+      }
+    }
+
+    const getFileData = async (uri) => {
+
+      fetch('https://vk.com/doc235937414_615260729?hash=681d9d81a33af0cae7&dl=a42a2beb63d4b43ee0')
+          .then((response) => response.json())
+          .then((json) => console.log(json))
+          .catch((error) => console.error(error))
+    }
+
 
   const downloadDB = async () => {
     // Информация для скачивания
-    let dbUri = `${FileSystem.documentDirectory}ab.db`; //Место, где находится бд
-    const url = "https://vk.com/doc235937414_614433612?hash=c84d5e28aca37a7801&dl=797ae6f61b35b766c2" // Ссылка, откуда скачивается - external url
+    let dbUri = `${FileSystem.documentDirectory}2.csv`; //Место, где находится бд
+    const url = "https://vk.com/doc235937414_615241572?hash=83a9f0557345ef7592&dl=9d5d7be29f8bf8fc5a" // Ссылка, откуда скачивается - external url
 
     console.log(`downloadDB function`)
     let check = await ensureDirExists(dbUri) // Должен показывать, что файл есть
@@ -164,11 +183,7 @@ function HomeScreen({navigation}) {
     await ensureDirExists(dbUri) // Должен показывать, что файла нет
     let download = await downloadFile(url, dbUri)
     await ensureDirExists(dbUri) // Должен показывать, что файл есть
-    try {
-      const db = SQLite.openDatabase('ab.db');
-    } catch (e) {
-      console.log(`Error while connecting to database`)
-    }
+
     console.log("Finish")
 
     try {
