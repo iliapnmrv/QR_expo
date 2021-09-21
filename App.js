@@ -11,14 +11,12 @@ import {
   Alert
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
-import { Asset } from "expo-asset";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from 'expo-media-library';
-
 
 function HomeScreen({navigation}) {
 
@@ -86,10 +84,26 @@ function HomeScreen({navigation}) {
     db.transaction(
       tx => {
         tx.executeSql(
-          'DELETE FROM scanned', 
+          `
+          DELETE FROM scanned;
+          `, 
           [], 
           (_, result) => {
-            console.log("Таблица отсканированных qr кодов успешно очищена")
+            console.log("Таблицы успешно очищены")
+          },
+          (_, error) => console.log(`Error code 2: ${error}`)
+      );
+      }
+    );
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          `
+          DELETE FROM qr;
+          `, 
+          [], 
+          (_, result) => {
+            console.log("Таблицы успешно очищены")
           },
           (_, error) => console.log(`Error code 2: ${error}`)
       );
@@ -121,17 +135,17 @@ function HomeScreen({navigation}) {
   const ensureDirExists = async (fileUri) => {
     const dirInfo = await FileSystem.getInfoAsync(fileUri);
     if (!dirInfo.exists) {
-      return console.log("Такого файла не существует");
+      return false
     }
-    return console.log("Такой файл существует")
+    return true
   }
 
   // Функция загрузки базы данных из папки assets
-  const deleteDB = async (fileUri) => {
+  const deleteFile = async (fileUri) => {
     const fileInfo = await FileSystem.getInfoAsync(fileUri);
     if (fileInfo.exists) {
       let del = await FileSystem.deleteAsync(fileUri);
-      console.log("Успешно удалена база данных")
+      console.log("Файл успешно удален")
     }else{
       console.log("Nothing to delete from", fileUri)
     }
@@ -141,70 +155,136 @@ function HomeScreen({navigation}) {
     console.log("downloadFile function")
     FileSystem.downloadAsync(uri, fileUri)
     .then(({ uri }) => {
-        saveFile(uri);
-        console.log(`uri: ${uri}`)
-      })
-      .catch(error => {
-        console.error(error);
-      })
+      saveFile(uri);
+    })
+    .catch(error => {
+      console.error(error);
+    })
+  }
+
+  saveFile = async (fileUri) => {
+    console.log("Save file func")
+    const { status } = await MediaLibrary.getPermissionsAsync();
+    if (status === "granted") {
+      const asset = await MediaLibrary.createAssetAsync(fileUri)
+      console.log(asset.uri)
+      await getFileData(asset.uri)
     }
+    // Обработать если нет разрешения
+  }
 
-    saveFile = async (fileUri) => {
-      const { status } = await MediaLibrary.getPermissionsAsync();
-      if (status === "granted") {
-        const asset = await MediaLibrary.createAssetAsync(fileUri)
-        console.log(asset.uri)
-        getFileData(asset.uri)
 
-        // await MediaLibrary.createAlbumAsync("Download", asset, false)
-        console.log("downloaded")
+  // Получает текст csv файла, который скачивается по ссылке
+  const getFileData = async (uri) => {
+    try {
+      let read = await FileSystem.readAsStringAsync(uri)
+      csvToJSON(read)
+    } catch (e) {
+      console.error(`${e}`)
+    }
+  }
+
+  //var csv is the CSV file with headers
+  function csvToJSON(csv){
+    var lines=csv.split(/\r\n|\n|\r/);
+    var result = [];
+    var headers=lines[0].split(";");
+    for(var i=1;i<lines.length;i++){
+        var obj = {};
+        var currentline=lines[i].split(";");
+        for(var j=0;j<headers.length;j++){
+            obj[headers[j]] = currentline[j];
+        }
+        result.push(obj);
+    }
+    let json = JSON.stringify(result)
+    insertJSONObj(json) //json объект для вставки в бд
+  }
+
+  const createDB = async () => {
+    console.log("Creating a db")
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          `CREATE TABLE IF NOT EXISTS qr(
+            id            INTEGER  NOT NULL PRIMARY KEY,
+            vedPos        INTEGER  NOT NULL,
+            name          VARCHAR(200) NOT NULL,
+            place         VARCHAR(100) NOT NULL,
+            kolvo         INTEGER  NOT NULL,
+            placePriority INTEGER  NOT NULL
+          );
+          `, 
+          [], 
+          (_, result) => {
+
+          },
+          (_, error) => console.log(error)
+      );
       }
+    );
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          `CREATE TABLE IF NOT EXISTS scanned(
+            id            INTEGER  NOT NULL PRIMARY KEY,
+            invNom        VARCHAR(100)  NOT NULL,
+            name          VARCHAR(200) NOT NULL,
+            status        INTEGER NOT NULL,
+            model         VARCHAR(200),
+            serNom        VARCHAR(100),
+            trace         VARCHAR(100)  
+          );
+          `, 
+          [], 
+          (_, result) => {
+
+          },
+          (_, error) => console.log(error)
+      );
+      }
+    );
+  }
+
+  const insert = (id, vedPos, name, place, kolvo, placePriority) => {
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          `INSERT INTO qr (id, vedPos, name, place, kolvo, placePriority) VALUES(?, ?, ?, ?, ?, ?)`, 
+          [id, vedPos, name, place, kolvo, placePriority], 
+          (_, result) => {},
+          (_, error) => console.log(error)
+      );
+      }
+    );
+  }
+
+  const insertJSONObj = async (json) => {
+    console.log(`json: ${json}`)
+    let data = JSON.parse(json)
+    setDownloadedInfo(`Успешно загружено! \nВ инвентаризационной описи ${data.length} строк`)
+    setDownloadedInfoModal(true)
+    for (let i = 0; i < data.length; i++) {
+      let obj = data[i]
+      let id = obj.id
+      let vedPos = obj.vedPos
+      let name = obj.name
+      let place = obj.place
+      let kolvo = obj.kolvo
+      let placePriority = obj.placePriority
+      insert(id, vedPos, name, place, kolvo, placePriority)
     }
-
-    const getFileData = async (uri) => {
-
-      fetch('https://vk.com/doc235937414_615260729?hash=681d9d81a33af0cae7&dl=a42a2beb63d4b43ee0')
-          .then((response) => response.json())
-          .then((json) => console.log(json))
-          .catch((error) => console.error(error))
-    }
-
+  }
 
   const downloadDB = async () => {
     // Информация для скачивания
-    let dbUri = `${FileSystem.documentDirectory}2.csv`; //Место, где находится бд
-    const url = "https://vk.com/doc235937414_615241572?hash=83a9f0557345ef7592&dl=9d5d7be29f8bf8fc5a" // Ссылка, откуда скачивается - external url
+    let csvUri = `${FileSystem.documentDirectory}1.csv`; //Место, где находится cкачанный csv файл
+    let dbUri = `${FileSystem.documentDirectory}SQLite/qr.db`; //Место, где находится бд
+    const url = "https://vk.com/doc235937414_615364129?hash=8800c3a10b6af7dc2f&dl=734583552837872d84" // Ссылка, откуда скачивается - external url
 
-    console.log(`downloadDB function`)
-    let check = await ensureDirExists(dbUri) // Должен показывать, что файл есть
-
-    // 1. Удаляется старая база
-    await deleteDB(dbUri)
-    await ensureDirExists(dbUri) // Должен показывать, что файла нет
-    let download = await downloadFile(url, dbUri)
-    await ensureDirExists(dbUri) // Должен показывать, что файл есть
-
-    console.log("Finish")
-
-    try {
-      db.transaction(
-        tx => {
-          tx.executeSql(
-            'SELECT * FROM qr',
-            [], 
-            (_, result) => {
-              setDownloadedInfo(`Успешно загружено! \nВ инвентаризационной описи ${result.rows.length} строк`)
-              setDownloadedInfoModal(true)
-            },
-            (_, error) => {
-              console.log(`Error code 1: ${error}`)
-            }
-          );
-        }
-      );
-    } catch (e) {
-      console.log(`Error code 7: ${e}`)
-    }
+    await createDB() //создание бд
+    await downloadFile(url, csvUri)
+    await deleteFile(csvUri)
   }
 
   // Scanned bar code 
@@ -253,6 +333,7 @@ function HomeScreen({navigation}) {
                             setScanStatus("Позиция сверх учета")
                           }
                           setScanRes(null)
+                          addScan(invNom, name, status, model, serNom, trace)
                         },
                         (_, error) => console.log(`Error code 5: ${error}`)
                     );
@@ -264,8 +345,8 @@ function HomeScreen({navigation}) {
                   setScanStatus(`В учете`)
                   setScanRes(`Позиция: ${row.vedPos}, Место: ${row.place}`)
                   substractItem(row.id)
+                  addScan(invNom, name, status, model, serNom, trace)
                 }
-                addScan(invNom, name, status, trace, model, serNom)
               }
               setItemsRemain(null)    
               setScanModalVisible(true) // модальное окно с результатом проверки
@@ -280,7 +361,7 @@ function HomeScreen({navigation}) {
   
   // Проверка на дубликат сканирования - промис
   function checkDouble(invNom){
-    return new Promise( resolve =>  {
+    return new Promise(resolve =>  {
        db.transaction(
         tx => {
           tx.executeSql(
@@ -336,12 +417,12 @@ function HomeScreen({navigation}) {
 
   // 1 действие: проверка предмета на нахождение в бд => изменение статуса
   // 2 действие: добавление в таблицу отсканированных предметов с указанным статусом
-  const addScan = (invNom, name, status, trace, model, serNom) => {
+  const addScan = (invNom, name, status, model, serNom, trace) => {
     db.transaction(
       tx => {
         tx.executeSql(
-          'INSERT INTO scanned (invNom, name, status, trace, model, serNom) VALUES(?, ?, ?, ?, ?, ?)', 
-          [invNom, name, status, trace, model, serNom], 
+          'INSERT INTO scanned (invNom, name, status, model, serNom, trace) VALUES(?, ?, ?, ?, ?, ?)', 
+          [invNom, name, status, model, serNom, trace], 
           (_, result) => {
             console.log("Успешно добавлено в бд сканов")
           },
