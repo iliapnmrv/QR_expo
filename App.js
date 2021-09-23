@@ -8,6 +8,7 @@ import {
   ScrollView, 
   TouchableOpacity,
   Modal,
+  TextInput,
   Alert
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -17,6 +18,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from 'expo-media-library';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import * as Clipboard from 'expo-clipboard';
+
 
 function HomeScreen({navigation}) {
 
@@ -114,15 +118,51 @@ function HomeScreen({navigation}) {
   // ------- Сессии end
 
 
-  // Подключение к бд
-  const db = SQLite.openDatabase('abc.db');
+  // ССылка для скачивания
+  // получает ссылку
+  const getLink = async () => {
+    try {
+      let url = await AsyncStorage.getItem('link');
+      return url
+    } catch(e) {
+      console.log('error', e);
+    };
+  };
 
-  //  setState модальных окон
+  // устанавливает ссылку
+  const setLink = async (link) => {
+    link == null ? link == "sometext" : null
+    console.log(`Ссылка: ${link}`)
+    try {
+      await AsyncStorage.setItem('link', link)
+    } catch (e) {
+      console.log(`Error code 11: ${e}`)
+    }
+  }
+
+  // по изменению статуса
+  useEffect(() => {
+    getLink()
+    .then(res => {
+      downloadLink != res ? setDownloadLink(res) : null
+    })
+    .catch(err => {
+      console.log('error', err);
+    });
+  }, []);
+
+
+  // Подключение к бд
+  const db = SQLite.openDatabase('qr.db');
+
+  //  useState модальных окон
   const [modalVisible, setModalVisible] = useState(false);
   const [scanModalVisible, setScanModalVisible] = useState(false);
   const [sessionModalVisible, setSessionModalVisible] = useState(false);
   const [DownloadedInfoModal, setDownloadedInfoModal] = useState(false);
+  const [downloadLink, setDownloadLink] = useState(false);
 
+  const [linkText, changeLinkText] = useState(null);
   const [downloadedInfo, setDownloadedInfo] = useState() // данные скачки новой бд
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState('Nothing Scanned! :(')
@@ -152,7 +192,6 @@ function HomeScreen({navigation}) {
   }
 
   const downloadFile = async (uri, fileUri) => {
-    console.log("downloadFile function")
     FileSystem.downloadAsync(uri, fileUri)
     .then(({ uri }) => {
       saveFile(uri);
@@ -163,7 +202,6 @@ function HomeScreen({navigation}) {
   }
 
   saveFile = async (fileUri) => {
-    console.log("Save file func")
     const { status } = await MediaLibrary.getPermissionsAsync();
     if (status === "granted") {
       const asset = await MediaLibrary.createAssetAsync(fileUri)
@@ -185,13 +223,20 @@ function HomeScreen({navigation}) {
   }
 
   //var csv is the CSV file with headers
-  function csvToJSON(csv){
+  async function csvToJSON(csv){
     var lines=csv.split(/\r\n|\n|\r/);
+    console.log(`lines: ${lines}`)
+    // lines.replace(/;["]/g, ';').replace(/["];/g, ';').replace(/["]["]/g, /"/)
     var result = [];
     var headers=lines[0].split(";");
     for(var i=1;i<lines.length;i++){
         var obj = {};
         var currentline=lines[i].split(";");
+        let name = currentline[2]
+        if (name.substr(name.length - 1) == '\"') {
+          name = name.substring('\"', name.length - 1).substring(1).replace('\"' + '\"', '\"') //удаление 1 и последней кавычки
+        }
+        currentline[2] = name
         for(var j=0;j<headers.length;j++){
             obj[headers[j]] = currentline[j];
         }
@@ -279,8 +324,9 @@ function HomeScreen({navigation}) {
   const downloadDB = async () => {
     // Информация для скачивания
     let csvUri = `${FileSystem.documentDirectory}1.csv`; //Место, где находится cкачанный csv файл
-    let dbUri = `${FileSystem.documentDirectory}SQLite/qr.db`; //Место, где находится бд
-    const url = "https://vk.com/doc235937414_615364129?hash=8800c3a10b6af7dc2f&dl=734583552837872d84" // Ссылка, откуда скачивается - external url
+    const url = await getLink() // Ссылка, откуда скачивается - external url
+    url == null ? url = "https://www.dropbox.com/s/7hrrsjcb885hdsp/headers2.csv?dl=1" : null //значение по умолчанию
+    console.log(`this is ${url}`)
 
     await createDB() //создание бд
     await downloadFile(url, csvUri)
@@ -432,6 +478,11 @@ function HomeScreen({navigation}) {
     );
   };
 
+  const insertTextFromClipboard = async () => {
+    const text = await Clipboard.getStringAsync();
+    changeLinkText(text);
+  }
+
   return (
       <View style={styles.container}>
         <ScrollView style={styles.scrollView}>
@@ -439,7 +490,7 @@ function HomeScreen({navigation}) {
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <Text style={styles.heading}>
+            <Text style={styles}>
               Expo SQlite не поддерживается в браузере!
             </Text>
           </View>
@@ -454,6 +505,40 @@ function HomeScreen({navigation}) {
             downloadDB(),
             onSessionChangeHandler(sessionStatus)
           )}} />
+          <Icon name="edit" size={25} color="#A9A9A9" onPress={()=>{ setDownloadLink(true) }}/>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={downloadLink}
+            onRequestClose={() => { setDownloadLink(!downloadLink) }}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.maintext}>Введите ссылку для скачивания</Text>
+                <View style={[styles.buttons, styles.modalCenter]} >
+                  <Icon name="clipboard" size={30} color="#A9A9A9" onPress={()=>{ insertTextFromClipboard() }}/>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={linkText == null ? "https://": linkText}
+                    onChangeText={text=>{ 
+                      changeLinkText(text)
+                    }}
+                    value={linkText}
+                  />
+                </View>
+                <View style={styles.buttons}>
+                  <TouchableOpacity style={[styles.button, styles.accept] } onPress={() => {
+                      setLink(linkText)
+                      setDownloadLink(!downloadLink)
+                    }}>
+                    <Text style={styles.btnTextStyle}>Сохранить</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setDownloadLink(!downloadLink) }}>
+                    <Text style={styles.btnTextStyle}>Закрыть</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </View>
         <View style={styles.barcodebox}>
           <BarCodeScanner
@@ -620,7 +705,19 @@ const styles = StyleSheet.create({
   none: {
     display: 'none',
   },
-
+  input: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#A9A9A9',
+    padding: 10,
+    alignSelf: 'center',
+    width:'90%',
+    marginLeft: 10,
+  },
+  modalCenter: {
+    marginBottom: 15,
+    marginTop: 10,
+  },
   sessionInfo:{
     flex: 1,
     flexDirection: 'row',
@@ -628,6 +725,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 10
+  },
+  sessionInfoButtons:{
+    justifyContent: 'center',
   },
   centeredView: {
     flex: 1,
@@ -639,6 +739,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     width: "90%",
+    alignItems: 'center',
   },
   button: {
     borderRadius: 5,
@@ -690,6 +791,7 @@ const styles = StyleSheet.create({
 
   maintext: {
     fontSize: 20,
+    textAlign: 'center',
     padding: 5,
   },
 
