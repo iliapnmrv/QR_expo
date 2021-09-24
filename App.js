@@ -76,6 +76,7 @@ function HomeScreen({navigation}) {
   useEffect(() => {
     getSessionStatus()
     .then(arr => {
+      arr[0] == "false" ? arr[0] = false : arr[0] = true
       setSessionStatus(arr[0]);
       setSessionDate(arr[1]);
       if (arr[0]) {
@@ -95,9 +96,9 @@ function HomeScreen({navigation}) {
   const onSessionChangeHandler = (status, date) =>{
     if (status) {
       setSessionInStorage(!status)
+      setSessionStatus(!status)
       setSessionDateInStorage(null)
       setSessionDate(`Сессия еще не была открыта`)
-      setSessionStatus(!status)
       setSessionInfo("Сессия закрыта")
       setSessionBtn("Открыть сессию")
     }else{
@@ -170,6 +171,7 @@ function HomeScreen({navigation}) {
   useEffect(() => {
     getLink()
     .then(res => {
+      linkPlaceholder != res ? changeLinkPlaceholder(res) : null
       downloadLink != res ? setDownloadLink(res) : null
     })
     .catch(err => {
@@ -189,6 +191,7 @@ function HomeScreen({navigation}) {
   const [downloadLink, setDownloadLink] = useState(false);
 
   const [linkText, changeLinkText] = useState(null);
+  const [linkPlaceholder, changeLinkPlaceholder] = useState("hhtps://");
   const [downloadedInfo, setDownloadedInfo] = useState() // данные скачки новой бд
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState('Nothing Scanned! :(')
@@ -218,6 +221,9 @@ function HomeScreen({navigation}) {
   }
 
   const downloadFile = async (uri, fileUri) => {
+    if (uri == null) {
+      return
+    }
     FileSystem.downloadAsync(uri, fileUri)
     .then(({ uri }) => {
       saveFile(uri);
@@ -252,7 +258,6 @@ function HomeScreen({navigation}) {
   async function csvToJSON(csv){
     var lines=csv.split(/\r\n|\n|\r/);
     console.log(`lines: ${lines}`)
-    // lines.replace(/;["]/g, ';').replace(/["];/g, ';').replace(/["]["]/g, /"/)
     var result = [];
     var headers=lines[0].split(";");
     for(var i=1;i<lines.length;i++){
@@ -351,8 +356,6 @@ function HomeScreen({navigation}) {
     // Информация для скачивания
     let csvUri = `${FileSystem.documentDirectory}1.csv`; //Место, где находится cкачанный csv файл
     const url = await getLink() // Ссылка, откуда скачивается - external url
-    url == null ? url = "https://www.dropbox.com/s/7hrrsjcb885hdsp/headers2.csv?dl=1" : null //значение по умолчанию
-    console.log(`this is ${url}`)
 
     await createDB() //создание бд
     await downloadFile(url, csvUri)
@@ -549,7 +552,7 @@ function HomeScreen({navigation}) {
                   <Icon name="clipboard" size={30} color="#A9A9A9" onPress={()=>{ insertTextFromClipboard() }}/>
                   <TextInput
                     style={styles.input}
-                    placeholder={linkText == null ? "https://": linkText}
+                    placeholder={linkPlaceholder}
                     onChangeText={text=>{ 
                       changeLinkText(text)
                     }}
