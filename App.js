@@ -22,6 +22,14 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import * as Clipboard from 'expo-clipboard';
 
 
+// Сегодняшняя дата
+let today = new Date();
+let dd = String(today.getDate()).padStart(2, '0');
+let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+let yyyy = today.getFullYear();
+
+today = dd + '.' + mm + '.' + yyyy;
+
 function HomeScreen({navigation}) {
 
 
@@ -30,12 +38,16 @@ function HomeScreen({navigation}) {
   const [sessionStatus, setSessionStatus] = useState(false);
   const [sessionInfo, setSessionInfo] = useState("Сессия закрыта");
   const [sessionBtn, setSessionBtn] = useState("Открыть сессию");
+  const [sessionDate, setSessionDate] = useState(null); //дата открытия сессии
+
 
   // получает статус сессии
   const getSessionStatus = async () => {
     try {
-      const result = await AsyncStorage.getItem('session');
-      return result;
+      const status = await AsyncStorage.getItem('session');
+      const date = await AsyncStorage.getItem('sessionDate');
+      let arr = [status, date]
+      return arr;
     } catch(e) {
       console.log('error', e);
     };
@@ -51,34 +63,48 @@ function HomeScreen({navigation}) {
     }
   }
 
+  const setSessionDateInStorage = async (date) => {
+    try {
+      date == null ? date = '' : null
+      await AsyncStorage.setItem('sessionDate', date)
+    } catch (e) {
+      console.log(`Error code 12: ${e}`)
+    }
+  }
+
   // по изменению статуса
   useEffect(() => {
     getSessionStatus()
-    .then(res => {
-      let a = JSON.parse(res)
-      setSessionStatus(a);
-      if (a) {
+    .then(arr => {
+      setSessionStatus(arr[0]);
+      setSessionDate(arr[1]);
+      if (arr[0]) {
         setSessionInfo("Сессия открыта")
         setSessionBtn("Закрыть сессию")
       }else {
         setSessionInfo("Сессия закрыта")
         setSessionBtn("Открыть сессию")
       }
+      arr[1] != null ? setSessionDate(`Сессия была открыта: ${arr[1]}`) : setSessionDate(`Сессия еще не была открыта`)
     })
     .catch(err => {
       console.log('error', err);
     });
   }, []);
 
-  const onSessionChangeHandler = (data) =>{
-    if (data) {
-      setSessionInStorage(!data)
-      setSessionStatus(!data)
+  const onSessionChangeHandler = (status, date) =>{
+    if (status) {
+      setSessionInStorage(!status)
+      setSessionDateInStorage(null)
+      setSessionDate(`Сессия еще не была открыта`)
+      setSessionStatus(!status)
       setSessionInfo("Сессия закрыта")
       setSessionBtn("Открыть сессию")
     }else{
-      setSessionInStorage(!data)
-      setSessionStatus(!data)
+      setSessionInStorage(!status)
+      setSessionStatus(!status)
+      setSessionDateInStorage(date)
+      setSessionDate(`Сессия была открыта: ${date}`)
       setSessionInfo("Сессия открыта")
       setSessionBtn("Закрыть сессию")
     }
@@ -201,7 +227,7 @@ function HomeScreen({navigation}) {
     })
   }
 
-  saveFile = async (fileUri) => {
+  const saveFile = async (fileUri) => {
     const { status } = await MediaLibrary.getPermissionsAsync();
     if (status === "granted") {
       const asset = await MediaLibrary.createAssetAsync(fileUri)
@@ -497,11 +523,18 @@ function HomeScreen({navigation}) {
           </>
         )}
         {/* Информация о сессии */}
+        <View style={{width: '100%', alignItems: 'center',}}>
+          <Text>
+            {sessionDate}
+          </Text>
+        </View>
         <View style={styles.sessionInfo}>
+          
+          
           <Text style={sessionStatus ? styles.active : styles.danger}>{sessionInfo}</Text>
           <Button title={sessionBtn} onPress={() => { sessionStatus ? setSessionModalVisible(true) : (
             downloadDB(),
-            onSessionChangeHandler(sessionStatus)
+            onSessionChangeHandler(sessionStatus, today)
           )}} />
           <Icon name="edit" size={25} color="#A9A9A9" onPress={()=>{ setDownloadLink(true) }}/>
           <Modal
@@ -583,9 +616,9 @@ function HomeScreen({navigation}) {
                                               scanStatus == "Позиция сверх учета" ? styles.blue :
                                               scanStatus == "Повторное считывание" ? styles.red :  null ]} >{scanStatus}</Text>
                 {scanRes && <Text style={styles.maintext}>{scanRes}</Text>}
-                {itemsRemain && <Text style={styles.maintext}>{itemsRemain}</Text>}
+                {itemsRemain && <Text style={[styles.maintext, styles.itemsRemain]}>{itemsRemain}</Text>}
                 <View style={styles.buttons}>
-                  <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setScanModalVisible(!scanModalVisible) }}>
+                  <TouchableOpacity style={[styles.button, scanStatus == "В учете" ? styles.accept : styles.reject ]} onPress={() => { setScanModalVisible(!scanModalVisible) }}>
                     <Text style={styles.btnTextStyle}>Закрыть</Text>
                   </TouchableOpacity>
                 </View>
@@ -606,7 +639,7 @@ function HomeScreen({navigation}) {
                 <View style={styles.buttons}>
                   <TouchableOpacity style={[styles.button, styles.accept] } onPress={() => {
                     setSessionModalVisible(!sessionModalVisible)
-                    onSessionChangeHandler(sessionStatus)
+                    onSessionChangeHandler(sessionStatus, today)
                     SessionClose()
                   }}>
                     <Text style={styles.btnTextStyle}>Да, закрыть</Text>
@@ -657,7 +690,6 @@ function App() {
   
   const [hasPermission, setHasPermission] = useState(null);
 
-
   // Ask user for camera permission
   const askForCameraPermission = () => {
     (async () => {
@@ -686,11 +718,10 @@ function App() {
       )
   }
 
-
-   return (
+  return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Инвентаризация" component={HomeScreen} />
+        <Stack.Screen component={HomeScreen} name={`Инвентаризация`}  />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -749,6 +780,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginRight: 10,
     marginLeft: 10,
+    marginTop: 5,
   },
   active:{
     color: '#28a745',
@@ -797,16 +829,15 @@ const styles = StyleSheet.create({
   maintext: {
     fontSize: 20,
     textAlign: 'center',
-    padding: 5,
+    padding: 1,
   },
 
-  baseText: {
-    fontSize: 28,
-    fontWeight: "bold",
+  itemsRemain:{
     marginBottom: 10,
-    color: "black",
   },
+
   scanBtn :{
+    marginBottom: 0,
   },
   barcodebox: {
     flex: 1,
