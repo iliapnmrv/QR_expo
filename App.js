@@ -435,9 +435,7 @@ function HomeScreen({navigation}) {
         tx.executeSql(
           'UPDATE qr SET kolvo = kolvo - 1 WHERE `id` = ?', 
           [id], 
-          (_, result) => {
-            console.log('updated')
-          },
+          (_, result) => {},
           (_, error) => console.log(`Error code 4: ${error}`)
       );
       }
@@ -450,7 +448,7 @@ function HomeScreen({navigation}) {
           (_, result) => {
             let row = result.rows.item(0);
             if (!row.kolvo) { //если не остается остатка
-              setItemsRemain(`Последняя позиция`)
+              setItemsRemain(`Позиция закрыта`)
             }else{
               setItemsRemain(`Осталось ${row.kolvo} в строке ${row.vedPos}`)
             }
@@ -490,7 +488,7 @@ function HomeScreen({navigation}) {
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <Text style={styles}>
+            <Text style={styles.containerText}>
               Expo SQlite не поддерживается в браузере!
             </Text>
           </View>
@@ -543,7 +541,9 @@ function HomeScreen({navigation}) {
         <View style={styles.barcodebox}>
           <BarCodeScanner
             onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-            style={{ height: 400, width: 400 }} />
+            style={{ height: 400, width: 400, marginBottom: 20, }} />
+          {scanned && <Button style={styles.scanBtn} title={'Сканировать'} onPress={() => setScanned(false)} color='' />}
+
         </View>
         {/* Информация о скачке новой базы данных */}
         <View style={styles.centeredView}>
@@ -574,7 +574,10 @@ function HomeScreen({navigation}) {
             visible={scanModalVisible}
             onRequestClose={() => { setScanModalVisible(!scanModalVisible) }}>
             <View style={styles.centeredView}>
-              <View style={styles.modalView}>
+              <View style={[styles.modalView, scanStatus == "В учете" ? styles.lightGreen :
+                                            scanStatus == "Позиция не в учете" ? styles.lightYellow : 
+                                            scanStatus == "Позиция сверх учета" ? styles.lightBlue :
+                                            scanStatus == "Повторное считывание" ? styles.lightRed :  null]}>
                 <Text style={[styles.maintext, scanStatus == "В учете" ? styles.green :
                                               scanStatus == "Позиция не в учете" ? styles.yellow : 
                                               scanStatus == "Позиция сверх учета" ? styles.blue :
@@ -644,7 +647,6 @@ function HomeScreen({navigation}) {
             </View>
           </Modal>
         </View>
-        {scanned && <Button style={styles.scanBtn} title={'Сканировать'} onPress={() => setScanned(false)} color='lightblue' />}
         </ScrollView>
       </View>
   );
@@ -672,14 +674,14 @@ function App() {
    if (hasPermission === null) {
     return (
       <View style={styles.container}>
-        <Text>Asking for permission to use the camera.</Text>
+        <Text style={styles.containerText}>Получение разрешений...</Text>
       </View>)
   }
   if (hasPermission === false) {
     return (
       <View style={styles.container}>
-        <Text style={{ margin: 10 }}>Camera cannot be accessed.</Text>
-        <Button title={'Allow Your Camera!'} onPress={() => askForCameraPermission()} />
+        <Text style={{ margin: 10 }}>Камера недоступна</Text>
+        <Button title={'Разрешить'} onPress={() => askForCameraPermission()} />
       </View>
       )
   }
@@ -788,7 +790,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center'
   },
-
+  containerText: {
+    textAlign: 'center',
+    width: '100%',
+  },
   maintext: {
     fontSize: 20,
     textAlign: 'center',
@@ -801,14 +806,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "black",
   },
-
   scanBtn :{
-    marginBottom: 20,
   },
   barcodebox: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    marginTop: 5,
+    flexDirection: 'column',
   },
   // цвета статусов
   green: {
@@ -822,5 +827,17 @@ const styles = StyleSheet.create({
   },  
   yellow: {
     color: '#F1C40F'
+  },
+  lightGreen: {
+    backgroundColor: '#ddfada'
+  },  
+  lightRed: {
+    backgroundColor: '#ffe7e6'
+  },  
+  lightBlue: {
+    backgroundColor: '#eafbff'
+  },  
+  lightYellow: {
+    backgroundColor: '#ffffeb'
   },
 });

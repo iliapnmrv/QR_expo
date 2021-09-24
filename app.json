@@ -26,7 +26,7 @@
             },
             "package": "com.inventory.appname",
             "versionCode": 3,
-            "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "MEDIA_LIBRARY"]
+            "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "MEDIA_LIBRARY", "CAMERA_ROLL"]
         },
         "web": {
             "favicon": "./assets/favicon.png"
