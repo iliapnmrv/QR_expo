@@ -12,7 +12,7 @@ import {
 import * as SQLite from "expo-sqlite";
 import BackHome from './backHome';
 
-export default function Over({ navigation }) {
+export default function Over(props) {
     const [data, setData] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [isLoading, setLoading] = useState(true);   
@@ -76,7 +76,7 @@ export default function Over({ navigation }) {
             />
             }
         >
-            <BackHome />
+            <BackHome navigation={props.navigation} />
             <View style={{ flex: 1, padding: 24 }}>
                 {isLoading ? <ActivityIndicator/> : (
                     <FlatList

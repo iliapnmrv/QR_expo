@@ -50,7 +50,7 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Home">
+      <Drawer.Navigator initialRouteName="Главная">
         <Drawer.Screen name="Главная" component={HomeScreen} />
         <Drawer.Screen name="В учете" component={Inside} />
         <Drawer.Screen name="Не в учете" component={NotReg} />
@@ -76,5 +76,3 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 })
-
-

@@ -13,7 +13,7 @@ import * as SQLite from "expo-sqlite";
 import BackHome from './backHome'
 
 
-export default function Inside({ navigation }) {
+export default function Inside(props) {
     const [data, setData] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [isLoading, setLoading] = useState(true);   
@@ -78,7 +78,7 @@ export default function Inside({ navigation }) {
             }
         >
             <View>
-                <BackHome />
+                <BackHome navigation={props.navigation} />
                 <Text style={styles.sectionHeader}>Позиции в учете инвентаризационной описи</Text>
             </View>
             <View style={{ flex: 1, padding: 24 }}>
@@ -100,12 +100,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 22
-    },
-    homeIcon: {
-        marginRight: 20,
-        marginTop: 10,
-        marginBottom: 0,
-        alignSelf: 'flex-end',
     },
     sectionHeader: {
         fontSize: 18,
