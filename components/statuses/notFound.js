@@ -76,7 +76,7 @@ export default function NotFound(props) {
             }
         >
             <BackHome navigation={props.navigation} />
-            <View style={{ flex: 1, padding: 24 }}>
+            <View style={{ flex: 1, marginTop: 10 }}>
                 {isLoading ? <ActivityIndicator/> : (
                     <FlatList
                     data={data}

@@ -81,7 +81,7 @@ export default function Inside(props) {
                 <BackHome navigation={props.navigation} />
                 <Text style={styles.sectionHeader}>Позиции в учете инвентаризационной описи</Text>
             </View>
-            <View style={{ flex: 1, padding: 24 }}>
+            <View style={{ flex: 1, padding: 24, paddingTop: 0 }}>
                 {isLoading ? <ActivityIndicator/> : (
                     <FlatList
                     data={data}

@@ -77,7 +77,7 @@ export default function Over(props) {
             }
         >
             <BackHome navigation={props.navigation} />
-            <View style={{ flex: 1, padding: 24 }}>
+            <View style={{ flex: 1, padding: 24, paddingTop: 0 }}>
                 {isLoading ? <ActivityIndicator/> : (
                     <FlatList
                     data={data}
