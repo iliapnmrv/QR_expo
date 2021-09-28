@@ -19,6 +19,7 @@ import * as MediaLibrary from 'expo-media-library';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import * as Clipboard from 'expo-clipboard';
 import 'react-native-gesture-handler';
+import Message from '../userMessage';
 
 
 // Сегодняшняя дата
@@ -120,7 +121,10 @@ export default function HomeScreen({navigation}) {
             `, 
             [], 
             (_, result) => {
-              console.log("Таблицы успешно очищены")
+                deleteTables(true)
+                setTimeout(() => {
+                    deleteTables(false)
+                }, 5000);
             },
             (_, error) => console.log(`Error code 2: ${error}`)
         );
@@ -133,13 +137,12 @@ export default function HomeScreen({navigation}) {
             DELETE FROM qr;
             `, 
             [], 
-            (_, result) => {
-              console.log("Таблицы успешно очищены")
-            },
+            (_, result) => {},
             (_, error) => console.log(`Error code 2: ${error}`)
         );
         }
       );
+        
     }
   
     // ------- Сессии end
@@ -189,6 +192,8 @@ export default function HomeScreen({navigation}) {
     const [sessionModalVisible, setSessionModalVisible] = useState(false);
     const [DownloadedInfoModal, setDownloadedInfoModal] = useState(false);
     const [downloadLink, setDownloadLink] = useState(false);
+    const [deletion, deleteTables] = useState(false)
+
   
     const [linkText, changeLinkText] = useState(null);
     const [linkPlaceholder, changeLinkPlaceholder] = useState("hhtps://");
@@ -264,7 +269,7 @@ export default function HomeScreen({navigation}) {
           var currentline=lines[i].split(";");
           let name = currentline[2]
           if (name.substr(name.length - 1) == '\"') {
-            name = name.substring('\"', name.length - 1).substring(1).replace('\"' + '\"', '\"') //удаление 1 и последней кавычки
+            name = name.substring('\"', name.length - 1).substring(1).replace('\"' + '\"', '\"') //удаление лишних кавычек
           }
           currentline[2] = name
           for(var j=0;j<headers.length;j++){
@@ -273,6 +278,10 @@ export default function HomeScreen({navigation}) {
           result.push(obj);
       }
       let json = JSON.stringify(result)
+      setDownloadedInfoModal(true)
+      setTimeout(() => {
+            setDownloadedInfoModal(false)
+        }, 5000);
       insertJSONObj(json) //json объект для вставки в бд
     }
   
@@ -319,6 +328,21 @@ export default function HomeScreen({navigation}) {
         }
       );
     }
+
+    const insertJSONObj = async (json) => {
+        let data = JSON.parse(json)
+        setDownloadedInfo(data.length)
+        for (let i = 0; i < data.length; i++) {
+          let obj = data[i]
+          let id = obj.id
+          let vedPos = obj.vedPos
+          let name = obj.name
+          let place = obj.place
+          let kolvo = obj.kolvo
+          let placePriority = obj.placePriority
+          insert(id, vedPos, name, place, kolvo, placePriority)
+        }
+    }
   
     const insert = (id, vedPos, name, place, kolvo, placePriority) => {
       db.transaction(
@@ -326,28 +350,17 @@ export default function HomeScreen({navigation}) {
           tx.executeSql(
             `INSERT INTO qr (id, vedPos, name, place, kolvo, placePriority) VALUES(?, ?, ?, ?, ?, ?)`, 
             [id, vedPos, name, place, kolvo, placePriority], 
-            (_, result) => {},
+            (_, result) => {
+
+                
+            },
             (_, error) => console.log(error)
         );
         }
       );
     }
   
-    const insertJSONObj = async (json) => {
-      let data = JSON.parse(json)
-      setDownloadedInfo(`Успешно загружено! \nВ инвентаризационной описи ${data.length} строк`)
-      setDownloadedInfoModal(true)
-      for (let i = 0; i < data.length; i++) {
-        let obj = data[i]
-        let id = obj.id
-        let vedPos = obj.vedPos
-        let name = obj.name
-        let place = obj.place
-        let kolvo = obj.kolvo
-        let placePriority = obj.placePriority
-        insert(id, vedPos, name, place, kolvo, placePriority)
-      }
-    }
+    
   
     const downloadDB = async () => {
       // Информация для скачивания
@@ -360,6 +373,8 @@ export default function HomeScreen({navigation}) {
     }
   
     // Scanned bar code 
+
+
     const handleBarCodeScanned = ({ type, data }) => {
       setScanned(true);
       setText(data)
@@ -508,6 +523,7 @@ export default function HomeScreen({navigation}) {
     }
   
     return (
+     
         <View style={styles.container}>
           <ScrollView style={styles.scrollView}>
           {Platform.OS === "web" ? (
@@ -578,25 +594,8 @@ export default function HomeScreen({navigation}) {
             {scanned && <Button style={styles.scanBtn} title={'Сканировать'} onPress={() => setScanned(false)} color='' />}
   
           </View>
-          {/* Информация о скачке новой базы данных */}
-          <View style={styles.centeredView}>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={DownloadedInfoModal}
-              onRequestClose={() => { setDownloadedInfoModal(!DownloadedInfoModal) }}>
-              <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                  <Text style={styles.maintext}>{downloadedInfo}</Text>
-                  <View style={styles.buttons}>
-                    <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setDownloadedInfoModal(!DownloadedInfoModal) }}>
-                      <Text style={styles.btnTextStyle}>Закрыть</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            </Modal>
-          </View>
+
+        {/* Информация о скачке новой базы данных */}
   
   
           {/* Результаты анализирования */}
@@ -681,7 +680,22 @@ export default function HomeScreen({navigation}) {
             </Modal>
           </View>
           </ScrollView>
+        
+            {/* Сообщения пользователю */}
+            {scanned && <Message message="QR код успешно отсканирован" sec={5}/>}
+            {DownloadedInfoModal && <Message message={`Успешно загружено ${downloadedInfo} строк`} sec={5}/>}
+            {deletion && <Message message={"Таблицы успешно очищены"} sec={5}/>}
+            {!downloadLink && <Message 
+                                message={linkText != null ? `Ссылка для скачивания изменена на ` : 'Ссылка не была введена'} 
+                                secondLine={linkText != null ? linkText : null} 
+                                sec={4}
+                            />}
+
         </View>
+        
+
+
+        
     );
   }
 

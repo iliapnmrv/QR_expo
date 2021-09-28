@@ -52,6 +52,7 @@ export default function Inside(props) {
             })
             result.then(() => {
                 setRefreshing(false)
+                 i = 1
             })
         } catch (e) {
             console.log(e)

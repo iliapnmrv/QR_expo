@@ -51,6 +51,7 @@ export default function NotReg(props) {
             })
             result.then(() => {
                 setRefreshing(false)
+                i = 1
             })
         } catch (e) {
             console.log(e)
