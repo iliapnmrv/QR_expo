@@ -46,7 +46,7 @@ export default function Message(props) {
 
 const styles = StyleSheet.create({
     centeredView: {
-        flex: 1,
+         flex: 1,
         justifyContent: "flex-end",
         alignItems: "center",
         flexDirection: 'column',

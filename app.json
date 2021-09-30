@@ -2,7 +2,7 @@
     "expo": {
         "name": "Инвентаризация",
         "slug": "Inventory",
-        "version": "1.4",
+        "version": "1.5",
         "orientation": "portrait",
         "icon": "./assets/inventory.png",
         "splash": {
@@ -25,7 +25,7 @@
                 "backgroundColor": "#FFFFFF"
             },
             "package": "com.inventory.appname",
-            "versionCode": 6,
+            "versionCode": 7,
             "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE", "MEDIA_LIBRARY", "CAMERA_ROLL"]
         },
         "web": {

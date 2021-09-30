@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  PermissionsAndroid,
   Alert
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -21,6 +22,26 @@ import * as Clipboard from 'expo-clipboard';
 import 'react-native-gesture-handler';
 import Message from '../userMessage';
 
+const requestStoragePermission = async () => {
+  let check = await PermissionsAndroid.check(
+    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+  )
+  if (!check) {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("You can use the camera");
+      } else {
+        console.log("Camera permission denied");
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+  return true
+};
 
 // Сегодняшняя дата
 let today = new Date();
@@ -77,7 +98,7 @@ export default function HomeScreen({navigation}) {
     useEffect(() => {
       getSessionStatus()
       .then(arr => {
-        arr[0] == "false" ? arr[0] = false : arr[0] = true
+        arr[0] = arr[0] == "false" || arr[0] == null ? false : true
         setSessionStatus(arr[0]);
         setSessionDate(arr[1]);
         if (arr[0]) {
@@ -172,6 +193,7 @@ export default function HomeScreen({navigation}) {
   
     // по изменению статуса
     useEffect(() => {
+      requestStoragePermission()
       getLink()
       .then(res => {
         linkPlaceholder != res ? changeLinkPlaceholder(res) : null
@@ -191,7 +213,7 @@ export default function HomeScreen({navigation}) {
     const [scanModalVisible, setScanModalVisible] = useState(false);
     const [sessionModalVisible, setSessionModalVisible] = useState(false);
     const [DownloadedInfoModal, setDownloadedInfoModal] = useState(false);
-    const [downloadLink, setDownloadLink] = useState(false);
+    const [downloadLink, setDownloadLink] = useState(null);
     const [deletion, deleteTables] = useState(false)
 
   
@@ -203,27 +225,6 @@ export default function HomeScreen({navigation}) {
     const [scanRes, setScanRes] = useState() // результат сканирования
     const [scanStatus, setScanStatus] = useState() // статус сканирования
     const [itemsRemain, setItemsRemain] = useState()
-    const [forceUpdate, forceUpdateId] = useForceUpdate();
-  
-    // Проверка на существование папки/файла
-    const ensureDirExists = async (fileUri) => {
-      const dirInfo = await FileSystem.getInfoAsync(fileUri);
-      if (!dirInfo.exists) {
-        return false
-      }
-      return true
-    }
-  
-    // Функция загрузки базы данных из папки assets
-    const deleteFile = async (fileUri) => {
-      const fileInfo = await FileSystem.getInfoAsync(fileUri);
-      if (fileInfo.exists) {
-        let del = await FileSystem.deleteAsync(fileUri);
-        console.log("Файл успешно удален")
-      }else{
-        console.log("Nothing to delete from", fileUri)
-      }
-    }
   
     const downloadFile = async (uri, fileUri) => {
       if (uri == null) {
@@ -278,10 +279,6 @@ export default function HomeScreen({navigation}) {
           result.push(obj);
       }
       let json = JSON.stringify(result)
-      setDownloadedInfoModal(true)
-      setTimeout(() => {
-            setDownloadedInfoModal(false)
-        }, 5000);
       insertJSONObj(json) //json объект для вставки в бд
     }
   
@@ -332,6 +329,10 @@ export default function HomeScreen({navigation}) {
     const insertJSONObj = async (json) => {
         let data = JSON.parse(json)
         setDownloadedInfo(data.length)
+        setDownloadedInfoModal(true)
+        setTimeout(() => {
+              setDownloadedInfoModal(false)
+        }, 5000);
         for (let i = 0; i < data.length; i++) {
           let obj = data[i]
           let id = obj.id
@@ -369,12 +370,10 @@ export default function HomeScreen({navigation}) {
   
       await createDB() //создание бд
       await downloadFile(url, csvUri)
-      await deleteFile(csvUri)
+
     }
   
     // Scanned bar code 
-
-
     const handleBarCodeScanned = ({ type, data }) => {
       setScanned(true);
       setText(data)
@@ -682,10 +681,10 @@ export default function HomeScreen({navigation}) {
           </ScrollView>
         
             {/* Сообщения пользователю */}
-            {scanned && <Message message="QR код успешно отсканирован" sec={5}/>}
+            {/* {scanned && <Message message="QR код успешно отсканирован" sec={5}/>} */}
             {DownloadedInfoModal && <Message message={`Успешно загружено ${downloadedInfo} строк`} sec={5}/>}
             {deletion && <Message message={"Таблицы успешно очищены"} sec={5}/>}
-            {!downloadLink && <Message 
+            {downloadLink != null && !downloadLink && <Message 
                                 message={linkText != null ? `Ссылка для скачивания изменена на ` : 'Ссылка не была введена'} 
                                 secondLine={linkText != null ? linkText : null} 
                                 sec={4}
@@ -699,12 +698,7 @@ export default function HomeScreen({navigation}) {
     );
   }
 
-  function useForceUpdate() {
-    const [value, setValue] = useState(0);
-    return [() => setValue(value + 1), value];
-   }
-
-   //Styles 
+  //Styles 
 const styles = StyleSheet.create({
     none: {
       display: 'none',
