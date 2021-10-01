@@ -227,9 +227,11 @@ export default function HomeScreen({navigation}) {
     const [itemsRemain, setItemsRemain] = useState()
   
     const downloadFile = async (uri, fileUri) => {
+      console.log("downloadFile func")
       if (uri == null) {
         return
       }
+      console.log("im here")
       FileSystem.downloadAsync(uri, fileUri)
       .then(({ uri }) => {
         saveFile(uri);
@@ -240,18 +242,19 @@ export default function HomeScreen({navigation}) {
     }
   
     const saveFile = async (fileUri) => {
-      const { status } = await MediaLibrary.getPermissionsAsync();
-      if (status === "granted") {
-        const asset = await MediaLibrary.createAssetAsync(fileUri)
-        console.log(asset.uri)
-        await getFileData(asset.uri)
+      let { status } = await MediaLibrary.getPermissionsAsync();
+      if (status != 'granted') {
+        await MediaLibrary.requestPermissionsAsync()
       }
+      const asset = await MediaLibrary.createAssetAsync(fileUri)
+      await getFileData(asset.uri)
       // Обработать если нет разрешения
     }
   
   
     // Получает текст csv файла, который скачивается по ссылке
     const getFileData = async (uri) => {
+      console.log("get file data")
       try {
         let read = await FileSystem.readAsStringAsync(uri)
         csvToJSON(read)
@@ -262,6 +265,7 @@ export default function HomeScreen({navigation}) {
   
     //var csv is the CSV file with headers
     async function csvToJSON(csv){
+      console.log(csv)
       var lines=csv.split(/\r\n|\n|\r/);
       var result = [];
       var headers=lines[0].split(";");
@@ -269,8 +273,11 @@ export default function HomeScreen({navigation}) {
           var obj = {};
           var currentline=lines[i].split(";");
           let name = currentline[2]
-          if (name.substr(name.length - 1) == '\"') {
-            name = name.substring('\"', name.length - 1).substring(1).replace('\"' + '\"', '\"') //удаление лишних кавычек
+          console.log(name)
+          if (name != undefined) {
+            if (name.substr(name.length - 1) == '\"') {
+              name = name.substring('\"', name.length - 1).substring(1).replace('\"' + '\"', '\"') //удаление лишних кавычек
+            }
           }
           currentline[2] = name
           for(var j=0;j<headers.length;j++){
