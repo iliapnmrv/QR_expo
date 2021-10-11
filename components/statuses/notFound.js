@@ -10,7 +10,7 @@ import {
   ScrollView
 } from 'react-native';
 import * as SQLite from "expo-sqlite";
-import BackHome from './backHome';
+import BackHome from './BackHome';
 
 
 export default function NotFound(props) {

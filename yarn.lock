@@ -1368,12 +1368,12 @@
     "sudo-prompt" "^9.0.0"
     "wcwidth" "^1.0.1"
 
-"@react-navigation/core@^6.0.1":
-  "integrity" "sha512-mVdvBDYdz8uzLQHokmVdX/xC4rS7NIkD1FN/yaGdovVzYApAhM+UGd3w1zskjyCSyXaVHHOwV59ZGVew+84xfQ=="
-  "resolved" "https://registry.npmjs.org/@react-navigation/core/-/core-6.0.1.tgz"
-  "version" "6.0.1"
+"@react-navigation/core@^6.0.3":
+  "integrity" "sha512-Kan/mpsCsb4NS1A+yIVpWfj6BITM051QAaQM8osWB5AfEsANhG+fCjSKL4Zv5idXpF0vxDbudj6CfnwJTnja6Q=="
+  "resolved" "https://registry.npmjs.org/@react-navigation/core/-/core-6.0.3.tgz"
+  "version" "6.0.3"
   dependencies:
-    "@react-navigation/routers" "^6.0.1"
+    "@react-navigation/routers" "^6.0.2"
     "escape-string-regexp" "^4.0.0"
     "nanoid" "^3.1.23"
     "query-string" "^7.0.0"
@@ -1388,34 +1388,43 @@
     "color" "^3.1.3"
     "warn-once" "^0.1.0"
 
-"@react-navigation/elements@^1.0.4", "@react-navigation/elements@^1.1.2":
-  "integrity" "sha512-PbPCleC1HpUlXtuP0DFNCNTEhRLd6lmB0KxY0SGRGqCemS3HpG/PajEQ1LDe7S51M03a1tDby1MfKTkNanUXAg=="
-  "resolved" "https://registry.npmjs.org/@react-navigation/elements/-/elements-1.1.2.tgz"
-  "version" "1.1.2"
+"@react-navigation/elements@^1.1.2", "@react-navigation/elements@^1.2.0":
+  "integrity" "sha512-0eraS7Gj39CD26aAyUyZdyoCe1XBEa9CbHoFHCv3N5/+FSfX+HYdPzkOi3KPT3nEdNx7GD4rTWN2y0qZ7yUiaA=="
+  "resolved" "https://registry.npmjs.org/@react-navigation/elements/-/elements-1.2.0.tgz"
+  "version" "1.2.0"
 
-"@react-navigation/native-stack@^6.0.5":
-  "integrity" "sha512-2gYLzs71D2PJk7SKzDZjMjc2lrwUytYGnR6QQhBlLtGm54R6DKyMtmisxMMz1KzMlI9JhtawVxSZ5SHP2VlSlA=="
-  "resolved" "https://registry.npmjs.org/@react-navigation/native-stack/-/native-stack-6.0.5.tgz"
-  "version" "6.0.5"
+"@react-navigation/native-stack@^6.2.3":
+  "integrity" "sha512-0me63n2ec3rD6Y882IgVAqyJh8yRH2GzwmVdveuZNOGgRkr9+aLhXp9VGw190xLbcmlxdDx/tj+d8hhtRA6Q+A=="
+  "resolved" "https://registry.npmjs.org/@react-navigation/native-stack/-/native-stack-6.2.3.tgz"
+  "version" "6.2.3"
   dependencies:
-    "@react-navigation/elements" "^1.0.4"
+    "@react-navigation/elements" "^1.2.0"
     "warn-once" "^0.1.0"
 
-"@react-navigation/native@^6.0.0", "@react-navigation/native@^6.0.2":
-  "integrity" "sha512-HDqEwgvQ4Cu16vz8jQ55lfyNK9CGbECI1wM9cPOcUa+gkOQEDZ/95VFfFjGGflXZs3ybPvGXlMC4ZAyh1CcO6w=="
-  "resolved" "https://registry.npmjs.org/@react-navigation/native/-/native-6.0.2.tgz"
-  "version" "6.0.2"
+"@react-navigation/native@^6.0.0", "@react-navigation/native@^6.0.5":
+  "integrity" "sha512-e23rhomQS98sNMcldO2mPVFOcpizrkfdZ6d7wK8nXhkd/m43IvhGmzAgpX4Iz7MFbOFsHGlDRzwba3nlYIGm1Q=="
+  "resolved" "https://registry.npmjs.org/@react-navigation/native/-/native-6.0.5.tgz"
+  "version" "6.0.5"
   dependencies:
-    "@react-navigation/core" "^6.0.1"
+    "@react-navigation/core" "^6.0.3"
     "escape-string-regexp" "^4.0.0"
     "nanoid" "^3.1.23"
 
-"@react-navigation/routers@^6.0.1":
-  "integrity" "sha512-5ctB49rmtTRQuTSBVgqMsEzBUjPP2ByUzBjNivA7jmvk+PDCl4oZsiR8KAm/twhxe215GYThfi2vUWXKAg6EEQ=="
-  "resolved" "https://registry.npmjs.org/@react-navigation/routers/-/routers-6.0.1.tgz"
-  "version" "6.0.1"
+"@react-navigation/routers@^6.0.2":
+  "integrity" "sha512-VEyBlpY+TBMTKE7qaWll/CUYcRctCrJAFx6jIgzkSxncsCOtgEeDEsDLggkGQEVAwOnftAiuXeVRlHkRswIXiw=="
+  "resolved" "https://registry.npmjs.org/@react-navigation/routers/-/routers-6.0.2.tgz"
+  "version" "6.0.2"
   dependencies:
     "nanoid" "^3.1.23"
+
+"@react-navigation/stack@^6.0.10":
+  "integrity" "sha512-BaNtmkSIY18+kVbry5Pao2xys0imSWoEJ3KUdXmNv6iR9T8JNL74rf5ecUFVtcY9RBnEf9CvbDwudBYCCSLvSA=="
+  "resolved" "https://registry.npmjs.org/@react-navigation/stack/-/stack-6.0.10.tgz"
+  "version" "6.0.10"
+  dependencies:
+    "@react-navigation/elements" "^1.2.0"
+    "color" "^3.1.3"
+    "warn-once" "^0.1.0"
 
 "@types/hammerjs@^2.0.36":
   "integrity" "sha512-VbjwR1fhsn2h2KXAY4oy1fm7dCxaKy0D+deTb8Ilc3Eo3rc5+5eA4rfYmZaHgNJKxVyI0f6WIXzO2zLkVmQPHA=="
@@ -4768,9 +4777,9 @@
   "version" "0.0.7"
 
 "nanoid@^3.1.23":
-  "integrity" "sha512-rdwtIXaXCLFAQbnfqDRnI6jaRHp9fTcYBjtFKE8eezcZ7LuLjhUaQGNeMXf1HmRoCH32CLz6XwX0TtxEOS/A3Q=="
-  "resolved" "https://registry.npmjs.org/nanoid/-/nanoid-3.1.25.tgz"
-  "version" "3.1.25"
+  "integrity" "sha512-dW2pUSGZ8ZnCFIlBIA31SV8huOGCHb6OwzVCc7A69rb/a+SgPBwfmLvK5TKQ3INPbRkcI8a/Owo0XbiTNH19wg=="
+  "resolved" "https://registry.npmjs.org/nanoid/-/nanoid-3.1.29.tgz"
+  "version" "3.1.29"
 
 "nanomatch@^1.2.9":
   "integrity" "sha512-fpoe2T0RbHwBTBUOftAfBPaDEi06ufaUai0mE6Yn1kacc3SnTErfb/h+X94VXzI64rKFHYImXSvdwGGCmwOqCA=="
@@ -5383,10 +5392,10 @@
   "resolved" "https://registry.npmjs.org/react-native-safe-area-context/-/react-native-safe-area-context-3.2.0.tgz"
   "version" "3.2.0"
 
-"react-native-screens@^3.6.0", "react-native-screens@>= 3.0.0":
-  "integrity" "sha512-emQmSu+B6cOIjJH2OIgpuxd9zCD6xz7/oo5GCetyjsM5qR3sMnVgOxqtK99xPu9XJH/8k7MplXbtJgtk/PHXwA=="
-  "resolved" "https://registry.npmjs.org/react-native-screens/-/react-native-screens-3.6.0.tgz"
-  "version" "3.6.0"
+"react-native-screens@>= 3.0.0", "react-native-screens@~3.4.0":
+  "integrity" "sha512-cg+q9MRnVdeOcJyvJtqffoXLur/C2wHA/7IO2+FAipzTlgHbbM1mTuSM7qG+SeiQjoIs4mHOEf7A0ziPKW04sA=="
+  "resolved" "https://registry.npmjs.org/react-native-screens/-/react-native-screens-3.4.0.tgz"
+  "version" "3.4.0"
   dependencies:
     "warn-once" "^0.1.0"
 

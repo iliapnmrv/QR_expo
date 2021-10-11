@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import * as SQLite from "expo-sqlite";
-import BackHome from './backHome'
+import BackHome from './BackHome'
 
 
 export default function Inside(props) {
@@ -42,6 +42,7 @@ export default function Inside(props) {
                                 resolve(false)
                             }
                             let data = result.rows._array
+                            console.log(data)
                             setData(data)
                             resolve(true)
                         },

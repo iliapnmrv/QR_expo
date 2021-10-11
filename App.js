@@ -6,17 +6,21 @@ import {
   Button, 
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
+
 import 'react-native-gesture-handler';
-import Inside from './components/statuses/inside';
-import Over from './components/statuses/over'
-import HomeScreen from './components/home/homeScreen';
-import NotReg from './components/statuses/notReg';
-import NotFound from './components/statuses/notFound';
+import Inside from './components/statuses/Inside';
+import Over from './components/statuses/Over'
+import HomeScreen from './components/home/HomeScreen';
+import NotReg from './components/statuses/NotReg';
+import NotFound from './components/statuses/NotFound';
+import BarCode from './components/home/BarCode';
 
 function App() {
-  const Drawer = createDrawerNavigator();
+
  
   const [hasPermission, setHasPermission] = useState(null);
 
@@ -48,17 +52,38 @@ function App() {
       )
   }
 
+  const RootStack = createStackNavigator();
+
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Главная">
+      <RootStack.Navigator>
+        <RootStack.Screen
+          name="Root"
+          component={Root}
+          options={{ headerShown: false }}
+        />
+        <RootStack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
+          <RootStack.Screen name="scanner" component={BarCode} />
+        </RootStack.Group>
+      </RootStack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+function Root() {
+  const Drawer = createDrawerNavigator();
+
+  return(
+    <Drawer.Navigator>
+      <Drawer.Group>
         <Drawer.Screen name="Главная" component={HomeScreen} />
         <Drawer.Screen name="В учете" component={Inside} />
         <Drawer.Screen name="Не в учете" component={NotReg} />
         <Drawer.Screen name="Сверх учета" component={Over} />
         <Drawer.Screen name="Не выявлено" component={NotFound} />
-      </Drawer.Navigator>
-    </NavigationContainer>
-  );
+      </Drawer.Group>
+    </Drawer.Navigator>
+  )
 }
 
 export default App;
