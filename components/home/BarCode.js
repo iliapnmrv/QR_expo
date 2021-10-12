@@ -16,11 +16,13 @@ export default function BarCode({route, navigation}, props) {
     let scanned = false
      // Scanned bar code 
      const handleBarCodeScanned = ({type, data}) => {
+        // console.log(data)
         setScannedData(data)
         navigation.navigate('Главная', {
             scannedData: scannedData,
-            modalVisible: true
-        })
+            prevScanPosition: null,
+            itemsRemain: null
+        }, true)
     };
 
     return(
