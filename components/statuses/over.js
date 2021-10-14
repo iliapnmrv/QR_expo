@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, 
-  Button, 
   StyleSheet,
-  FlatList,
-  Text,
-  ActivityIndicator,
   RefreshControl,
   ScrollView
 } from 'react-native';
 import * as SQLite from "expo-sqlite";
 import BackHome from './BackHome';
+import List from './List/List';
 
 export default function Over(props) {
     const [data, setData] = useState(null);
@@ -63,8 +59,6 @@ export default function Over(props) {
         getData();
     }, []);
 
-    let i = 1
-
     return (
         <ScrollView 
             style={{flex: 1}}
@@ -77,17 +71,7 @@ export default function Over(props) {
             }
         >
             <BackHome navigation={props.navigation} />
-            <View style={{ flex: 1, padding: 24, paddingTop: 0 }}>
-                {isLoading ? <ActivityIndicator/> : (
-                    <FlatList
-                    data={data}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <Text style={styles.item}>{i++}. {item.name}</Text>
-                    )}
-                    />
-                )}
-            </View>
+            <List data={data}/>
         </ScrollView>
     );
 }

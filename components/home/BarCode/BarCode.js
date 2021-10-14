@@ -40,7 +40,7 @@ export default function BarCode({ navigation }) {
             <Icon 
                 name = "times"
                 size = { 40 }
-                color = "#A9A9A9"
+                color = "#f9f9f9"
                 style = { styles.closeBtn }
                 onPress = { () => navigation.goBack() }
             />
@@ -55,11 +55,11 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         padding: 0,
-        margin: 0,
+        margin: -20,
     },
     closeBtn : {
         position: 'absolute',
-        right: '15%',
-        bottom: '13%',
+        alignSelf: 'center',
+        bottom: '15%',
     },
 })

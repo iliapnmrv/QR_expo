@@ -712,20 +712,34 @@ export default function HomeScreen({route, navigation}, props) {
             <View style={styles.prevScan}>
               {scannedData !== null ?
                 <View>
-                  <Text style={styles.header}>Сканирование</Text>
-                  <Text>{scannedData}</Text>
-                  {prevScanPosition ? <Text>{prevScanPosition}</Text> : null}
-                  {itemsRemain ? <Text>{itemsRemain}</Text> : null}
+                  <View>
+                    <Text style={styles.secondHeader}>Информация QR кода</Text>
+                    <Text style={styles.info}>{scannedData}</Text>
+                  </View>
+                  {prevScanPosition ? (
+                    <View>
+                      <Text style={styles.secondHeader}>Позиция сканирования</Text>
+                      <Text style={[styles.info, styles.biggerFont]}>{prevScanPosition}</Text>
+                    </View>
+                  ) : null}
+                  {itemsRemain ? (
+                    <View>
+                      <Text style={styles.secondHeader}>Осталось</Text>
+                      <Text style={[styles.info, styles.biggerFont]}>{itemsRemain}</Text>
+                    </View>
+                  ) : null}
+
                   {sessionStatus ?                   
-                    <TouchableOpacity style={[styles.analyzeBtn, styles.button, styles.accept]} onPress={ () => {
-                        analyze(scannedData)
+                    <TouchableOpacity 
+                      style={[styles.analyzeBtn, styles.button, styles.accept]} 
+                      onPress={ () => {
+                          analyze(scannedData)
                     }}>
                       <Text style={styles.btnTextStyle}>Найти в ведомости</Text>
                     </TouchableOpacity> : null
                   }
-
-                </View> : <Text>Предыдущих сканирований не было</Text>
-              }
+                  </View> : <Text>Предыдущих сканирований не было</Text>
+                }
             </View>
           </View> 
   
@@ -828,18 +842,25 @@ const styles = StyleSheet.create({
     sessionInfoButtons:{
       justifyContent: 'center',
     },
-
-
     prevScan:{
-      padding: 10,
       flex: 1,
       justifyContent: 'center',
     },
     analyzeBtn: {
       alignSelf: 'flex-end',
     },
-    header:{
-      fontSize: 20,
+    secondHeader:{
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      fontSize: 18,
+      backgroundColor: '#f9f9f9',
+    },
+    info:{
+      paddingHorizontal: 8,
+      paddingVertical: 5,
+    },
+    biggerFont: {
+      fontSize: 16,
     },
     buttonMain:{
       padding: 10,
