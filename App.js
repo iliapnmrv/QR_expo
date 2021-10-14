@@ -17,7 +17,7 @@ import Over from './components/statuses/Over'
 import HomeScreen from './components/home/HomeScreen';
 import NotReg from './components/statuses/NotReg';
 import NotFound from './components/statuses/NotFound';
-import BarCode from './components/home/BarCode';
+import BarCode from './components/home/BarCode/BarCode';
 
 function App() {
 

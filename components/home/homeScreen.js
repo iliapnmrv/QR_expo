@@ -9,8 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  PermissionsAndroid,
-  Alert
+  PermissionsAndroid
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SQLite from "expo-sqlite";
@@ -61,25 +60,12 @@ export default function HomeScreen({route, navigation}, props) {
   const [sessionDate, setSessionDate] = useState(null); //дата открытия сессии
   
   const getItemsRemainInStorage = async () => {
-    try {
-      let data = await AsyncStorage.getItem('itemsRemain');
-      if (data.charAt(0)==='\"') { //если первый элемент - кавычка
-        data = data.substr(1).slice(0, -1)
-      }
-      setItemsRemain(data)
-    } catch(e) {
-      console.log('error212', e);
-    };
-  };
-
-  const setItemsRemainInStorage = async (items) => {
-    try {
-      let val = JSON.stringify(items)
-      await AsyncStorage.setItem('itemsRemain', val)
-    } catch (e) {
-      console.log(`Error code 6: ${e}`)
+    let data = await AsyncStorage.getItem('itemsRemain');
+    if (data[0] === '\"') {
+      data = data.substr(1).slice(0, -1)
     }
-  }
+    setItemsRemain(data)
+  };
 
   // получает статус сессии
   const getSessionStatus = async () => {
@@ -94,47 +80,27 @@ export default function HomeScreen({route, navigation}, props) {
   };
 
   const getPrevScan = async () => {
-    try {
-      let data = await AsyncStorage.getItem('scannedData');
-      data = data.replace(/\\n/g, '\n')
-      if (data.charAt(0)==='\"') { //если первый элемент - кавычка
-        data = data.substr(1).slice(0, -1)
-      }
-      setScannedData(data)
-    } catch(e) {
-      console.log('error', e);
-    };
+    let data = await AsyncStorage.getItem('scannedData');
+    data = data.replace(/\\n/g, '\n')
+    if (data[0] === '\"') {
+      data = data.substr(1).slice(0, -1)
+    }
+    setScannedData(data)
   };
 
   const getScanPosStorage = async () => {
-    try {
-      let data = await AsyncStorage.getItem('prevScanPosition');
-      data = data.replace(/\\n/g, '\n')
-      if (data.charAt(0)==='\"') { //если первый элемент - кавычка
-        data = data.substr(1).slice(0, -1)
-      }
-      setPrevScanPosition(data)
-    } catch(e) {
-      console.log('error', e);
-    };
+    let data = await AsyncStorage.getItem('prevScanPosition');
+    data = data.replace(/\\n/g, '\n')
+    if (data[0] === '\"') {
+      data = data.substr(1).slice(0, -1)
+    }
+    setPrevScanPosition(data)
   };
 
-  // устанавливает статус сессии
+  
   const setPrevScan = async (prevScan) => {
-    try {
-      let val = JSON.stringify(prevScan)
-      await AsyncStorage.setItem('scannedData', val)
-    } catch (e) {
-      console.log(`Error code 6: ${e}`)
-    }
-  }
-  const setScanPosStorage = async (position) => {
-    try {
-      let val = JSON.stringify(position)
-      await AsyncStorage.setItem('prevScanPosition', val)
-    } catch (e) {
-      console.log(`Error code 6: ${e}`)
-    }
+    let val = JSON.stringify(prevScan)
+    await AsyncStorage.setItem('scannedData', val)
   }
   
   // устанавливает статус сессии
@@ -155,19 +121,41 @@ export default function HomeScreen({route, navigation}, props) {
       console.log(`Error code 12: ${e}`)
     }
   }
+
+  useEffect(() => {
+    itemsRemain != null ? (
+      (async () => {
+        await AsyncStorage.setItem('itemsRemain', JSON.stringify(itemsRemain))
+      })()
+    ) : null
+  }, [itemsRemain])
+
+  useEffect(() => {
+    prevScanPosition != null ? (
+      (async () => {
+        await AsyncStorage.setItem('prevScanPosition', JSON.stringify(prevScanPosition))
+      })()
+    ) : null
+  }, [prevScanPosition])
+
+  useEffect(() => {
+    scannedData != null ? (
+      (async () => {
+        await AsyncStorage.setItem('scannedData', JSON.stringify(scannedData))
+      })()
+    ) : null
+  }, [scannedData])
+
+  useEffect(() => {
+    if (route.params?.scannedData) {
+     setScannedData(route.params.scannedData)
+     setPrevScanPosition(route.params.prevScanPosition)
+     setPrevScan(route.params.scannedData)
+     setItemsRemain(route.params.itemsRemain)
+   }
+  }, [route.params?.scannedData]);
   
-    // по изменению статуса
     useEffect(() => {
-       if (route.params?.scannedData) {
-        setScannedData(route.params.scannedData)
-        setPrevScanPosition(route.params.prevScanPosition)
-        setPrevScan(route.params.scannedData)
-        setItemsRemain(route.params?.itemsRemain)
-      }else{
-        getPrevScan()
-        getScanPosStorage()
-        getItemsRemainInStorage()        
-      }
       getSessionStatus()
       .then(arr => {
         arr[0] = arr[0] == "false" || arr[0] == null ? false : true
@@ -176,6 +164,9 @@ export default function HomeScreen({route, navigation}, props) {
         if (arr[0]) {
           setSessionInfo("Сессия открыта")
           setSessionBtn("Закрыть сессию")
+          getPrevScan()
+          getScanPosStorage()
+          getItemsRemainInStorage()
         }else {
           setSessionInfo("Сессия закрыта")
           setSessionBtn("Открыть сессию")
@@ -185,7 +176,7 @@ export default function HomeScreen({route, navigation}, props) {
       .catch(err => {
         console.log('error', err);
       });
-    }, [route.params?.scannedData]);
+    }, []);
   
     const onSessionChangeHandler = (status, date) =>{
       if (status) {
@@ -206,6 +197,9 @@ export default function HomeScreen({route, navigation}, props) {
     }
   
     const SessionClose = () => {
+      setItemsRemain(null)
+      setPrevScanPosition(null)
+      setScannedData(null)
       db.transaction(
         tx => {
           tx.executeSql(
@@ -234,12 +228,8 @@ export default function HomeScreen({route, navigation}, props) {
             (_, error) => console.log(`Error code 2: ${error}`)
         );
         }
-      );
-        
-    }
-  
-    // ------- Сессии end
-  
+      ); 
+    }  
   
     // ССылка для скачивания
     // получает ссылку
@@ -286,10 +276,9 @@ export default function HomeScreen({route, navigation}, props) {
     const [DownloadedInfoModal, setDownloadedInfoModal] = useState(false);
     const [downloadLink, setDownloadLink] = useState(null);
     const [deletion, deleteTables] = useState(false)
-    // barcode
+
     const [scannedData, setScannedData] = useState(null)
     const [prevScanPosition, setPrevScanPosition] = useState(null) // Информация о предыдущем сканировании
-
   
     const [linkText, changeLinkText] = useState(null);
     const [linkPlaceholder, changeLinkPlaceholder] = useState("hhtps://");
@@ -502,7 +491,6 @@ export default function HomeScreen({route, navigation}, props) {
                             setScanRes(null)
                             addScan(invNom, name, status, model, serNom, pos, place, trace)
                             setPrevScanPosition(`Номер QR кода ${num}, статус: ${pos}`)
-                            setScanPosStorage(`Номер QR кода ${num}, статус: ${pos}`)
                           },
                           (_, error) => console.log(`Error code 5: ${error}`)
                       );
@@ -518,10 +506,9 @@ export default function HomeScreen({route, navigation}, props) {
                   let num = invNom.substr(invNom.length - 5); // номер qr кодa
                   if (row?.vedPos) {
                     setPrevScanPosition(`Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${row.place == undefined ? null : row.place}`)
-                    setScanPosStorage(`Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${row.place == undefined ? null : row.place}`)
                   }
                 }
-                setItemsRemain(null)    
+                // setItemsRemain(null)    
                 setScanModalVisible(true) // модальное окно с результатом проверки
               })     
             },
@@ -602,7 +589,6 @@ export default function HomeScreen({route, navigation}, props) {
               let row = result.rows.item(0);
               if (!row.kolvo) { //если не остается остатка
                 setItemsRemain(`Позиция закрыта`)
-                setItemsRemainInStorage(`Позиция закрыта`)
               }else{
                 let left = row.kolvo // оставшееся количество предметов
                 let pos = row.vedPos // строка в ведомости
@@ -614,7 +600,6 @@ export default function HomeScreen({route, navigation}, props) {
                       (_, result) => {
                         let scanned = result.rows.length
                         setItemsRemain(`${scanned}/${left+scanned}, строка: ${pos} `)
-                        setItemsRemainInStorage(`${scanned}/${left+scanned}, строка: ${pos} `)
                       },
                       (_, error) => console.log(error)
                   );
@@ -725,7 +710,7 @@ export default function HomeScreen({route, navigation}, props) {
               <Text style={styles.buttonMainText} >Нажмите, чтобы отсканировать QR код</Text>
             </TouchableOpacity>
             <View style={styles.prevScan}>
-              {scannedData !== null?
+              {scannedData !== null ?
                 <View>
                   <Text style={styles.header}>Сканирование</Text>
                   <Text>{scannedData}</Text>
@@ -739,16 +724,10 @@ export default function HomeScreen({route, navigation}, props) {
                     </TouchableOpacity> : null
                   }
 
-                </View> : null
+                </View> : <Text>Предыдущих сканирований не было</Text>
               }
-              {!scannedData && <Text>Предыдущих сканирований не было</Text>}
             </View>
-
-
-          </View>
-        
-        {/* Информация о скачке новой базы данных */}
-  
+          </View> 
   
           {/* Результаты анализирования */}
           <View style={styles.centeredView}>
@@ -795,8 +774,10 @@ export default function HomeScreen({route, navigation}, props) {
                     }}>
                       <Text style={styles.btnTextStyle}>Да, закрыть</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.button, styles.reject]} onPress={() => { setSessionModalVisible(!sessionModalVisible) }}>
-                      <Text style={styles.btnTextStyle}>Отменить</Text>
+                    <TouchableOpacity 
+                      style={[styles.button, styles.reject]} 
+                      onPress={() => { setSessionModalVisible(!sessionModalVisible) }}>
+                        <Text style={styles.btnTextStyle}>Отменить</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -815,10 +796,6 @@ export default function HomeScreen({route, navigation}, props) {
                             />}
  
         </View>
-        
-
-
-        
     );
   }
 
@@ -954,13 +931,6 @@ const styles = StyleSheet.create({
   
     scanBtn :{
       marginBottom: 0,
-    },
-    barcodebox: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 5,
-      flexDirection: 'column',
     },
     // цвета статусов
     green: {

@@ -5361,6 +5361,13 @@
   "resolved" "https://registry.npmjs.org/react-is/-/react-is-17.0.2.tgz"
   "version" "17.0.2"
 
+"react-native-barcode-mask@^1.2.4":
+  "integrity" "sha512-Jh3mEs/xUBs/z9mKkj2mM07MMQ2SdtW9mU4FOo5DQyA2kDte6lW87vIYFkWw1nxpzc7sy28ahMsgId8LTtKZsg=="
+  "resolved" "https://registry.npmjs.org/react-native-barcode-mask/-/react-native-barcode-mask-1.2.4.tgz"
+  "version" "1.2.4"
+  dependencies:
+    "prop-types" "^15.6.2"
+
 "react-native-config@^1.4.3":
   "integrity" "sha512-KcrlImtkrANeYMT5VM3NaXO5+nyxZkY42CVW8FCHThVqLa5xkNwQJSn8RXu+pNn5WpUatxYgUTP5ZqUpA4/ZKQ=="
   "resolved" "https://registry.npmjs.org/react-native-config/-/react-native-config-1.4.3.tgz"
