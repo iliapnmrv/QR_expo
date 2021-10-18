@@ -35,7 +35,17 @@ export default function BarCode({ navigation }) {
                 onBarCodeScanned = { handleBarCodeScanned }
                 style = { [StyleSheet.absoluteFillObject] }
             /> 
-            <BarcodeMask edgeColor="#62B1F6" width={250} height={250} showAnimatedLine={false} outerMaskOpacity={0.4} />
+            <BarcodeMask 
+                edgeColor="#62B1F6" 
+                width={250} 
+                height={250} 
+                showAnimatedLine={false} 
+                outerMaskOpacity={0.3} 
+                edgeBorderWidth={5}
+                edgeRadius={10}
+                edgeHeight={25}
+                edgeWidth={25}
+            />
 
             <Icon 
                 name = "times"

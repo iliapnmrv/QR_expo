@@ -1,33 +1,34 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
+  Button, 
   StyleSheet,
+  FlatList,
   Text,
+  ActivityIndicator,
   RefreshControl,
   ScrollView,
 } from 'react-native';
 import * as SQLite from "expo-sqlite";
 import BackHome from './BackHome'
-import List from './List/List';
+import styles from './ListStyles'
+
 
 export default function Inside(props) {
     const [data, setData] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [isLoading, setLoading] = useState(true);   
-    
-
-    const onRefresh = (val) => {
-        setRefreshing(val);
-        setLoading(val)
+      
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
         getData()
-    }
+    }, []);
 
     // Подключение к бд
     const db = SQLite.openDatabase('qr.db');
 
     // Получение данный из бд
     const getData = async () => {
-        console.log(123)
         try {
             let result = new Promise(resolve => {
                 db.transaction(
@@ -52,11 +53,15 @@ export default function Inside(props) {
             })
             result.then(() => {
                 setRefreshing(false)
+                 i = 1
+                console.log(1111);
+                return
+            }).then(() => {
+                console.log('here')
+                setLoading(false);
             })
         } catch (e) {
             console.log(e)
-        } finally {
-            setLoading(false);
         }
     }
 
@@ -64,38 +69,44 @@ export default function Inside(props) {
         getData();
     }, []);
 
+    let i = 1
+
     return (
         <ScrollView 
             style={{flex: 1}}
-            contentContainerStyle={styles.scrollView}
             refreshControl={
-            <RefreshControl
-                refreshing={refreshing}
-                onRefresh={() => onRefresh(true)}
-            />
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
             }
         >
             <View>
                 <BackHome navigation={props.navigation} />
                 <Text style={styles.sectionHeader}>Позиции в учете инвентаризационной описи</Text>
             </View>
-            <List data={data} onRefresh={onRefresh} isLoading={isLoading} />
+            <ScrollView 
+                style={{ flex: 1}}
+                horizontal={true}
+                persistentScrollbar={true}
+                showsHorizontalScrollIndicator={true}
+             >
+                {isLoading ? <ActivityIndicator animating={true} size="large" style={{opacity:1}} color="#0000ff"/> : (
+                    <FlatList
+                        data={data}
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <View style={styles.item} >
+                                <Text style={styles.itemCell}>{i++}</Text>
+                                <Text style={[styles.itemCell, styles.itemCenterCell]}>{item.name}</Text>
+                                <Text style={styles.itemCell}>{item.invNom.substr(-5)}</Text>
+                                <Text style={styles.itemCell}>{item.pos}</Text>
+                                <Text style={styles.itemCell}>{item.place}</Text>
+                            </View>
+                        )}
+                    />
+                )}
+            </ScrollView>
         </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: 22
-    },
-    sectionHeader: {
-        fontSize: 18,
-        padding: 10,
-    },
-   
-    scrollView: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-})

@@ -85,7 +85,17 @@ export default function HomeScreen({route, navigation}, props) {
     if (data[0] === '\"') {
       data = data.substr(1).slice(0, -1)
     }
-    setScannedData(data)
+    data = data.split('\n');
+    data[1] = data[1].replace('\\\"', "\"")   
+    setScannedData(data.join('\n'))
+  };
+
+  const getSredstvo = async () => {
+    let data = await AsyncStorage.getItem('sredstvo');
+    if (data[0] === '\"') {
+      data = data.substr(1).slice(0, -1)
+    }
+    setSredstvo(data)
   };
 
   const getScanPosStorage = async () => {
@@ -97,12 +107,7 @@ export default function HomeScreen({route, navigation}, props) {
     setPrevScanPosition(data)
   };
 
-  
-  const setPrevScan = async (prevScan) => {
-    let val = JSON.stringify(prevScan)
-    await AsyncStorage.setItem('scannedData', val)
-  }
-  
+
   // устанавливает статус сессии
   const setSessionInStorage = async (sessionVal) => {
     try {
@@ -123,12 +128,25 @@ export default function HomeScreen({route, navigation}, props) {
   }
 
   useEffect(() => {
-    itemsRemain != null ? (
+    itemsRemain == null ? (
+      (async () => {
+        await AsyncStorage.setItem('itemsRemain', 'null')
+      })()
+    ) : (
       (async () => {
         await AsyncStorage.setItem('itemsRemain', JSON.stringify(itemsRemain))
       })()
-    ) : null
+    )
+    
   }, [itemsRemain])
+  
+  useEffect(() => {
+    sredstvo != null ? (
+      (async () => {
+        await AsyncStorage.setItem('sredstvo', JSON.stringify(sredstvo))
+      })()
+    ) : null
+  }, [sredstvo])
 
   useEffect(() => {
     prevScanPosition != null ? (
@@ -148,11 +166,12 @@ export default function HomeScreen({route, navigation}, props) {
 
   useEffect(() => {
     if (route.params?.scannedData) {
-     setScannedData(route.params.scannedData)
-     setPrevScanPosition(route.params.prevScanPosition)
-     setPrevScan(route.params.scannedData)
-     setItemsRemain(route.params.itemsRemain)
-   }
+      let sred = route.params?.scannedData
+      sred[0] == 1 ? setSredstvo("ТМЦ") : setSredstvo("ОС")
+      setScannedData(route.params.scannedData)
+      setPrevScanPosition(route.params.prevScanPosition)
+      setItemsRemain(route.params.itemsRemain)
+    }
   }, [route.params?.scannedData]);
   
     useEffect(() => {
@@ -165,6 +184,7 @@ export default function HomeScreen({route, navigation}, props) {
           setSessionInfo("Сессия открыта")
           setSessionBtn("Закрыть сессию")
           getPrevScan()
+          getSredstvo()
           getScanPosStorage()
           getItemsRemainInStorage()
         }else {
@@ -198,6 +218,7 @@ export default function HomeScreen({route, navigation}, props) {
   
     const SessionClose = () => {
       setItemsRemain(null)
+      setSredstvo(null)
       setPrevScanPosition(null)
       setScannedData(null)
       db.transaction(
@@ -278,6 +299,7 @@ export default function HomeScreen({route, navigation}, props) {
     const [deletion, deleteTables] = useState(false)
 
     const [scannedData, setScannedData] = useState(null)
+    const [sredstvo, setSredstvo] = useState(null)
     const [prevScanPosition, setPrevScanPosition] = useState(null) // Информация о предыдущем сканировании
   
     const [linkText, changeLinkText] = useState(null);
@@ -428,6 +450,7 @@ export default function HomeScreen({route, navigation}, props) {
         }
       );
     }
+
   
     const downloadDB = async () => {
       // Информация для скачивания
@@ -491,6 +514,7 @@ export default function HomeScreen({route, navigation}, props) {
                             setScanRes(null)
                             addScan(invNom, name, status, model, serNom, pos, place, trace)
                             setPrevScanPosition(`Номер QR кода ${num}, статус: ${pos}`)
+                            setItemsRemain(null)
                           },
                           (_, error) => console.log(`Error code 5: ${error}`)
                       );
@@ -499,7 +523,7 @@ export default function HomeScreen({route, navigation}, props) {
                   }else{
                     status = 1 // в учете
                     setScanStatus(`В учете`)
-                    setScanRes(`Позиция: ${row.vedPos}, Место: ${row.place}`)
+                    setScanRes(`Позиция: ${row.vedPos}\nМесто: ${row.place}`)
                     addScan(invNom, name, status, model, serNom, row.vedPos, row.place, trace)
                     substractItem(row.id, name)
                   }
@@ -508,7 +532,6 @@ export default function HomeScreen({route, navigation}, props) {
                     setPrevScanPosition(`Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${row.place == undefined ? null : row.place}`)
                   }
                 }
-                // setItemsRemain(null)    
                 setScanModalVisible(true) // модальное окно с результатом проверки
               })     
             },
@@ -713,18 +736,27 @@ export default function HomeScreen({route, navigation}, props) {
               {scannedData !== null ?
                 <View>
                   <View>
-                    <Text style={styles.secondHeader}>Информация QR кода</Text>
+                    <View style={styles.secondHeader}>
+                      <MaterialCommunityIcon name="information-outline" size={20} style={{marginLeft: 8}}/>
+                      <Text style={styles.secondHeaderText}>Информация QR кода {sredstvo}</Text>
+                    </View>
                     <Text style={styles.info}>{scannedData}</Text>
                   </View>
                   {prevScanPosition ? (
                     <View>
-                      <Text style={styles.secondHeader}>Позиция сканирования</Text>
+                      <View style={styles.secondHeader}>
+                        <MaterialCommunityIcon name="clipboard-list-outline" size={20} style={{marginLeft: 8}}/>
+                        <Text style={styles.secondHeaderText}>Позиция сканирования</Text>
+                      </View>
                       <Text style={[styles.info, styles.biggerFont]}>{prevScanPosition}</Text>
                     </View>
                   ) : null}
-                  {itemsRemain ? (
+                  {itemsRemain != 'null' && itemsRemain ? (
                     <View>
-                      <Text style={styles.secondHeader}>Осталось</Text>
+                      <View style={styles.secondHeader}>
+                        <MaterialCommunityIcon name="magnify-scan" size={20} style={{marginLeft: 8}}/>
+                        <Text style={styles.secondHeaderText}>Осталось</Text>
+                      </View>
                       <Text style={[styles.info, styles.biggerFont]}>{itemsRemain}</Text>
                     </View>
                   ) : null}
@@ -738,7 +770,7 @@ export default function HomeScreen({route, navigation}, props) {
                       <Text style={styles.btnTextStyle}>Найти в ведомости</Text>
                     </TouchableOpacity> : null
                   }
-                  </View> : <Text>Предыдущих сканирований не было</Text>
+                  </View> : <Text style={{padding: 20}}>Предыдущих сканирований не было</Text>
                 }
             </View>
           </View> 
@@ -850,10 +882,15 @@ const styles = StyleSheet.create({
       alignSelf: 'flex-end',
     },
     secondHeader:{
-      paddingHorizontal: 8,
+      backgroundColor: '#f9f9f9',
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    secondHeaderText :{
+      paddingHorizontal: 4,
       paddingVertical: 2,
       fontSize: 18,
-      backgroundColor: '#f9f9f9',
     },
     info:{
       paddingHorizontal: 8,
@@ -948,10 +985,6 @@ const styles = StyleSheet.create({
   
     itemsRemain:{
       marginBottom: 10,
-    },
-  
-    scanBtn :{
-      marginBottom: 0,
     },
     // цвета статусов
     green: {

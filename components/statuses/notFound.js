@@ -13,6 +13,7 @@ import * as SQLite from "expo-sqlite";
 import BackHome from './BackHome';
 
 
+
 export default function NotFound(props) {
     const [data, setData] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -77,19 +78,26 @@ export default function NotFound(props) {
         >
             <BackHome navigation={props.navigation} />
             <View style={{ flex: 1, marginTop: 10 }}>
-                {isLoading ? <ActivityIndicator/> : (
-                    <FlatList
-                    data={data}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.item}>
-                            <Text style={styles.itemCell}>{item.vedPos}</Text>
-                            <Text style={[styles.itemCell, styles.itemCenterCell]}>{item.name}</Text>
-                            <Text style={styles.itemCell}>{item.kolvo}</Text>
-                        </View>
+                <ScrollView
+                    horizontal={true}
+                    persistentScrollbar={true}
+                    showsHorizontalScrollIndicator={true}
+                >
+                    {isLoading ? <ActivityIndicator color="#0000ff"/> : (
+                        <FlatList
+                            data={data}
+                            keyExtractor={item => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <View style={styles.item} >
+                                    <Text style={styles.itemCell}>{item.vedPos}</Text>
+                                    <Text style={[styles.itemCell, styles.itemCenterCell]}>{item.name}</Text>
+                                    <Text style={styles.itemCell}>{item.kolvo}</Text>
+                                </View>
+                            )}
+                        />
                     )}
-                    />
-                )}
+                </ScrollView>
+
             </View>
         </ScrollView>
     );
@@ -101,6 +109,7 @@ const styles = StyleSheet.create({
         paddingTop: 22
     },
     itemCell: {
+        width: '40%',
         justifyContent: 'center', //Centered horizontally
         alignItems: 'center', //Centered vertically
         flex:1,
@@ -108,9 +117,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     itemCenterCell: {
-        width: 100,
+        width: 350,
     },
     item: {
+        paddingTop: 5,
+        paddingBottom: 15,
+        paddingHorizontal: 10,
         flex: 1,
         flexDirection: "row", 
         alignItems: 'center', 

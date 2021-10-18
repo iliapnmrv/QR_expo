@@ -11,6 +11,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import 'react-native-gesture-handler';
 import Inside from './components/statuses/Inside';
 import Over from './components/statuses/Over'
@@ -18,6 +19,9 @@ import HomeScreen from './components/home/HomeScreen';
 import NotReg from './components/statuses/NotReg';
 import NotFound from './components/statuses/NotFound';
 import BarCode from './components/home/BarCode/BarCode';
+
+import * as Updates from 'expo-updates';
+
 
 function App() {
 
@@ -76,11 +80,76 @@ function Root() {
   return(
     <Drawer.Navigator>
       <Drawer.Group>
-        <Drawer.Screen name="Главная" component={HomeScreen} />
-        <Drawer.Screen name="В учете" component={Inside} />
-        <Drawer.Screen name="Не в учете" component={NotReg} />
-        <Drawer.Screen name="Сверх учета" component={Over} />
-        <Drawer.Screen name="Не выявлено" component={NotFound} />
+        <Drawer.Screen 
+          name="Главная" 
+          component={HomeScreen} 
+          options={{
+            drawerIcon: () => (
+              <MaterialCommunityIcon 
+                name="home" 
+                style={styles.icon}
+                size={25} 
+                color="#909090" 
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen 
+          name="В учете" 
+          component={Inside}
+          options={{
+            drawerIcon: () => (
+              <MaterialCommunityIcon 
+                name="playlist-check" 
+                style={styles.icon}
+                size={25} 
+                color="#909090" 
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen 
+          name="Не в учете" 
+          component={NotReg}
+          options={{
+            drawerIcon: () => (
+              <MaterialCommunityIcon 
+                name="playlist-minus" 
+                style={styles.icon}
+                size={25} 
+                color="#909090" 
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen 
+          name="Сверх учета"
+          component={Over} 
+          options={{
+            drawerIcon: () => (
+              <MaterialCommunityIcon 
+                name="playlist-plus" 
+                style={styles.icon}
+                size={25} 
+                color="#909090" 
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen 
+          name="Не выявлено" 
+          component={NotFound} 
+          options={{
+            drawerIcon: () => (
+              <MaterialCommunityIcon 
+                name="format-list-numbered" 
+                style={styles.icon}
+                size={25} 
+                color="#909090" 
+              />
+            ),
+          }}
+        />
       </Drawer.Group>
     </Drawer.Navigator>
   )
@@ -99,5 +168,9 @@ const styles = StyleSheet.create({
   containerText: {
     textAlign: 'center',
     width: '100%',
+  },
+  icon: {
+    marginLeft: 3, 
+    marginRight: -20
   },
 })

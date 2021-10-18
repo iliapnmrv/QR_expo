@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
+  View, 
+  Button, 
   StyleSheet,
+  FlatList,
+  Text,
+  ActivityIndicator,
   RefreshControl,
   ScrollView
 } from 'react-native';
 import * as SQLite from "expo-sqlite";
 import BackHome from './BackHome';
-import List from './List/List';
+import styles from './ListStyles'
+
 
 export default function NotReg(props) {
     const [data, setData] = useState(null);
@@ -65,7 +71,6 @@ export default function NotReg(props) {
     return (
         <ScrollView 
             style={{flex: 1}}
-            contentContainerStyle={styles.scrollView}
             refreshControl={
             <RefreshControl
                 refreshing={refreshing}
@@ -73,24 +78,30 @@ export default function NotReg(props) {
             />
             }
         >
-            <BackHome navigation={props.navigation} />
-            <List data={data}/>
+            <View>
+                <BackHome navigation={props.navigation} />
+                <Text style={styles.sectionHeader}>Позиции не в учете инвентаризационной описи</Text>
+            </View>
+            <ScrollView 
+                style={{ flex: 1}}
+                horizontal={true}
+                persistentScrollbar={true}
+                showsHorizontalScrollIndicator={true}
+             >
+                {isLoading ? <ActivityIndicator color="#0000ff"/> : (
+                    <FlatList
+                        data={data}
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item }) => (
+                            <View style={styles.item} >
+                                <Text style={styles.itemCell}>{i++}</Text>
+                                <Text style={[styles.itemCell, styles.itemCenterCell]}>{item.name}</Text>
+                                <Text style={styles.itemCell}>{item.invNom.substr(-5)}</Text>
+                            </View>
+                        )}
+                    />
+                )}
+            </ScrollView>
         </ScrollView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: 22
-    },
-    item: {
-        marginTop: 10,
-        fontSize: 18,
-        height: 44,
-    },
-    scrollView: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-})
