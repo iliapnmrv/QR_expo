@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     View,
     StyleSheet,
@@ -21,10 +21,13 @@ export default function BarCode({ navigation }) {
     const handleBarCodeScanned = ({ type, data, bounds }) => {
         const {x, y} = bounds.origin
         if (x >= viewMinX && y >= viewMinY && x <= (viewMinX + finderWidth / 2) && y <= (viewMinY + finderHeight / 2)) {
-            navigation.navigate('Главная', {
-                scannedData: data,
-                prevScanPosition: null,
-                itemsRemain: null
+            navigation.navigate('Drawer', {
+                screen: 'Инвентаризация',
+                params: {
+                    scannedData: data,
+                    prevScanPosition: null,
+                    itemsRemain: null
+                }
             }, true)
         }
     };

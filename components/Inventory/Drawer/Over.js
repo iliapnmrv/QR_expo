@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  Button, 
-  StyleSheet,
   FlatList,
   Text,
   ActivityIndicator,
   RefreshControl,
-  ScrollView,
+  ScrollView
 } from 'react-native';
 import * as SQLite from "expo-sqlite";
-import BackHome from './BackHome'
-import styles from './ListStyles'
+import BackHome from './BackHome';
+import styles from './Styles/ListStyles'
 
 
-export default function Inside(props) {
+export default function Over(props) {
     const [data, setData] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [isLoading, setLoading] = useState(true);   
@@ -35,7 +33,7 @@ export default function Inside(props) {
                     tx => {
                     tx.executeSql(
                         `
-                        SELECT * FROM scanned WHERE status = 1
+                        SELECT * FROM scanned WHERE status = 3
                         `, 
                         [], 
                         (_, result) => {
@@ -53,15 +51,11 @@ export default function Inside(props) {
             })
             result.then(() => {
                 setRefreshing(false)
-                 i = 1
-                console.log(1111);
-                return
-            }).then(() => {
-                console.log('here')
-                setLoading(false);
             })
         } catch (e) {
             console.log(e)
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -75,15 +69,15 @@ export default function Inside(props) {
         <ScrollView 
             style={{flex: 1}}
             refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                />
+            <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+            />
             }
         >
             <View>
                 <BackHome navigation={props.navigation} />
-                <Text style={styles.sectionHeader}>Позиции в учете инвентаризационной описи</Text>
+                <Text style={styles.sectionHeader}>Позиции сверх учета инвентаризационной описи</Text>
             </View>
             <ScrollView 
                 style={{ flex: 1}}
@@ -91,7 +85,7 @@ export default function Inside(props) {
                 persistentScrollbar={true}
                 showsHorizontalScrollIndicator={true}
              >
-                {isLoading ? <ActivityIndicator animating={true} size="large" style={{opacity:1}} color="#0000ff"/> : (
+                {isLoading ? <ActivityIndicator color="#0000ff"/> : (
                     <FlatList
                         data={data}
                         keyExtractor={item => item.id.toString()}
@@ -100,8 +94,6 @@ export default function Inside(props) {
                                 <Text style={styles.itemCell}>{i++}</Text>
                                 <Text style={[styles.itemCell, styles.itemCenterCell]}>{item.name}</Text>
                                 <Text style={styles.itemCell}>{item.invNom.substr(-5)}</Text>
-                                <Text style={styles.itemCell}>{item.pos}</Text>
-                                <Text style={styles.itemCell}>{item.place}</Text>
                             </View>
                         )}
                     />

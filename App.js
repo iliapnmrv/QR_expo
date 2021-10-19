@@ -9,18 +9,21 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import 'react-native-gesture-handler';
-import Inside from './components/statuses/Inside';
-import Over from './components/statuses/Over'
-import HomeScreen from './components/home/HomeScreen';
-import NotReg from './components/statuses/NotReg';
-import NotFound from './components/statuses/NotFound';
-import BarCode from './components/home/BarCode/BarCode';
+import Inside from './Components/Inventory/Drawer/Inside';
+import Over from './Components/Inventory/Drawer/Over'
+import Inventory from './Components/Inventory/Inventory';
+import NotReg from './Components/Inventory/Drawer/NotReg';
+import NotFound from './Components/Inventory/Drawer/NotFound';
+import BarCode from './Components/BarCode/BarCode';
+import { Provider } from 'react-redux';
+import { store } from './src/store';
+import Docs from './Components/Docs/Docs';
 
-import * as Updates from 'expo-updates';
 
 
 function App() {
@@ -56,33 +59,90 @@ function App() {
       )
   }
 
-  const RootStack = createStackNavigator();
+
+  const Tab = createBottomTabNavigator();
 
   return (
-    <NavigationContainer>
-      <RootStack.Navigator>
-        <RootStack.Screen
-          name="Root"
-          component={Root}
-          options={{ headerShown: false }}
-        />
-        <RootStack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
-          <RootStack.Screen name="scanner" component={BarCode} />
-        </RootStack.Group>
-      </RootStack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={{
+            tabBarLabelStyle: {
+              fontSize: 12,
+              margin: 0,
+            },
+          }}
+        >
+          <Tab.Screen 
+            name="Inventory" 
+            component={Home} 
+            options={{ 
+              headerShown: false,
+              tabBarLabel: 'Инвентаризация',
+              tabBarIcon: () => {
+                return(
+                  <MaterialCommunityIcon 
+                      name="format-list-numbered" 
+                      style={styles.icon}
+                      size={25} 
+                      style={{ width: 25, height: 25}}
+                      color="#999999" 
+                  />
+                )
+              },
+            }}
+          />
+          <Tab.Screen 
+            name="Docs" 
+            component={Docs} 
+            options={{ 
+              headerShown: false,
+              tabBarLabel: 'Документооборот',
+              tabBarIcon: () => {
+                return(
+                  <MaterialCommunityIcon 
+                      name="file-document-outline" 
+                      style={styles.icon}
+                      size={25} 
+                      style={{ width: 25, height: 25}}
+                      color="#999999" 
+                  />
+                )
+              },
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
 
-function Root() {
+function Home() {
+  const Stack = createNativeStackNavigator();
+
+  return(
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Drawer"
+        component={Drawer}
+        options={{ headerShown: false, }}
+      />
+      <Stack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
+        <Stack.Screen name="scanner" component={BarCode} />
+      </Stack.Group>
+    </Stack.Navigator>
+  )
+}
+
+function Drawer() {
   const Drawer = createDrawerNavigator();
 
   return(
     <Drawer.Navigator>
       <Drawer.Group>
         <Drawer.Screen 
-          name="Главная" 
-          component={HomeScreen} 
+          name="Инвентаризация" 
+          component={Inventory} 
           options={{
             drawerIcon: () => (
               <MaterialCommunityIcon 

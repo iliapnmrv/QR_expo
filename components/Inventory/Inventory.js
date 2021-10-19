@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  StyleSheet,
   Text, 
   View, 
   Button, 
@@ -20,6 +19,8 @@ import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIc
 import * as Clipboard from 'expo-clipboard';
 import 'react-native-gesture-handler';
 import Message from '../UserMessage';
+import { useDispatch, useSelector } from 'react-redux';
+import {styles} from './Styles/Stylse'
 
 const requestStoragePermission = async () => {
   let check = await PermissionsAndroid.check(
@@ -51,21 +52,75 @@ let yyyy = today.getFullYear();
 today = dd + '.' + mm + '.' + yyyy;
 
 
-export default function HomeScreen({route, navigation}, props) {
+export function Inventory({route, navigation}) {
+
+  const dispatch = useDispatch()
+
+  const sessionStatus = useSelector(state => state.session.sessionStatus)
+  const sessionInfo = useSelector(state => state.session.sessionInfo)
+  const sessionBtn = useSelector(state => state.session.sessionBtn)
+  const sessionDate = useSelector(state => state.session.sessionDate)
+
+  const scannedData = useSelector(state => state.scan.scannedData)
+  const sredstvo = useSelector(state => state.scan.sredstvo)
+  const prevPosition = useSelector(state => state.scan.prevPosition)
+  const itemsRemain = useSelector(state => state.scan.itemsRemain)
+
+
   // ------ Сессии
   // Данные сессии
-  const [sessionStatus, setSessionStatus] = useState(false);
-  const [sessionInfo, setSessionInfo] = useState("Сессия закрыта");
-  const [sessionBtn, setSessionBtn] = useState("Открыть сессию");
-  const [sessionDate, setSessionDate] = useState(null); //дата открытия сессии
-  
-  const getItemsRemainInStorage = async () => {
-    let data = await AsyncStorage.getItem('itemsRemain');
-    if (data[0] === '\"') {
-      data = data.substr(1).slice(0, -1)
-    }
-    setItemsRemain(data)
-  };
+  const setSessionStatus = async (status) => {
+    dispatch({type: "setSessionStatus", payload: status})
+    await AsyncStorage.setItem('session', JSON.stringify(status))
+  }
+
+  const setSessionInfo = (info) => {
+    dispatch({type: "setSessionInfo", payload: info})
+  }
+
+  const setSessionBtn = (btn) => {
+    dispatch({type: "setSessionBtn", payload: btn})
+  } 
+
+  const setSessionDate = async (date) => {
+    dispatch({type: "setSessionDate", payload: date})
+    date = date == "Сессия еще не была открыта" ? '' : date.substr(-10)
+    await AsyncStorage.setItem('sessionDate', date)
+  }
+
+
+
+  // Setters
+  const setScannedData = async (data) => {
+    dispatch({type: "setScannedData", payload: data})
+    data != null ? (
+      await AsyncStorage.setItem('scannedData', JSON.stringify(data))
+    ) : null
+  }
+
+  const setPrevPosition = async (position) => {
+    dispatch({type: "setPrevPosition", payload: position})
+    position != null ? (
+        await AsyncStorage.setItem('prevScanPosition', JSON.stringify(position))
+    ) : null
+  }
+
+  const setSredstvo = async (sredstvo) => {
+    dispatch({type: "setSredstvo", payload: sredstvo})
+    sredstvo != null ? (
+      await AsyncStorage.setItem('sredstvo', JSON.stringify(sredstvo))
+    ) : null
+  } 
+
+  const setItemsRemain = async (itemsRemain) => {
+    dispatch({type: "setItemsRemain", payload: itemsRemain})
+    itemsRemain == null ? (
+      await AsyncStorage.setItem('itemsRemain', 'null')
+    ) : (
+      await AsyncStorage.setItem('itemsRemain', JSON.stringify(itemsRemain))
+    )  
+  }
+ 
 
   // получает статус сессии
   const getSessionStatus = async () => {
@@ -98,118 +153,61 @@ export default function HomeScreen({route, navigation}, props) {
     setSredstvo(data)
   };
 
-  const getScanPosStorage = async () => {
+  const getPrevPosition = async () => {
     let data = await AsyncStorage.getItem('prevScanPosition');
     data = data.replace(/\\n/g, '\n')
     if (data[0] === '\"') {
       data = data.substr(1).slice(0, -1)
     }
-    setPrevScanPosition(data)
+    setPrevPosition(data)
   };
 
-
-  // устанавливает статус сессии
-  const setSessionInStorage = async (sessionVal) => {
-    try {
-      let val = JSON.stringify(sessionVal)
-      await AsyncStorage.setItem('session', val)
-    } catch (e) {
-      console.log(`Error code 6: ${e}`)
+  const getItemsRemain = async () => {
+    let data = await AsyncStorage.getItem('itemsRemain');
+    if (data[0] === '\"') {
+      data = data.substr(1).slice(0, -1)
     }
-  }
-  
-  const setSessionDateInStorage = async (date) => {
-    try {
-      date == null ? date = '' : null
-      await AsyncStorage.setItem('sessionDate', date)
-    } catch (e) {
-      console.log(`Error code 12: ${e}`)
-    }
-  }
-
-  useEffect(() => {
-    itemsRemain == null ? (
-      (async () => {
-        await AsyncStorage.setItem('itemsRemain', 'null')
-      })()
-    ) : (
-      (async () => {
-        await AsyncStorage.setItem('itemsRemain', JSON.stringify(itemsRemain))
-      })()
-    )
-    
-  }, [itemsRemain])
-  
-  useEffect(() => {
-    sredstvo != null ? (
-      (async () => {
-        await AsyncStorage.setItem('sredstvo', JSON.stringify(sredstvo))
-      })()
-    ) : null
-  }, [sredstvo])
-
-  useEffect(() => {
-    prevScanPosition != null ? (
-      (async () => {
-        await AsyncStorage.setItem('prevScanPosition', JSON.stringify(prevScanPosition))
-      })()
-    ) : null
-  }, [prevScanPosition])
-
-  useEffect(() => {
-    scannedData != null ? (
-      (async () => {
-        await AsyncStorage.setItem('scannedData', JSON.stringify(scannedData))
-      })()
-    ) : null
-  }, [scannedData])
+    setItemsRemain(data)
+  };
 
   useEffect(() => {
     if (route.params?.scannedData) {
       let sred = route.params?.scannedData
       sred[0] == 1 ? setSredstvo("ТМЦ") : setSredstvo("ОС")
       setScannedData(route.params.scannedData)
-      setPrevScanPosition(route.params.prevScanPosition)
+      setPrevPosition(route.params.prevScanPosition)
       setItemsRemain(route.params.itemsRemain)
     }
   }, [route.params?.scannedData]);
   
-    useEffect(() => {
-      getSessionStatus()
-      .then(arr => {
-        arr[0] = arr[0] == "false" || arr[0] == null ? false : true
-        setSessionStatus(arr[0]);
-        setSessionDate(arr[1]);
-        if (arr[0]) {
-          setSessionInfo("Сессия открыта")
-          setSessionBtn("Закрыть сессию")
-          getPrevScan()
-          getSredstvo()
-          getScanPosStorage()
-          getItemsRemainInStorage()
-        }else {
-          setSessionInfo("Сессия закрыта")
-          setSessionBtn("Открыть сессию")
-        }
-        arr[1] != null ? setSessionDate(`Сессия была открыта: ${arr[1]}`) : setSessionDate(`Сессия еще не была открыта`)
-      })
-      .catch(err => {
-        console.log('error', err);
-      });
-    }, []);
+  useEffect(() => {
+    getSessionStatus()
+    .then(arr => {
+      arr[0] = arr[0] == "false" || arr[0] == null ? false : true
+      setSessionStatus(arr[0]);
+      if (arr[0]) {
+        setSessionInfo("Сессия открыта")
+        setSessionBtn("Закрыть сессию")
+        getPrevScan()
+        getSredstvo()
+        getPrevPosition()
+        getItemsRemain()
+      }else {
+        setSessionInfo("Сессия закрыта")
+        setSessionBtn("Открыть сессию")
+      }
+      arr[1] != null ? setSessionDate(`Сессия была открыта: ${arr[1]}`) : setSessionDate(`Сессия еще не была открыта`)
+    })
+  }, []);
   
     const onSessionChangeHandler = (status, date) =>{
       if (status) {
-        setSessionInStorage(!status)
         setSessionStatus(!status)
-        setSessionDateInStorage(null)
         setSessionDate(`Сессия еще не была открыта`)
         setSessionInfo("Сессия закрыта")
         setSessionBtn("Открыть сессию")
       }else{
-        setSessionInStorage(!status)
         setSessionStatus(!status)
-        setSessionDateInStorage(date)
         setSessionDate(`Сессия была открыта: ${date}`)
         setSessionInfo("Сессия открыта")
         setSessionBtn("Закрыть сессию")
@@ -219,7 +217,7 @@ export default function HomeScreen({route, navigation}, props) {
     const SessionClose = () => {
       setItemsRemain(null)
       setSredstvo(null)
-      setPrevScanPosition(null)
+      setPrevPosition(null)
       setScannedData(null)
       db.transaction(
         tx => {
@@ -297,17 +295,12 @@ export default function HomeScreen({route, navigation}, props) {
     const [DownloadedInfoModal, setDownloadedInfoModal] = useState(false);
     const [downloadLink, setDownloadLink] = useState(null);
     const [deletion, deleteTables] = useState(false)
-
-    const [scannedData, setScannedData] = useState(null)
-    const [sredstvo, setSredstvo] = useState(null)
-    const [prevScanPosition, setPrevScanPosition] = useState(null) // Информация о предыдущем сканировании
   
     const [linkText, changeLinkText] = useState(null);
     const [linkPlaceholder, changeLinkPlaceholder] = useState("hhtps://");
     const [downloadedInfo, setDownloadedInfo] = useState() // данные скачки новой бд
     const [scanRes, setScanRes] = useState() // результат сканирования
     const [scanStatus, setScanStatus] = useState() // статус сканирования
-    const [itemsRemain, setItemsRemain] = useState()
   
     const downloadFile = async (uri, fileUri) => {
       console.log("downloadFile func")
@@ -513,7 +506,8 @@ export default function HomeScreen({route, navigation}, props) {
                             let place = null
                             setScanRes(null)
                             addScan(invNom, name, status, model, serNom, pos, place, trace)
-                            setPrevScanPosition(`Номер QR кода ${num}, статус: ${pos}`)
+                            console.log('heree')
+                            setPrevPosition(`Номер QR кода ${num}, статус: ${pos}`)
                             setItemsRemain(null)
                           },
                           (_, error) => console.log(`Error code 5: ${error}`)
@@ -529,7 +523,8 @@ export default function HomeScreen({route, navigation}, props) {
                   }
                   let num = invNom.substr(invNom.length - 5); // номер qr кодa
                   if (row?.vedPos) {
-                    setPrevScanPosition(`Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${row.place == undefined ? null : row.place}`)
+                    console.log('or heree')
+                    setPrevPosition(`Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${row.place == undefined ? null : row.place}`)
                   }
                 }
                 setScanModalVisible(true) // модальное окно с результатом проверки
@@ -658,10 +653,11 @@ export default function HomeScreen({route, navigation}, props) {
       changeLinkText(text);
     }
 
+
     return (
 
         <View style={styles.container}>
-           <ScrollView style={styles.scrollView}>
+           <ScrollView>
           {Platform.OS === "web" ? (
             <View
               style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -721,7 +717,7 @@ export default function HomeScreen({route, navigation}, props) {
               </View>
             </Modal>
           </View>
-          <View style={styles.mainContent}>
+          <View>
             <TouchableOpacity 
               activeOpacity={0.5}
               style={styles.buttonMain} 
@@ -742,13 +738,13 @@ export default function HomeScreen({route, navigation}, props) {
                     </View>
                     <Text style={styles.info}>{scannedData}</Text>
                   </View>
-                  {prevScanPosition ? (
+                  {prevPosition ? (
                     <View>
                       <View style={styles.secondHeader}>
                         <MaterialCommunityIcon name="clipboard-list-outline" size={20} style={{marginLeft: 8}}/>
                         <Text style={styles.secondHeaderText}>Позиция сканирования</Text>
                       </View>
-                      <Text style={[styles.info, styles.biggerFont]}>{prevScanPosition}</Text>
+                      <Text style={[styles.info, styles.biggerFont]}>{prevPosition}</Text>
                     </View>
                   ) : null}
                   {itemsRemain != 'null' && itemsRemain ? (
@@ -840,175 +836,8 @@ export default function HomeScreen({route, navigation}, props) {
                                 secondLine={linkText != null ? linkText : null} 
                                 sec={4}
                             />}
- 
         </View>
     );
   }
 
-  //Styles 
-const styles = StyleSheet.create({
-    none: {
-      display: 'none',
-    },
-    input: {
-      height: 40,
-      borderWidth: 1,
-      borderColor: '#A9A9A9',
-      padding: 10,
-      alignSelf: 'center',
-      width:'90%',
-      marginLeft: 10,
-    },
-    modalCenter: {
-      marginBottom: 15,
-      marginTop: 10,
-    },
-    sessionInfo:{
-      flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      marginTop: 10,
-      marginBottom: 10
-    },
-    sessionInfoButtons:{
-      justifyContent: 'center',
-    },
-    prevScan:{
-      flex: 1,
-      justifyContent: 'center',
-    },
-    analyzeBtn: {
-      alignSelf: 'flex-end',
-    },
-    secondHeader:{
-      backgroundColor: '#f9f9f9',
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    secondHeaderText :{
-      paddingHorizontal: 4,
-      paddingVertical: 2,
-      fontSize: 18,
-    },
-    info:{
-      paddingHorizontal: 8,
-      paddingVertical: 5,
-    },
-    biggerFont: {
-      fontSize: 16,
-    },
-    buttonMain:{
-      padding: 10,
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'row',
-      borderTopWidth: 1,
-      borderTopColor: '#D0D0D0',     
-      borderBottomWidth: 1,
-      borderBottomColor: '#D0D0D0',
-    },
-    buttonMainText:{
-      color: 'black',
-    },  
-    centeredView: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      marginTop: 22
-    },
-    buttons:{
-      flexDirection: "row",
-      justifyContent: "center",
-      width: "90%",
-      alignItems: 'center',
-    },
-    button: {
-      borderRadius: 5,
-      padding: 10,
-      elevation: 2,
-      marginRight: 10,
-      marginLeft: 10,
-      marginTop: 5,
-    },
-    active:{
-      color: '#28a745',
-    },
-    danger:{
-      color: '#dc3545',
-    },
-    accept: {
-      backgroundColor: '#28a745',
-    },
-    reject: {
-      backgroundColor: '#dc3545',
-    },
-    btnTextStyle: {
-      color: "white"
-    },
-    modalView: {
-      justifyContent: 'center',
-      margin: 20,
-      backgroundColor: "white",
-      borderRadius: 5,
-      padding: 20,
-      alignItems: "center",
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      width: '80%',
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5
-    },
-  
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      paddingTop: 5,
-      justifyContent: 'center',
-      textAlign: 'center'
-    },
-    containerText: {
-      textAlign: 'center',
-      width: '100%',
-    },
-    maintext: {
-      fontSize: 20,
-      textAlign: 'center',
-      padding: 1,
-    },
-  
-    itemsRemain:{
-      marginBottom: 10,
-    },
-    // цвета статусов
-    green: {
-      color: '#28a745'
-    },  
-    red: {
-      color: '#dc3545'
-    },  
-    blue: {
-      color: '#85C1E9'
-    },  
-    yellow: {
-      color: '#F1C40F'
-    },
-    lightGreen: {
-      backgroundColor: '#ddfada'
-    },  
-    lightRed: {
-      backgroundColor: '#ffe7e6'
-    },  
-    lightBlue: {
-      backgroundColor: '#eafbff'
-    },  
-    lightYellow: {
-      backgroundColor: '#ffffeb'
-    },
-  });
+  export default Inventory

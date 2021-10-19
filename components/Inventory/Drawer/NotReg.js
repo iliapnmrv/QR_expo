@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  Button, 
-  StyleSheet,
   FlatList,
   Text,
   ActivityIndicator,
@@ -11,7 +9,7 @@ import {
 } from 'react-native';
 import * as SQLite from "expo-sqlite";
 import BackHome from './BackHome';
-import styles from './ListStyles'
+import styles from './Styles/ListStyles'
 
 
 export default function NotReg(props) {
