@@ -59,78 +59,84 @@ function App() {
       )
   }
 
+  const Stack = createNativeStackNavigator();
 
-  const Tab = createBottomTabNavigator();
 
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={{
-            tabBarLabelStyle: {
-              fontSize: 12,
-              margin: 0,
-            },
-          }}
-        >
-          <Tab.Screen 
-            name="Inventory" 
-            component={Home} 
-            options={{ 
-              headerShown: false,
-              tabBarLabel: 'Инвентаризация',
-              tabBarIcon: () => {
-                return(
-                  <MaterialCommunityIcon 
-                      name="format-list-numbered" 
-                      style={styles.icon}
-                      size={25} 
-                      style={{ width: 25, height: 25}}
-                      color="#999999" 
-                  />
-                )
-              },
-            }}
+        <Stack.Navigator>
+          <Stack.Screen
+            name="HomeTabs"
+            component={HomeTabs}
+            options={{ headerShown: false, }}
           />
-          <Tab.Screen 
-            name="Docs" 
-            component={Docs} 
-            options={{ 
-              headerShown: false,
-              tabBarLabel: 'Документооборот',
-              tabBarIcon: () => {
-                return(
-                  <MaterialCommunityIcon 
-                      name="file-document-outline" 
-                      style={styles.icon}
-                      size={25} 
-                      style={{ width: 25, height: 25}}
-                      color="#999999" 
-                  />
-                )
-              },
-            }}
-          />
-        </Tab.Navigator>
+          <Stack.Group screenOptions={{ presentation: 'modal', headerShown: false,  tabBarVisible: false }}>
+            <Stack.Screen 
+              name="scanner" 
+              component={BarCode} 
+              options={{
+                tabBarVisible: false,
+              }}
+            />
+          </Stack.Group>
+        </Stack.Navigator>
       </NavigationContainer>
     </Provider>
   );
 }
 
-function Home() {
-  const Stack = createNativeStackNavigator();
+function HomeTabs() {
+  const Tab = createBottomTabNavigator();
 
-  return(
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Drawer"
-        component={Drawer}
-        options={{ headerShown: false, }}
-      />
-      <Stack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
-        <Stack.Screen name="scanner" component={BarCode} />
-      </Stack.Group>
-    </Stack.Navigator>
+  return (
+    <Tab.Navigator
+    screenOptions={{
+      tabBarLabelStyle: {
+        fontSize: 12,
+        margin: 0,
+      },
+    }}
+  >
+    <Tab.Screen 
+      name="Inventory" 
+      component={Drawer} 
+      options={{ 
+        headerShown: false,
+        tabBarLabel: 'Инвентаризация',
+        tabBarIcon: () => {
+          return(
+            <MaterialCommunityIcon 
+                name="format-list-numbered" 
+                style={styles.icon}
+                size={25} 
+                style={{ width: 25, height: 25}}
+                color="#999999" 
+            />
+          )
+        },
+      }}
+    />
+    <Tab.Screen 
+      name="Docs" 
+      component={Docs} 
+      options={{ 
+        headerShown: false,
+        tabBarLabel: 'Документооборот',
+        tabBarIcon: () => {
+          return(
+            <MaterialCommunityIcon 
+                name="file-document-outline" 
+                style={styles.icon}
+                size={25} 
+                style={{ width: 25, height: 25}}
+                color="#999999" 
+            />
+          )
+        },
+      }}
+    />
+  </Tab.Navigator>
   )
 }
 

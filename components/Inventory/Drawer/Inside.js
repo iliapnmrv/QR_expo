@@ -35,7 +35,7 @@ export default function Inside(props) {
                     tx => {
                     tx.executeSql(
                         `
-                        SELECT * FROM scanned WHERE status = 1 DESC
+                        SELECT * FROM scanned WHERE status = 1 ORDER BY id DESC
                         `, 
                         [], 
                         (_, result) => {
@@ -54,10 +54,8 @@ export default function Inside(props) {
             result.then(() => {
                 setRefreshing(false)
                  i = 1
-                console.log(1111);
                 return
             }).then(() => {
-                console.log('here')
                 setLoading(false);
             })
         } catch (e) {

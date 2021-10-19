@@ -21,7 +21,7 @@ export default function BarCode({ navigation }) {
     const handleBarCodeScanned = ({ type, data, bounds }) => {
         const {x, y} = bounds.origin
         if (x >= viewMinX && y >= viewMinY && x <= (viewMinX + finderWidth / 2) && y <= (viewMinY + finderHeight / 2)) {
-            navigation.navigate('Drawer', {
+            navigation.navigate('Inventory', {
                 screen: 'Инвентаризация',
                 params: {
                     scannedData: data,
