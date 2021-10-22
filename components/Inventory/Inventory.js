@@ -462,9 +462,9 @@ export function Inventory({route, navigation}) {
       let invNom = arr[0] // Инвентарный номер
       let name // наименование
       name = arr[1] == undefined ?  '' : arr[1] // наименование
-      let trace = arr[3] // номер прослеживаемости
-      let model = arr[4] // Модель
-      let serNom = arr[5] // Серийный номер
+      let model = arr[2] // Модель
+      let serNom = arr[3] // Серийный номер
+      let trace = arr[5] // номер прослеживаемости
       let status, pos
       db.transaction(
         tx => {
@@ -506,7 +506,6 @@ export function Inventory({route, navigation}) {
                             let place = null
                             setScanRes(null)
                             addScan(invNom, name, status, model, serNom, pos, place, trace)
-                            console.log('heree')
                             setPrevPosition(`Номер QR кода ${num}, статус: ${pos}`)
                             setItemsRemain(null)
                           },
@@ -523,7 +522,6 @@ export function Inventory({route, navigation}) {
                   }
                   let num = invNom.substr(invNom.length - 5); // номер qr кодa
                   if (row?.vedPos) {
-                    console.log('or heree')
                     setPrevPosition(`Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${row.place == undefined ? null : row.place}`)
                   }
                 }
@@ -634,6 +632,7 @@ export function Inventory({route, navigation}) {
     // 1 действие: проверка предмета на нахождение в бд => изменение статуса
     // 2 действие: добавление в таблицу отсканированных предметов с указанным статусом
     const addScan = (invNom, name, status, model, serNom, pos, place, trace) => {
+      console.log(model, serNom);
       db.transaction(
         tx => {
           tx.executeSql(

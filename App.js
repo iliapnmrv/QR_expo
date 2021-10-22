@@ -17,13 +17,13 @@ import 'react-native-gesture-handler';
 import Inside from './Components/Inventory/Drawer/Inside';
 import Over from './Components/Inventory/Drawer/Over'
 import Inventory from './Components/Inventory/Inventory';
+import Log from './Components/Inventory/Drawer/Log';
 import NotReg from './Components/Inventory/Drawer/NotReg';
 import NotFound from './Components/Inventory/Drawer/NotFound';
 import BarCode from './Components/BarCode/BarCode';
 import { Provider } from 'react-redux';
 import { store } from './src/store';
 import Docs from './Components/Docs/Docs';
-
 
 
 function App() {
@@ -161,6 +161,20 @@ function Drawer() {
           }}
         />
         <Drawer.Screen 
+          name="Журнал" 
+          component={Log}
+          options={{
+            drawerIcon: () => (
+              <MaterialCommunityIcon 
+                name="format-list-numbered" 
+                style={styles.icon}
+                size={25} 
+                color="#909090" 
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen 
           name="В учете" 
           component={Inside}
           options={{
@@ -208,7 +222,7 @@ function Drawer() {
           options={{
             drawerIcon: () => (
               <MaterialCommunityIcon 
-                name="format-list-numbered" 
+                name="playlist-remove" 
                 style={styles.icon}
                 size={25} 
                 color="#909090" 
