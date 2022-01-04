@@ -1,14 +1,14 @@
 const initialState = {
-    sessionStatus: false,
-    sessionDate: null,
+    status: false,
+    date: null,
 }
 
 export const sessionReducer = (state = initialState, { type, payload }) => {
     switch (type) {
         case "setSessionStatus":
-            return {...state, sessionStatus: payload }
+            return {...state, status: payload }
         case "setSessionDate":
-            return {...state, sessionDate: payload }
+            return {...state, date: payload }
         default:
             return state
     }

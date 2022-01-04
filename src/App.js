@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { registerRootComponent } from "expo";
+
 import { StyleSheet, Text, View, Button } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 
@@ -9,22 +11,22 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import "react-native-gesture-handler";
-import Inside from "./routes/Inventory/Drawer/Inside";
-import Over from "./routes/Inventory/Drawer/Over";
-import Inventory from "./routes/Inventory/Inventory";
-import Log from "./routes/Inventory/Drawer/Log";
-import NotReg from "./routes/Inventory/Drawer/NotReg";
-import NotFound from "./routes/Inventory/Drawer/NotFound";
-import BarCode from "./components/QRScanner/QRScanner";
+import Inside from "./routes/Inventory/Drawer/Inside.js";
+import Over from "./routes/Inventory/Drawer/Over.js";
+import Inventory from "./routes/Inventory/Inventory.js";
+import Log from "./routes/Inventory/Drawer/Log.js";
+import NotReg from "./routes/Inventory/Drawer/NotReg.js";
+import NotFound from "./routes/Inventory/Drawer/NotFound.js";
+import BarCode from "./components/QRScanner/QRScanner.js";
 import { Provider } from "react-redux";
-import { store } from "./store";
-import Docs from "./routes/Docs/Docs";
+import { store, persistor } from "./store/index.js";
+import Docs from "./routes/Docs/Docs.js";
+import { PersistGate } from "redux-persist/integration/react";
 
 function App() {
   const [hasPermission, setHasPermission] = useState(null);
 
   useEffect(() => {
-    console.log(123);
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === "granted");
@@ -52,30 +54,32 @@ function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            name="HomeTabs"
-            component={HomeTabs}
-            options={{ headerShown: false }}
-          />
-          <Stack.Group
-            screenOptions={{
-              presentation: "modal",
-              headerShown: false,
-              tabBarVisible: false,
-            }}
-          >
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer>
+          <Stack.Navigator>
             <Stack.Screen
-              name="scanner"
-              component={BarCode}
-              options={{
+              name="HomeTabs"
+              component={HomeTabs}
+              options={{ headerShown: false }}
+            />
+            <Stack.Group
+              screenOptions={{
+                presentation: "modal",
+                headerShown: false,
                 tabBarVisible: false,
               }}
-            />
-          </Stack.Group>
-        </Stack.Navigator>
-      </NavigationContainer>
+            >
+              <Stack.Screen
+                name="scanner"
+                component={BarCode}
+                options={{
+                  tabBarVisible: false,
+                }}
+              />
+            </Stack.Group>
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PersistGate>
     </Provider>
   );
 }
@@ -104,7 +108,7 @@ function HomeTabs() {
                 name="format-list-numbered"
                 style={styles.icon}
                 size={25}
-                style={{ width: 25, height: 25 }}
+                // style={{ width: 25, height: 25 }}
                 color="#999999"
               />
             );
@@ -123,7 +127,7 @@ function HomeTabs() {
                 name="file-document-outline"
                 style={styles.icon}
                 size={25}
-                style={{ width: 25, height: 25 }}
+                // style={{ width: 25, height: 25 }}
                 color="#999999"
               />
             );
@@ -229,7 +233,7 @@ function Drawer() {
   );
 }
 
-export default App;
+export default registerRootComponent(App);
 
 const styles = StyleSheet.create({
   container: {

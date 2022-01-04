@@ -1,8 +1,9 @@
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import { styles } from "../../routes/Inventory/styles/styles";
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
-export default function ScanButton() {
+export default function ScanButton({ navigation }) {
   return (
     <TouchableOpacity
       activeOpacity={0.5}

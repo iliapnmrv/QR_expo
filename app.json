@@ -2,7 +2,6 @@
     "expo": {
         "name": "Инвентаризация",
         "slug": "Inventory",
-        "entryPoint": "./src/App.js",
         "version": "1.7",
         "orientation": "portrait",
         "icon": "./assets/inventory.png",
@@ -32,6 +31,7 @@
         "web": {
             "favicon": "./assets/favicon.png"
         },
+        "entryPoint": "./src/App.js",
         "description": "Company inventory",
         "githubUrl": "https://github.com/iliapnmrv/inventory"
     }

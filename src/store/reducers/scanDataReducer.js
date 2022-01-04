@@ -1,14 +1,14 @@
 const initialState = {
-    scannedData: null,
-    sredstvo: null,
-    prevPosition: null,
-    itemsRemain: null,
+    data: "",
+    sredstvo: "",
+    prevPosition: "",
+    remains: "",
 }
 
 export const scanDataReducer = (state = initialState, { type, payload }) => {
     switch (type) {
         case "setScannedData":
-            return {...state, scannedData: payload }
+            return {...state, data: payload }
 
         case "setPrevPosition":
             return {...state, prevPosition: payload }
@@ -16,8 +16,8 @@ export const scanDataReducer = (state = initialState, { type, payload }) => {
         case "setSredstvo":
             return {...state, sredstvo: payload }
 
-        case "setItemsRemain":
-            return {...state, itemsRemain: payload }
+        case "setRemains":
+            return {...state, remains: payload }
 
         default:
             return state
