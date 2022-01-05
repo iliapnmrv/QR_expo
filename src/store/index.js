@@ -4,12 +4,14 @@ import { persistStore, persistReducer } from "redux-persist";
 import { sessionReducer } from './reducers/sessionReducer';
 import { scanDataReducer } from './reducers/scanDataReducer';
 import { scanResultReducer } from './reducers/scanResultReducer';
+import { modalReducer } from './reducers/modalReducer';
 
 
 const rootReducer = combineReducers({
     'session': sessionReducer,
     'scan': scanDataReducer,
     'scanResult': scanResultReducer,
+    'modals': modalReducer,
 })
 
 const persistConfig = {

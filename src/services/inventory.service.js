@@ -5,6 +5,7 @@ import {
   setScanStatus,
 } from "../store/actions/scanResultAction";
 import { setPrevPosition, setRemains } from "../store/actions/scanDataAction";
+import { toggleScanModal } from "../store/actions/modalAction";
 const db = SQLite.openDatabase("qr.db");
 
 export const analyze = async (data) => {
@@ -106,7 +107,8 @@ export const analyze = async (data) => {
               );
             }
           }
-          setScanModalVisible(true); // модальное окно с результатом проверки
+          console.log("here");
+          store.dispatch(toggleScanModal(true)); // модальное окно с результатом проверки
         });
       },
       (_, error) => console.log(error)

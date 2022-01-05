@@ -10,7 +10,6 @@ import {
   TextInput,
   PermissionsAndroid,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
@@ -19,16 +18,26 @@ import * as Clipboard from "expo-clipboard";
 import "react-native-gesture-handler";
 import { useDispatch, useSelector } from "react-redux";
 import { styles } from "./styles/styles.js";
-import { SESSIONS_INFO } from "../../constants/constants";
+import { SCAN_STATUS_COLOR, SESSIONS_INFO } from "../../constants/constants";
 import ScanButton from "../../components/Buttons/ScanButton";
 import ScanData from "../../components/ScanData/ScanData.js";
-import { setSessionStatus } from "../../store/actions/sessionAction.js";
+import {
+  setDownloadUrl,
+  setSessionDate,
+  setSessionStatus,
+} from "../../store/actions/sessionAction.js";
 import {
   setPrevPosition,
   setRemains,
   setScanData,
   setSredstvo,
 } from "../../store/actions/scanDataAction.js";
+import {
+  toggleCloseSessionModal,
+  toggleDownloadLinkModal,
+  toggleScanModal,
+} from "../../store/actions/modalAction.js";
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 const requestStoragePermission = async () => {
   let check = await PermissionsAndroid.check(
@@ -62,8 +71,11 @@ today = dd + "." + mm + "." + yyyy;
 export function Inventory({ route, navigation }) {
   const dispatch = useDispatch();
 
-  const { status, sessionDate } = useSelector(({ session }) => session);
+  const { status, date, url } = useSelector(({ session }) => session);
   const { remains } = useSelector(({ scan }) => scan);
+  const { scanModal, downloadLinkModal, closeSessionModal } = useSelector(
+    ({ modals }) => modals
+  );
   const { scanStatus, scanResult } = useSelector(
     ({ scanResult }) => scanResult
   );
@@ -71,19 +83,13 @@ export function Inventory({ route, navigation }) {
   // ------ Сессии
   // Данные сессии
 
-  const setSessionDate = async (date) => {
-    date = date == "Сессия еще не была открыта" ? "" : date.substr(-10);
-    dispatch({ type: "setSessionDate", payload: date });
-  };
-
-  const onSessionChangeHandler = (status, date) => {
+  const onSessionChangeHandler = (status) => {
     if (status) {
-      dispatch(setSessionStatus(!status));
-      setSessionDate(`Сессия еще не была открыта`);
+      dispatch(setSessionDate(`Сессия еще не была открыта`));
     } else {
-      dispatch(setSessionStatus(!status));
-      setSessionDate(`Сессия была открыта: ${date}`);
+      dispatch(setSessionDate(`Сессия была открыта: ${today}`));
     }
+    dispatch(setSessionStatus(!status));
   };
 
   const SessionClose = () => {
@@ -96,10 +102,10 @@ export function Inventory({ route, navigation }) {
         `DROP TABLE IF EXISTS qr;`,
         [],
         (_, result) => {
-          deleteTables(true);
-          setTimeout(() => {
-            deleteTables(false);
-          }, 5000);
+          showMessage({
+            message: "Таблицы успешно очищены",
+            type: "info",
+          });
         },
         (_, error) => console.log(`Error code 2: ${error}`)
       );
@@ -114,53 +120,15 @@ export function Inventory({ route, navigation }) {
     });
   };
 
-  // ССылка для скачивания
-  // получает ссылку
-  const getLink = async () => {
-    try {
-      let url = await AsyncStorage.getItem("link");
-      return url;
-    } catch (e) {
-      console.log("error", e);
-    }
-  };
-
-  // устанавливает ссылку
-  const setLink = async (link) => {
-    link == null ? link == "sometext" : null;
-    console.log(`Ссылка: ${link}`);
-    try {
-      await AsyncStorage.setItem("link", link);
-    } catch (e) {
-      console.log(`Error code 11: ${e}`);
-    }
-  };
-
   // по изменению статуса
   useEffect(() => {
     requestStoragePermission();
-    getLink()
-      .then((res) => {
-        linkPlaceholder != res ? changeLinkPlaceholder(res) : null;
-        downloadLink != res ? setDownloadLink(res) : null;
-      })
-      .catch((err) => {
-        console.log("error", err);
-      });
   }, []);
 
   // Подключение к бд
   const db = SQLite.openDatabase("qr.db");
 
   //  useState модальных окон
-  const [scanModalVisible, setScanModalVisible] = useState(false);
-  const [sessionModalVisible, setSessionModalVisible] = useState(false);
-  const [DownloadedInfoModal, setDownloadedInfoModal] = useState(false);
-  const [downloadLink, setDownloadLink] = useState(null);
-  const [deletion, deleteTables] = useState(false);
-
-  const [linkText, changeLinkText] = useState(null);
-  const [linkPlaceholder, changeLinkPlaceholder] = useState("hhtps://");
   const [downloadedInfo, setDownloadedInfo] = useState(); // данные скачки новой бд
 
   const downloadFile = async (uri, fileUri) => {
@@ -266,19 +234,12 @@ export function Inventory({ route, navigation }) {
 
   const insertJSONObj = async (json) => {
     let data = JSON.parse(json);
-    setDownloadedInfo(data.length);
-    setDownloadedInfoModal(true);
-    setTimeout(() => {
-      setDownloadedInfoModal(false);
-    }, 5000);
+    showMessage({
+      message: `В инвентаризации ${data.length} строк`,
+      type: "info",
+    });
     for (let i = 0; i < data.length; i++) {
-      let obj = data[i];
-      let id = obj.id;
-      let vedPos = obj.vedPos;
-      let name = obj.name;
-      let place = obj.place;
-      let kolvo = obj.kolvo;
-      let placePriority = obj.placePriority;
+      let { id, vedPos, name, place, kolvo, placePriority } = data[i];
       insert(id, vedPos, name, place, kolvo, placePriority);
     }
   };
@@ -297,7 +258,6 @@ export function Inventory({ route, navigation }) {
   const downloadDB = async () => {
     // Информация для скачивания
     let csvUri = `${FileSystem.documentDirectory}1.csv`; //Место, где находится cкачанный csv файл
-    const url = await getLink(); // Ссылка, откуда скачивается - external url
 
     await createDB(); //создание бд
     await downloadFile(url, csvUri);
@@ -305,9 +265,8 @@ export function Inventory({ route, navigation }) {
 
   const insertTextFromClipboard = async () => {
     const text = await Clipboard.getStringAsync();
-    changeLinkText(text);
+    dispatch(setDownloadUrl(text));
   };
-
   return (
     <View style={styles.container}>
       <ScrollView>
@@ -324,7 +283,7 @@ export function Inventory({ route, navigation }) {
         )}
         {/* Информация о сессии */}
         <View style={{ width: "100%", alignItems: "center" }}>
-          <Text>{sessionDate}</Text>
+          <Text>{date}</Text>
         </View>
         <View style={styles.sessionInfo}>
           <Text style={status ? styles.active : styles.danger}>
@@ -334,26 +293,26 @@ export function Inventory({ route, navigation }) {
             title={SESSIONS_INFO[status].button}
             onPress={() => {
               status
-                ? setSessionModalVisible(true)
-                : (downloadDB(), onSessionChangeHandler(status, today));
+                ? dispatch(toggleCloseSessionModal(true))
+                : (downloadDB(), onSessionChangeHandler(status));
             }}
           />
-          {!status && (
+          {!status ? (
             <Icon
               name="edit"
               size={25}
               color="#A9A9A9"
               onPress={() => {
-                setDownloadLink(true);
+                dispatch(toggleDownloadLinkModal(true));
               }}
             />
-          )}
+          ) : null}
           <Modal
             animationType="slide"
             transparent={true}
-            visible={downloadLink}
+            visible={downloadLinkModal}
             onRequestClose={() => {
-              setDownloadLink(!downloadLink);
+              dispatch(toggleDownloadLinkModal(!downloadLinkModal));
             }}
           >
             <View style={styles.centeredView}>
@@ -372,19 +331,19 @@ export function Inventory({ route, navigation }) {
                   />
                   <TextInput
                     style={styles.input}
-                    placeholder={linkPlaceholder}
+                    placeholder={url}
                     onChangeText={(text) => {
-                      changeLinkText(text);
+                      dispatch(setDownloadUrl(text));
                     }}
-                    value={linkText}
+                    value={url}
                   />
                 </View>
                 <View style={styles.buttons}>
                   <TouchableOpacity
                     style={[styles.button, styles.accept]}
                     onPress={() => {
-                      setLink(linkText);
-                      setDownloadLink(!downloadLink);
+                      dispatch(setDownloadUrl(url));
+                      dispatch(toggleDownloadLinkModal(!downloadLinkModal));
                     }}
                   >
                     <Text style={styles.btnTextStyle}>Сохранить</Text>
@@ -392,7 +351,7 @@ export function Inventory({ route, navigation }) {
                   <TouchableOpacity
                     style={[styles.button, styles.reject]}
                     onPress={() => {
-                      setDownloadLink(!downloadLink);
+                      dispatch(toggleDownloadLinkModal(!downloadLinkModal));
                     }}
                   >
                     <Text style={styles.btnTextStyle}>Закрыть</Text>
@@ -412,50 +371,34 @@ export function Inventory({ route, navigation }) {
           <Modal
             animationType="slide"
             transparent={true}
-            visible={scanModalVisible}
+            visible={scanModal}
             onRequestClose={() => {
-              setScanModalVisible(!scanModalVisible);
+              dispatch(toggleScanModal(!scanModal));
             }}
           >
             <View style={styles.centeredView}>
               <View
                 style={[
                   styles.modalView,
-                  scanStatus == "В учете"
-                    ? styles.lightGreen
-                    : scanStatus == "Позиция не в учете"
-                    ? styles.lightYellow
-                    : scanStatus == "Позиция сверх учета"
-                    ? styles.lightBlue
-                    : scanStatus == "Повторное считывание"
-                    ? styles.lightRed
-                    : null,
+                  styles[SCAN_STATUS_COLOR.modal[scanStatus]],
                 ]}
               >
                 <Text
                   style={[
                     styles.maintext,
-                    scanStatus == "В учете"
-                      ? styles.green
-                      : scanStatus == "Позиция не в учете"
-                      ? styles.yellow
-                      : scanStatus == "Позиция сверх учета"
-                      ? styles.blue
-                      : scanStatus == "Повторное считывание"
-                      ? styles.red
-                      : null,
+                    styles[SCAN_STATUS_COLOR.text[scanStatus]],
                   ]}
                 >
                   {scanStatus}
                 </Text>
-                {scanResult && (
+                {scanResult ? (
                   <Text style={styles.maintext}>{scanResult}</Text>
-                )}
-                {remains && (
+                ) : null}
+                {remains ? (
                   <Text style={[styles.maintext, styles.itemsRemain]}>
                     {remains}
                   </Text>
-                )}
+                ) : null}
                 <View style={styles.buttons}>
                   <TouchableOpacity
                     style={[
@@ -463,7 +406,7 @@ export function Inventory({ route, navigation }) {
                       scanStatus == "В учете" ? styles.accept : styles.reject,
                     ]}
                     onPress={() => {
-                      setScanModalVisible(!scanModalVisible);
+                      dispatch(toggleScanModal(!scanModal));
                     }}
                   >
                     <Text style={styles.btnTextStyle}>Закрыть</Text>
@@ -478,9 +421,9 @@ export function Inventory({ route, navigation }) {
           <Modal
             animationType="slide"
             transparent={true}
-            visible={sessionModalVisible}
+            visible={closeSessionModal}
             onRequestClose={() => {
-              setSessionModalVisible(!sessionModalVisible);
+              dispatch(toggleCloseSessionModal(!closeSessionModal));
             }}
           >
             <View style={styles.centeredView}>
@@ -492,8 +435,8 @@ export function Inventory({ route, navigation }) {
                   <TouchableOpacity
                     style={[styles.button, styles.accept]}
                     onPress={() => {
-                      setSessionModalVisible(!sessionModalVisible);
-                      onSessionChangeHandler(status, today);
+                      dispatch(toggleCloseSessionModal(!closeSessionModal));
+                      onSessionChangeHandler(status);
                       SessionClose();
                     }}
                   >
@@ -502,7 +445,7 @@ export function Inventory({ route, navigation }) {
                   <TouchableOpacity
                     style={[styles.button, styles.reject]}
                     onPress={() => {
-                      setSessionModalVisible(!sessionModalVisible);
+                      dispatch(toggleCloseSessionModal(!closeSessionModal));
                     }}
                   >
                     <Text style={styles.btnTextStyle}>Отменить</Text>
@@ -513,26 +456,6 @@ export function Inventory({ route, navigation }) {
           </Modal>
         </View>
       </ScrollView>
-
-      {/* Сообщения пользователю */}
-      {/* {deletion && <Message message={"Таблицы успешно очищены"} sec={5} />}
-{DownloadedInfoModal && (
-  <Message
-    message={`Успешно загружено ${downloadedInfo} строк`}
-    sec={5}
-  />
-)}
-{downloadLink != null && !downloadLink && (
-  <Message
-    message={
-      linkText != null
-        ? `Ссылка для скачивания изменена на `
-        : "Ссылка не была введена"
-    }
-    secondLine={linkText != null ? linkText : null}
-    sec={4}
-  />
-)} */}
     </View>
   );
 }

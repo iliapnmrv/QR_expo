@@ -9,7 +9,7 @@ const initialState = {
 export const modalReducer = (state = initialState, { type, payload }) => {
     switch (type) {
         case TOGGLE_SCAN_MODAL:
-            return {...state, data: payload }
+            return {...state, scanModal: payload }
 
         case TOGGLE_DOWNLOAD_LINK_MODAL:
             return {...state, downloadLinkModal: payload }

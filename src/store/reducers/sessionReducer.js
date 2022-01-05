@@ -1,8 +1,9 @@
-import { SET_SESSION_DATE, SET_SESSION_STATUS } from "../actions/sessionAction"
+import { SET_DOWNLOAD_URL, SET_SESSION_DATE, SET_SESSION_STATUS } from "../actions/sessionAction"
 
 const initialState = {
     status: false,
     date: null,
+    url: "http://",
 }
 
 export const sessionReducer = (state = initialState, { type, payload }) => {
@@ -11,6 +12,8 @@ export const sessionReducer = (state = initialState, { type, payload }) => {
             return {...state, status: payload }
         case SET_SESSION_DATE:
             return {...state, date: payload }
+        case SET_DOWNLOAD_URL:
+            return {...state, url: payload }
         default:
             return state
     }

@@ -22,6 +22,7 @@ import { Provider } from "react-redux";
 import { store, persistor } from "./store/index.js";
 import Docs from "./routes/Docs/Docs.js";
 import { PersistGate } from "redux-persist/integration/react";
+import FlashMessage from "react-native-flash-message";
 
 function App() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -55,30 +56,33 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen
-              name="HomeTabs"
-              component={HomeTabs}
-              options={{ headerShown: false }}
-            />
-            <Stack.Group
-              screenOptions={{
-                presentation: "modal",
-                headerShown: false,
-                tabBarVisible: false,
-              }}
-            >
+        <View style={{ flex: 1 }}>
+          <NavigationContainer>
+            <Stack.Navigator>
               <Stack.Screen
-                name="scanner"
-                component={BarCode}
-                options={{
+                name="HomeTabs"
+                component={HomeTabs}
+                options={{ headerShown: false }}
+              />
+              <Stack.Group
+                screenOptions={{
+                  presentation: "modal",
+                  headerShown: false,
                   tabBarVisible: false,
                 }}
-              />
-            </Stack.Group>
-          </Stack.Navigator>
-        </NavigationContainer>
+              >
+                <Stack.Screen
+                  name="scanner"
+                  component={BarCode}
+                  options={{
+                    tabBarVisible: false,
+                  }}
+                />
+              </Stack.Group>
+            </Stack.Navigator>
+          </NavigationContainer>
+          <FlashMessage position="top" />
+        </View>
       </PersistGate>
     </Provider>
   );
