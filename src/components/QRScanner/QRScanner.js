@@ -3,8 +3,17 @@ import { View, StyleSheet, useWindowDimensions } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import BarcodeMask from "react-native-barcode-mask";
+import {
+  setPrevPosition,
+  setRemains,
+  setScanData,
+  setSredstvo,
+} from "../../store/actions/scanDataAction";
+import { useDispatch } from "react-redux";
 
 export default function BarCode({ navigation }) {
+  const dispatch = useDispatch();
+
   const { height, width } = useWindowDimensions();
 
   const finderWidth = 280;
@@ -25,15 +34,15 @@ export default function BarCode({ navigation }) {
         "Inventory",
         {
           screen: "Инвентаризация",
-          params: {
-            scannedData: data,
-            prevScanPosition: null,
-            itemsRemain: null,
-          },
         },
         true
       );
     }
+    console.log(data);
+    dispatch(setRemains(""));
+    dispatch(setPrevPosition(""));
+    dispatch(setScanData(data));
+    data[0] == 1 ? dispatch(setSredstvo("ТМЦ")) : dispatch(setSredstvo("ОС"));
   };
 
   return (

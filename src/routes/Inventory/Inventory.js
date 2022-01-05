@@ -22,6 +22,13 @@ import { styles } from "./styles/styles.js";
 import { SESSIONS_INFO } from "../../constants/constants";
 import ScanButton from "../../components/Buttons/ScanButton";
 import ScanData from "../../components/ScanData/ScanData.js";
+import { setSessionStatus } from "../../store/actions/sessionAction.js";
+import {
+  setPrevPosition,
+  setRemains,
+  setScanData,
+  setSredstvo,
+} from "../../store/actions/scanDataAction.js";
 
 const requestStoragePermission = async () => {
   let check = await PermissionsAndroid.check(
@@ -63,62 +70,30 @@ export function Inventory({ route, navigation }) {
 
   // ------ Сессии
   // Данные сессии
-  const setSessionStatus = async (status) => {
-    dispatch({ type: "setSessionStatus", payload: status });
-  };
 
   const setSessionDate = async (date) => {
     date = date == "Сессия еще не была открыта" ? "" : date.substr(-10);
     dispatch({ type: "setSessionDate", payload: date });
   };
 
-  // Setters
-  const setScannedData = async (data) => {
-    dispatch({ type: "setScannedData", payload: data });
-  };
-
-  const setPrevPosition = async (position) => {
-    dispatch({ type: "setPrevPosition", payload: position });
-  };
-
-  const setSredstvo = async (sredstvo) => {
-    dispatch({ type: "setSredstvo", payload: sredstvo });
-  };
-
-  const setRemains = async (remains) => {
-    dispatch({ type: "setRemains", payload: remains });
-  };
-
-  useEffect(() => {
-    if (route.params?.scannedData) {
-      let sred = route.params?.scannedData;
-      sred[0] == 1 ? setSredstvo("ТМЦ") : setSredstvo("ОС");
-      setScannedData(route.params.scannedData);
-      setPrevPosition(route.params.prevScanPosition);
-      setRemains(route.params.remains);
-    }
-  }, [route.params?.scannedData]);
-
   const onSessionChangeHandler = (status, date) => {
     if (status) {
-      setSessionStatus(!status);
+      dispatch(setSessionStatus(!status));
       setSessionDate(`Сессия еще не была открыта`);
     } else {
-      setSessionStatus(!status);
+      dispatch(setSessionStatus(!status));
       setSessionDate(`Сессия была открыта: ${date}`);
     }
   };
 
   const SessionClose = () => {
-    setRemains(null);
-    setSredstvo(null);
-    setPrevPosition(null);
-    setScannedData(null);
+    dispatch(setRemains(null));
+    dispatch(setSredstvo(null));
+    dispatch(setPrevPosition(null));
+    dispatch(setScanData(null));
     db.transaction((tx) => {
       tx.executeSql(
-        `
-            DROP TABLE IF EXISTS qr;
-            `,
+        `DROP TABLE IF EXISTS qr;`,
         [],
         (_, result) => {
           deleteTables(true);
@@ -131,9 +106,7 @@ export function Inventory({ route, navigation }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        `
-            DROP TABLE IF EXISTS scanned;
-            `,
+        `DROP TABLE IF EXISTS scanned;`,
         [],
         (_, result) => {},
         (_, error) => console.log(`Error code 2: ${error}`)

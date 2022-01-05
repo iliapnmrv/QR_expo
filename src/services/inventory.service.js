@@ -1,5 +1,10 @@
 import { store } from "../store";
 import * as SQLite from "expo-sqlite";
+import {
+  setScanResult,
+  setScanStatus,
+} from "../store/actions/scanResultAction";
+import { setPrevPosition, setRemains } from "../store/actions/scanDataAction";
 const db = SQLite.openDatabase("qr.db");
 
 export const analyze = async (data) => {
@@ -19,20 +24,19 @@ export const analyze = async (data) => {
             let row = getScannedItemRow(invNom);
             row.then((position) => {
               if (Array.isArray(position)) {
-                store.dispatch({
-                  type: "SET_SCAN_RESULT",
-                  payload: `Инвентарный номер ${invNom} уже сканировался, позиция: ${position[0]}, ${position[1]}`,
-                });
+                store.dispatch(
+                  setScanResult(
+                    `Инвентарный номер ${invNom} уже сканировался, позиция: ${position[0]}, ${position[1]}`
+                  )
+                );
               } else {
-                store.dispatch({
-                  type: "SET_SCAN_RESULT",
-                  payload: `Инвентарный номер ${invNom} уже сканировался, ${position}`,
-                });
+                store.dispatch(
+                  setScanResult(
+                    `Инвентарный номер ${invNom} уже сканировался, ${position}`
+                  )
+                );
               }
-              store.dispatch({
-                type: "SET_SCAN_STATUS",
-                payload: `Повторное считывание`,
-              });
+              store.dispatch(setScanStatus(`Повторное считывание`));
             });
           } else {
             let row = result.rows.item(0);
@@ -45,25 +49,16 @@ export const analyze = async (data) => {
                   (_, result) => {
                     if (!result.rows.length) {
                       // если не нашлись записи
-                      status = 2; // не в
-                      store.dispatch({
-                        type: "SET_SCAN_STATUS",
-                        payload: "Позиция не в учете",
-                      });
+                      status = 2; // не в учете
+                      store.dispatch(setScanStatus("Позиция не в учете"));
                       pos = "Не в учете";
                     } else {
                       status = 3; // сверх учета
-                      store.dispatch({
-                        type: "SET_SCAN_STATUS",
-                        payload: "Позиция сверх учета",
-                      });
+                      store.dispatch(setScanStatus("Позиция сверх учета"));
                       pos = "Сверх учета";
                     }
                     let place = null;
-                    store.dispatch({
-                      type: "SET_SCAN_RESULT",
-                      payload: "",
-                    });
+                    store.dispatch(setScanResult(""));
                     addScanToDB(
                       invNom,
                       name,
@@ -74,25 +69,20 @@ export const analyze = async (data) => {
                       place,
                       trace
                     );
-                    store.dispatch({
-                      type: "setPrevPosition",
-                      payload: `Номер QR кода ${num}, статус: ${pos}`,
-                    });
-                    store.dispatch({ type: "setRemains", payload: "" });
+                    store.dispatch(
+                      setPrevPosition(`Номер QR кода ${num}, статус: ${pos}`)
+                    );
+                    store.dispatch(setRemains(""));
                   },
                   (_, error) => console.log(`Error code 5: ${error}`)
                 );
               });
             } else {
               status = 1; // в учете
-              store.dispatch({
-                type: "SET_SCAN_STATUS",
-                payload: "В учете",
-              });
-              store.dispatch({
-                type: "SET_SCAN_RESULT",
-                payload: `Позиция: ${row.vedPos}\nМесто: ${row.place}`,
-              });
+              store.dispatch(setScanStatus("В учете"));
+              store.dispatch(
+                setScanResult(`Позиция: ${row.vedPos}\nМесто: ${row.place}`)
+              );
               addScanToDB(
                 invNom,
                 name,
@@ -107,12 +97,13 @@ export const analyze = async (data) => {
             }
             let num = invNom.substr(invNom.length - 5); // номер qr кодa
             if (row?.vedPos) {
-              store.dispatch({
-                type: "setPrevPosition",
-                payload: `Номер QR кода ${num}, позиция: ${
-                  row.vedPos
-                }, место: ${row.place == undefined ? null : row.place}`,
-              });
+              store.dispatch(
+                setPrevPosition(
+                  `Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${
+                    row.place == undefined ? null : row.place
+                  }`
+                )
+              );
             }
           }
           setScanModalVisible(true); // модальное окно с результатом проверки
@@ -208,7 +199,7 @@ const subtractItem = (id, name) => {
         let row = result.rows.item(0);
         if (!row.kolvo) {
           //если не остается остатка
-          dispatch({ type: "setRemains", payload: `Позиция закрыта` });
+          store.dispatch(setRemains(`Позиция закрыта`));
         } else {
           let left = row.kolvo; // оставшееся количество предметов
           let pos = row.vedPos; // строка в ведомости
@@ -218,10 +209,9 @@ const subtractItem = (id, name) => {
               [name, pos],
               (_, result) => {
                 let scanned = result.rows.length;
-                dispatch({
-                  type: "setRemains",
-                  payload: `${scanned}/${left + scanned}, строка: ${pos} `,
-                });
+                store.dispatch(
+                  setRemains(`${scanned}/${left + scanned}, строка: ${pos} `)
+                );
               },
               (_, error) => console.log(error)
             );

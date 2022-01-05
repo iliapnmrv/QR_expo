@@ -1,3 +1,5 @@
+import { SET_PREV_POSITION, SET_REMAINS, SET_SCAN_DATA, SET_SREDSTVO } from "../actions/scanDataAction"
+
 const initialState = {
     data: "",
     sredstvo: "",
@@ -7,16 +9,16 @@ const initialState = {
 
 export const scanDataReducer = (state = initialState, { type, payload }) => {
     switch (type) {
-        case "setScannedData":
+        case SET_SCAN_DATA:
             return {...state, data: payload }
 
-        case "setPrevPosition":
+        case SET_PREV_POSITION:
             return {...state, prevPosition: payload }
 
-        case "setSredstvo":
+        case SET_SREDSTVO:
             return {...state, sredstvo: payload }
 
-        case "setRemains":
+        case SET_REMAINS:
             return {...state, remains: payload }
 
         default:

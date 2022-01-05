@@ -1,3 +1,5 @@
+import { SET_SESSION_DATE, SET_SESSION_STATUS } from "../actions/sessionAction"
+
 const initialState = {
     status: false,
     date: null,
@@ -5,9 +7,9 @@ const initialState = {
 
 export const sessionReducer = (state = initialState, { type, payload }) => {
     switch (type) {
-        case "setSessionStatus":
+        case SET_SESSION_STATUS:
             return {...state, status: payload }
-        case "setSessionDate":
+        case SET_SESSION_DATE:
             return {...state, date: payload }
         default:
             return state
