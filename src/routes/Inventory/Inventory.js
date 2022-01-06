@@ -18,25 +18,25 @@ import * as Clipboard from "expo-clipboard";
 import "react-native-gesture-handler";
 import { useDispatch, useSelector } from "react-redux";
 import { styles } from "./styles/styles.js";
-import { SCAN_STATUS_COLOR, SESSIONS_INFO } from "../../constants/constants";
-import ScanButton from "../../components/Buttons/ScanButton";
-import ScanData from "../../components/ScanData/ScanData.js";
+import { SCAN_STATUS_COLOR, SESSIONS_INFO } from "constants/constants";
+import ScanButton from "components/Buttons/ScanButton";
+import ScanData from "components/ScanData/ScanData.js";
 import {
   setDownloadUrl,
   setSessionDate,
   setSessionStatus,
-} from "../../store/actions/sessionAction.js";
+} from "store/actions/sessionAction.js";
 import {
   setPrevPosition,
   setRemains,
   setScanData,
   setSredstvo,
-} from "../../store/actions/scanDataAction.js";
+} from "store/actions/scanDataAction.js";
 import {
   toggleCloseSessionModal,
   toggleDownloadLinkModal,
   toggleScanModal,
-} from "../../store/actions/modalAction.js";
+} from "store/actions/modalAction.js";
 import { showMessage, hideMessage } from "react-native-flash-message";
 
 const requestStoragePermission = async () => {
@@ -129,7 +129,6 @@ export function Inventory({ route, navigation }) {
   const db = SQLite.openDatabase("qr.db");
 
   //  useState модальных окон
-  const [downloadedInfo, setDownloadedInfo] = useState(); // данные скачки новой бд
 
   const downloadFile = async (uri, fileUri) => {
     console.log("downloadFile func");

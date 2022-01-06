@@ -8,7 +8,7 @@ import {
   setRemains,
   setScanData,
   setSredstvo,
-} from "../../store/actions/scanDataAction";
+} from "store/actions/scanDataAction";
 import { useDispatch } from "react-redux";
 
 export default function BarCode({ navigation }) {

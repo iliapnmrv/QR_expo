@@ -18,16 +18,39 @@ import Log from "./routes/Inventory/Drawer/Log.js";
 import NotReg from "./routes/Inventory/Drawer/NotReg.js";
 import NotFound from "./routes/Inventory/Drawer/NotFound.js";
 import BarCode from "./components/QRScanner/QRScanner.js";
-import { Provider } from "react-redux";
+import { Provider, useSelector, useDispatch } from "react-redux";
 import { store, persistor } from "./store/index.js";
 import Docs from "./routes/Docs/Docs.js";
 import { PersistGate } from "redux-persist/integration/react";
 import FlashMessage from "react-native-flash-message";
+import SignInScreen from "./routes/Auth/SignInScreen.js";
+import $api from "./http/index.js";
+import SignUpScreen from "./routes/Auth/SignUpScreen.js";
+
+const AppWrapper = () => {
+  return (
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
+  );
+};
 
 function App() {
   const [hasPermission, setHasPermission] = useState(null);
 
+  const { username, isSignedIn } = useSelector(({ auth }) => auth);
+
+  const dispatch = useDispatch();
+
   useEffect(() => {
+    const fetchData = async () => {
+      const data = await $api.get(`/inventory`).then(({ data }) => data);
+      console.log(data);
+    };
+    fetchData();
+
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === "granted");
@@ -54,11 +77,35 @@ function App() {
   const Stack = createNativeStackNavigator();
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <View style={{ flex: 1 }}>
-          <NavigationContainer>
-            <Stack.Navigator>
+    <View style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator>
+          {!isSignedIn ? (
+            // No token found, user isn't signed in
+            <>
+              <Stack.Screen
+                name="SignIn"
+                component={SignInScreen}
+                options={{
+                  headerShown: false,
+                  // When logging out, a pop animation feels intuitive
+                  // You can remove this if you want the default 'push' animation
+                  // animationTypeForReplace: state.isSignout ? "pop" : "push",
+                }}
+              />
+              <Stack.Screen
+                name="SignUp"
+                component={SignUpScreen}
+                options={{
+                  headerShown: false,
+                  // When logging out, a pop animation feels intuitive
+                  // You can remove this if you want the default 'push' animation
+                  // animationTypeForReplace: state.isSignout ? "pop" : "push",
+                }}
+              />
+            </>
+          ) : (
+            <>
               <Stack.Screen
                 name="HomeTabs"
                 component={HomeTabs}
@@ -79,12 +126,12 @@ function App() {
                   }}
                 />
               </Stack.Group>
-            </Stack.Navigator>
-          </NavigationContainer>
-          <FlashMessage position="top" />
-        </View>
-      </PersistGate>
-    </Provider>
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+      <FlashMessage position="top" />
+    </View>
   );
 }
 
@@ -237,7 +284,7 @@ function Drawer() {
   );
 }
 
-export default registerRootComponent(App);
+export default registerRootComponent(AppWrapper);
 
 const styles = StyleSheet.create({
   container: {

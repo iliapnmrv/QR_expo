@@ -5,6 +5,7 @@ import { sessionReducer } from './reducers/sessionReducer';
 import { scanDataReducer } from './reducers/scanDataReducer';
 import { scanResultReducer } from './reducers/scanResultReducer';
 import { modalReducer } from './reducers/modalReducer';
+import { authReducer } from './reducers/authReducer';
 
 
 const rootReducer = combineReducers({
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
     'scan': scanDataReducer,
     'scanResult': scanResultReducer,
     'modals': modalReducer,
+    'auth': authReducer,
 })
 
 const persistConfig = {

@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { styles } from "../../routes/Inventory/styles/styles";
+import { styles } from "routes/Inventory/styles/styles";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useSelector } from "react-redux";
-import { analyze } from "../../services/inventory.service.js";
+import { analyze } from "services/inventory.service.js";
 
 export default function ScanData() {
   const { status } = useSelector(({ session }) => session);

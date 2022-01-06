@@ -15,6 +15,7 @@
         "@react-navigation/native": "^6.0.5",
         "@react-navigation/native-stack": "^6.2.3",
         "@react-navigation/stack": "^6.0.10",
+        "axios": "^0.24.0",
         "babel-preset-react-native": "2.1.0",
         "events": "^3.3.0",
         "expo": "^44.0.0",
