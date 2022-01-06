@@ -38,7 +38,7 @@ const AppWrapper = () => {
 };
 
 function App() {
-  const [hasPermission, setHasPermission] = useState(null);
+  const [hasPermission, setHasPermission] = useState("null");
 
   const { username, isSignedIn } = useSelector(({ auth }) => auth);
 
@@ -47,14 +47,15 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const data = await $api.get(`/inventory`).then(({ data }) => data);
-      console.log(data);
+      console.log("basic inventory data", data);
     };
     fetchData();
 
-    (async () => {
+    const getPermissions = async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
+      setHasPermission(status);
+    };
+    getPermissions();
   }, []);
 
   // Check permission & show view
@@ -80,7 +81,7 @@ function App() {
     <View style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator>
-          {!isSignedIn ? (
+          {isSignedIn ? (
             // No token found, user isn't signed in
             <>
               <Stack.Screen

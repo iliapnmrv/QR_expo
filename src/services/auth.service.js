@@ -1,6 +1,6 @@
 import axios from 'axios'
-import $api, { API_URL } from 'http';
-import { setUser } from "store/actions/authAction";
+import $api, { API_URL } from 'http/index.js';
+import { setUser } from "store/actions/authAction.js";
 class AuthService {
     async registration(login, password) {
         const registrationData = await $api.post('auth/registration/', {

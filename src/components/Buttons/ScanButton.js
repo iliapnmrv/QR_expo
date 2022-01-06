@@ -1,37 +1,25 @@
-import axios from 'axios'
-import $api, { API_URL } from 'http';
-import { setUser } from "store/actions/authAction";
-class AuthService {
-    async registration(login, password) {
-        const registrationData = await $api.post('auth/registration/', {
-            login,
-            password
-        }).then(({ data }) => data)
-        setUser(JSON.stringify(registrationData.user), registrationData.accessToken)
-        return registrationData
-    }
+import React from "react";
+import { Text, TouchableOpacity } from "react-native";
+import { styles } from "../../routes/Inventory/styles/styles";
+import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
-    async login(login, password) {
-        const loginData = $api.post('auth/login/', {
-            login,
-            password
-        }).then(({ data }) => data)
-        setUser(JSON.stringify(loginData.user), loginData.accessToken)
-        return loginData
-    }
+export default function ScanButton({ navigation }) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.5}
+      style={styles.buttonMain}
+      onPress={() => navigation.navigate("scanner")}
+    >
+      <MaterialCommunityIcon
+        name="qrcode-scan"
+        size={30}
+        style={{ paddingRight: 10 }}
+        color="#909090"
+      />
 
-    async logout() {
-        setUser()
-        return $api.post('auth/logout/')
-    }
-
-    async checkAuth() {
-
-        const data = await axios.get(`${API_URL}auth/refresh`, { withCredentials: true }).then(({ data }) => data)
-        console.log(data, "data");
-        // setUser(data.accessToken)
-        return data
-    }
+      <Text style={styles.buttonMainText}>
+        Нажмите, чтобы отсканировать QR код
+      </Text>
+    </TouchableOpacity>
+  );
 }
-
-export default new AuthService

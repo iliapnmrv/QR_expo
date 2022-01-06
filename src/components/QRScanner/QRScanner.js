@@ -30,13 +30,7 @@ export default function BarCode({ navigation }) {
       x <= viewMinX + finderWidth / 2 &&
       y <= viewMinY + finderHeight / 2
     ) {
-      navigation.navigate(
-        "Inventory",
-        {
-          screen: "Инвентаризация",
-        },
-        true
-      );
+      navigation.goBack();
     }
     console.log(data);
     dispatch(setRemains(""));

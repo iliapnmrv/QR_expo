@@ -3,7 +3,7 @@ import { SafeAreaView, Text } from "react-native";
 import CustomButton from "components/Buttons/CustomButton";
 
 import Input from "components/Input/Input";
-import authService from "services/auth.service";
+import authService from "services/auth.service.js";
 import { styles } from "./AuthScreensStyles";
 
 export default function SignInScreen({ navigation }) {

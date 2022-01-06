@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { styles } from "./styles/styles.js";
 import { SCAN_STATUS_COLOR, SESSIONS_INFO } from "constants/constants";
 import ScanButton from "components/Buttons/ScanButton";
-import ScanData from "components/ScanData/ScanData.js";
+import ScanData from "components/ScanData/ScanData";
 import {
   setDownloadUrl,
   setSessionDate,
@@ -68,7 +68,7 @@ let yyyy = today.getFullYear();
 
 today = dd + "." + mm + "." + yyyy;
 
-export function Inventory({ route, navigation }) {
+function Inventory({ navigation }) {
   const dispatch = useDispatch();
 
   const { status, date, url } = useSelector(({ session }) => session);
