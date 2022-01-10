@@ -20,6 +20,7 @@ export default function BarCode({ route, navigation }) {
   const dispatch = useDispatch();
 
   const { height, width } = useWindowDimensions();
+  console.log(height, width);
 
   const finderWidth = 280;
   const finderHeight = 230;
@@ -28,15 +29,9 @@ export default function BarCode({ route, navigation }) {
 
   // Scanned bar code
   const handleBarCodeScanned = ({ type, data, bounds }) => {
-    const { x, y } = bounds.origin;
-    if (
-      x >= viewMinX &&
-      y >= viewMinY &&
-      x <= viewMinX + finderWidth / 2 &&
-      y <= viewMinY + finderHeight / 2
-    ) {
-      navigation.goBack();
-    }
+    const { x, y } = bounds.origin; //190 347
+    navigation.goBack();
+
     console.log(data);
 
     if (prevScreen == "docs") {

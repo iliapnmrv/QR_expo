@@ -13,16 +13,18 @@ export default function ScanDataItem({ icon, header, data }) {
         />
         <Text style={styles.headerText}>{header}</Text>
       </View>
-      <Text style={[styles.info, styles.biggerFont]}>{data}</Text>
+      <Text style={styles.text}>{data}</Text>
     </View>
   );
 }
 
 //Styles
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   header: {
-    backgroundColor: "#f9f9f9",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E8E8E8",
     flex: 1,
+    marginTop: 2,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -31,11 +33,9 @@ export const styles = StyleSheet.create({
     paddingVertical: 4,
     fontSize: 18,
   },
-  info: {
+  text: {
     paddingHorizontal: 8,
     paddingVertical: 5,
-  },
-  biggerFont: {
     fontSize: 16,
   },
 });

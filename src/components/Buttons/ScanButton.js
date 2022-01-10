@@ -1,7 +1,6 @@
 import React from "react";
-import { Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { styles } from "./styles/ScanButton.styles";
 
 export default function ScanButton({ navigation, prevScreen }) {
   const goToScanner = () => {
@@ -17,13 +16,38 @@ export default function ScanButton({ navigation, prevScreen }) {
     >
       <MaterialCommunityIcon
         name="qrcode-scan"
-        size={30}
+        size={35}
         style={{ paddingRight: 10 }}
         color="#909090"
       />
-      <Text style={styles.scanButtonText}>
-        Нажмите, чтобы отсканировать QR код
-      </Text>
+      <View>
+        <Text style={styles.scanButtonHeaderText}>Сканировать</Text>
+        <Text style={styles.scanButtonMainText}>
+          Нажмите, чтобы отсканировать QR код
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  scanButton: {
+    padding: 10,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    maxHeight: 70,
+    backgroundColor: "white",
+    borderRadius: 10,
+  },
+  scanButtonHeaderText: {
+    fontSize: 19,
+    fontWeight: "600",
+  },
+  scanButtonMainText: {
+    color: "black",
+    fontSize: 13,
+    fontWeight: "400",
+  },
+});

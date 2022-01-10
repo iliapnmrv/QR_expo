@@ -38,6 +38,8 @@ import {
   toggleScanModal,
 } from "store/actions/inventory/modalAction.js";
 import { showMessage, hideMessage } from "react-native-flash-message";
+import { generalStyles } from "../../styles/base/general.js";
+import Title from "../../components/Title/Title.js";
 
 const requestStoragePermission = async () => {
   let check = await PermissionsAndroid.check(
@@ -269,8 +271,8 @@ function Inventory({ navigation }) {
     dispatch(setDownloadUrl(text));
   };
   return (
-    <View style={styles.container}>
-      <ScrollView>
+    <ScrollView>
+      <View style={generalStyles.page}>
         {Platform.OS === "web" ? (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -364,6 +366,7 @@ function Inventory({ navigation }) {
         </View>
         <View>
           <ScanButton navigation={navigation} prevScreen="inventory" />
+          <Title title="Сканирование" />
           <ScanData />
         </View>
 
@@ -456,8 +459,8 @@ function Inventory({ navigation }) {
             </View>
           </Modal>
         </View>
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 

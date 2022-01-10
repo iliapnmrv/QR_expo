@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { registerRootComponent } from "expo";
 
-import { StyleSheet, Text, View, Button } from "react-native";
+import { StyleSheet, Text, View, Button, ScrollView } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 
 import { NavigationContainer } from "@react-navigation/native";
@@ -132,6 +132,7 @@ function App() {
           )}
         </Stack.Navigator>
       </NavigationContainer>
+
       <FlashMessage position="top" />
     </View>
   );
