@@ -3,9 +3,12 @@ import * as SQLite from "expo-sqlite";
 import {
   setScanResult,
   setScanStatus,
-} from "../store/actions/scanResultAction";
-import { setPrevPosition, setRemains } from "../store/actions/scanDataAction";
-import { toggleScanModal } from "../store/actions/modalAction";
+} from "../store/actions/inventory/scanResultAction";
+import {
+  setPrevPosition,
+  setRemains,
+} from "../store/actions/inventory/scanDataAction";
+import { toggleScanModal } from "../store/actions/inventory/modalAction";
 const db = SQLite.openDatabase("qr.db");
 
 export const analyze = async (data) => {
@@ -145,7 +148,7 @@ const getScannedItemRow = (invNom) => {
         "SELECT * FROM `scanned` WHERE invNom = ?",
         [invNom],
         (_, result) => {
-          let { status, pos } = result.rows.item(0);
+          let { status, pos, place } = result.rows.item(0);
           if (status == 2) {
             resolve(pos);
           } else if (status == 3) {

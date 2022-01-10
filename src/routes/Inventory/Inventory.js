@@ -25,18 +25,18 @@ import {
   setDownloadUrl,
   setSessionDate,
   setSessionStatus,
-} from "store/actions/sessionAction.js";
+} from "store/actions/inventory/sessionAction.js";
 import {
   setPrevPosition,
   setRemains,
   setScanData,
   setSredstvo,
-} from "store/actions/scanDataAction.js";
+} from "store/actions/inventory/scanDataAction.js";
 import {
   toggleCloseSessionModal,
   toggleDownloadLinkModal,
   toggleScanModal,
-} from "store/actions/modalAction.js";
+} from "store/actions/inventory/modalAction.js";
 import { showMessage, hideMessage } from "react-native-flash-message";
 
 const requestStoragePermission = async () => {
@@ -71,13 +71,15 @@ today = dd + "." + mm + "." + yyyy;
 function Inventory({ navigation }) {
   const dispatch = useDispatch();
 
-  const { status, date, url } = useSelector(({ session }) => session);
-  const { remains } = useSelector(({ scan }) => scan);
+  const { status, date, url } = useSelector(
+    ({ inventory }) => inventory.session
+  );
+  const { remains } = useSelector(({ inventory }) => inventory.scan);
   const { scanModal, downloadLinkModal, closeSessionModal } = useSelector(
-    ({ modals }) => modals
+    ({ inventory }) => inventory.modals
   );
   const { scanStatus, scanResult } = useSelector(
-    ({ scanResult }) => scanResult
+    ({ inventory }) => inventory.scanResult
   );
 
   // ------ Сессии
@@ -361,7 +363,7 @@ function Inventory({ navigation }) {
           </Modal>
         </View>
         <View>
-          <ScanButton navigation={navigation} />
+          <ScanButton navigation={navigation} prevScreen="inventory" />
           <ScanData />
         </View>
 

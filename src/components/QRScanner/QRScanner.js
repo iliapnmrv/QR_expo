@@ -8,10 +8,15 @@ import {
   setRemains,
   setScanData,
   setSredstvo,
-} from "store/actions/scanDataAction";
+} from "store/actions/inventory/scanDataAction";
+
+import { setDocsScanData } from "store/actions/docs/docsScanDataAction";
+
 import { useDispatch } from "react-redux";
 
-export default function BarCode({ navigation }) {
+export default function BarCode({ route, navigation }) {
+  const { prevScreen } = route.params;
+
   const dispatch = useDispatch();
 
   const { height, width } = useWindowDimensions();
@@ -33,10 +38,16 @@ export default function BarCode({ navigation }) {
       navigation.goBack();
     }
     console.log(data);
-    dispatch(setRemains(""));
-    dispatch(setPrevPosition(""));
-    dispatch(setScanData(data));
-    data[0] == 1 ? dispatch(setSredstvo("ТМЦ")) : dispatch(setSredstvo("ОС"));
+
+    if (prevScreen == "docs") {
+      dispatch(setDocsScanData(data));
+    }
+    if (prevScreen == "inventory") {
+      dispatch(setRemains(""));
+      dispatch(setPrevPosition(""));
+      dispatch(setScanData(data));
+      data[0] == 1 ? dispatch(setSredstvo("ТМЦ")) : dispatch(setSredstvo("ОС"));
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import { SET_DOWNLOAD_URL, SET_SESSION_DATE, SET_SESSION_STATUS } from "../actions/sessionAction"
+import { SET_DOWNLOAD_URL, SET_SESSION_DATE, SET_SESSION_STATUS } from "../../actions/inventory/sessionAction"
 
 const initialState = {
     status: false,

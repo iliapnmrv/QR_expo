@@ -1,4 +1,4 @@
-import { SET_SCAN_RESULT, SET_SCAN_STATUS } from "../actions/scanResultAction"
+import { SET_SCAN_RESULT, SET_SCAN_STATUS } from "../../actions/inventory/scanResultAction"
 
 const initialState = {
     scanStatus: "",

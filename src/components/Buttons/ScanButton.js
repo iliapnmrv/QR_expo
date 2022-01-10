@@ -1,14 +1,19 @@
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
-import { styles } from "../../routes/Inventory/styles/styles";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import { styles } from "./styles/ScanButton.styles";
 
-export default function ScanButton({ navigation }) {
+export default function ScanButton({ navigation, prevScreen }) {
+  const goToScanner = () => {
+    navigation.navigate("scanner", {
+      prevScreen,
+    });
+  };
   return (
     <TouchableOpacity
       activeOpacity={0.5}
-      style={styles.buttonMain}
-      onPress={() => navigation.navigate("scanner")}
+      style={styles.scanButton}
+      onPress={goToScanner}
     >
       <MaterialCommunityIcon
         name="qrcode-scan"
@@ -16,8 +21,7 @@ export default function ScanButton({ navigation }) {
         style={{ paddingRight: 10 }}
         color="#909090"
       />
-
-      <Text style={styles.buttonMainText}>
+      <Text style={styles.scanButtonText}>
         Нажмите, чтобы отсканировать QR код
       </Text>
     </TouchableOpacity>

@@ -1,4 +1,4 @@
-import { SET_PREV_POSITION, SET_REMAINS, SET_SCAN_DATA, SET_SREDSTVO } from "../actions/scanDataAction"
+import { SET_PREV_POSITION, SET_REMAINS, SET_SCAN_DATA, SET_SREDSTVO } from "../../actions/inventory/scanDataAction"
 
 const initialState = {
     data: "",

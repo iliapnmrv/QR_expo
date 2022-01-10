@@ -41,6 +41,7 @@ function App() {
   const [hasPermission, setHasPermission] = useState("null");
 
   const { username, isSignedIn } = useSelector(({ auth }) => auth);
+  console.log("isSignedIn", isSignedIn);
 
   const dispatch = useDispatch();
 

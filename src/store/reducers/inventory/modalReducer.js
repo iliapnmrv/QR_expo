@@ -1,4 +1,4 @@
-import { TOGGLE_CLOSE_SESSION_MODAL, TOGGLE_DOWNLOAD_LINK_MODAL, TOGGLE_SCAN_MODAL } from "../actions/modalAction"
+import { TOGGLE_CLOSE_SESSION_MODAL, TOGGLE_DOWNLOAD_LINK_MODAL, TOGGLE_SCAN_MODAL } from "../../actions/inventory/modalAction"
 
 const initialState = {
     scanModal: false,

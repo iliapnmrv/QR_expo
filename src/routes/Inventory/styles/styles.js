@@ -36,37 +36,13 @@ export const styles = StyleSheet.create({
     analyzeBtn: {
         alignSelf: 'flex-end',
     },
-    secondHeader: {
-        backgroundColor: '#f9f9f9',
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    secondHeaderText: {
-        paddingHorizontal: 4,
-        paddingVertical: 2,
-        fontSize: 18,
-    },
+
     info: {
         paddingHorizontal: 8,
         paddingVertical: 5,
     },
     biggerFont: {
         fontSize: 16,
-    },
-    buttonMain: {
-        padding: 10,
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'row',
-        borderTopWidth: 1,
-        borderTopColor: '#D0D0D0',
-        borderBottomWidth: 1,
-        borderBottomColor: '#D0D0D0',
-    },
-    buttonMainText: {
-        color: 'black',
     },
     centeredView: {
         flex: 1,

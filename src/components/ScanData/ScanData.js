@@ -1,62 +1,38 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { styles } from "routes/Inventory/styles/styles";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useSelector } from "react-redux";
 import { analyze } from "services/inventory.service.js";
+import ScanDataItem from "./Item/ScanDataItem";
 
 export default function ScanData() {
-  const { status } = useSelector(({ session }) => session);
+  const { status } = useSelector(({ inventory }) => inventory.session);
   const { data, sredstvo, prevPosition, remains } = useSelector(
-    ({ scan }) => scan
+    ({ inventory }) => inventory.scan
   );
 
   return (
     <View style={styles.prevScan}>
       {data !== null ? (
         <View>
-          <View>
-            <View style={styles.secondHeader}>
-              <MaterialCommunityIcon
-                name="information-outline"
-                size={20}
-                style={{ marginLeft: 8 }}
-              />
-              <Text style={styles.secondHeaderText}>
-                Информация QR кода {sredstvo}
-              </Text>
-            </View>
-            <Text style={styles.info}>{data}</Text>
-          </View>
+          <ScanDataItem
+            icon="information-outline"
+            header={`Информация QR кода ${sredstvo}`}
+            data={data}
+          />
           {prevPosition ? (
-            <View>
-              <View style={styles.secondHeader}>
-                <MaterialCommunityIcon
-                  name="clipboard-list-outline"
-                  size={20}
-                  style={{ marginLeft: 8 }}
-                />
-                <Text style={styles.secondHeaderText}>
-                  Позиция сканирования
-                </Text>
-              </View>
-              <Text style={[styles.info, styles.biggerFont]}>
-                {prevPosition}
-              </Text>
-            </View>
+            <ScanDataItem
+              icon="clipboard-list-outline"
+              header="Позиция сканирования"
+              data={prevPosition}
+            />
           ) : null}
-          {remains != "null" && remains ? (
-            <View>
-              <View style={styles.secondHeader}>
-                <MaterialCommunityIcon
-                  name="magnify-scan"
-                  size={20}
-                  style={{ marginLeft: 8 }}
-                />
-                <Text style={styles.secondHeaderText}>Осталось</Text>
-              </View>
-              <Text style={[styles.info, styles.biggerFont]}>{remains}</Text>
-            </View>
+          {remains != null && remains ? (
+            <ScanDataItem
+              icon="magnify-scan"
+              header="Осталось"
+              data={remains}
+            />
           ) : null}
 
           {status ? (

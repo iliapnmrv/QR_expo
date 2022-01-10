@@ -1,29 +1,37 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createStore, combineReducers } from 'redux';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createStore, combineReducers } from "redux";
 import { persistStore, persistReducer } from "redux-persist";
-import { sessionReducer } from './reducers/sessionReducer';
-import { scanDataReducer } from './reducers/scanDataReducer';
-import { scanResultReducer } from './reducers/scanResultReducer';
-import { modalReducer } from './reducers/modalReducer';
-import { authReducer } from './reducers/authReducer';
+import { sessionReducer } from "./reducers/inventory/sessionReducer";
+import { scanDataReducer } from "./reducers/inventory/scanDataReducer";
+import { scanResultReducer } from "./reducers/inventory/scanResultReducer";
+import { modalReducer } from "./reducers/inventory/modalReducer";
+import { authReducer } from "./reducers/authReducer";
+import { docsScanDataReducer } from "./reducers/docs/docsScanDataReducer";
 
+const inventoryReducers = combineReducers({
+  session: sessionReducer,
+  scan: scanDataReducer,
+  scanResult: scanResultReducer,
+  modals: modalReducer,
+});
+
+const docsReducers = combineReducers({
+  scan: docsScanDataReducer,
+});
 
 const rootReducer = combineReducers({
-    'session': sessionReducer,
-    'scan': scanDataReducer,
-    'scanResult': scanResultReducer,
-    'modals': modalReducer,
-    'auth': authReducer,
-})
+  inventory: inventoryReducers,
+  docs: docsReducers,
+  auth: authReducer,
+});
 
 const persistConfig = {
-    key: "root",
-    storage: AsyncStorage,
-    blacklist: []
+  key: "root",
+  storage: AsyncStorage,
+  blacklist: [],
 };
 
-const persistedReducer = persistReducer(persistConfig, rootReducer)
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-
-export const store = createStore(persistedReducer)
-export const persistor = persistStore(store)
+export const store = createStore(persistedReducer);
+export const persistor = persistStore(store);
