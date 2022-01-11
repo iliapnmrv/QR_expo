@@ -16,7 +16,16 @@ function Docs({ navigation }) {
   const qrNumber = invNom.slice(-5);
 
   const getItemData = async () => {
-    console.log(123);
+    const itemData = {
+      type: invNom[0],
+      qr: qrNumber,
+      name,
+      model,
+      sernom,
+    };
+    navigation.navigate("docsEdit", {
+      itemData,
+    });
   };
 
   useEffect(() => {
@@ -39,7 +48,7 @@ function Docs({ navigation }) {
             paddingBottom: 5,
           }}
         >
-          {data !== null ? (
+          {data ? (
             <>
               <ScanDataItem
                 icon="information-outline"
@@ -59,7 +68,7 @@ function Docs({ navigation }) {
             </Text>
           )}
         </View>
-        {data !== null ? (
+        {data ? (
           <CustomButton
             text="Изменить данные"
             onPress={getItemData}

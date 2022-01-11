@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-export default function CustomButton({ text, onPress, type }) {
+export default function CustomButton({ text, onPress, type = "PRIMARY" }) {
   return (
     <>
       <TouchableOpacity

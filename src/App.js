@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { registerRootComponent } from "expo";
 
-import { StyleSheet, Text, View, Button, ScrollView } from "react-native";
+import { StyleSheet, Text, View, Button } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 
 import { NavigationContainer } from "@react-navigation/native";
@@ -26,6 +26,7 @@ import FlashMessage from "react-native-flash-message";
 import SignInScreen from "./routes/Auth/SignInScreen.js";
 import $api from "./http/index.js";
 import SignUpScreen from "./routes/Auth/SignUpScreen.js";
+import DocsEdit from "./routes/Docs/DocsEdit/DocsEdit.js";
 
 const AppWrapper = () => {
   return (
@@ -127,6 +128,13 @@ function App() {
                     tabBarVisible: false,
                   }}
                 />
+                <Stack.Screen
+                  name="docsEdit"
+                  component={DocsEdit}
+                  options={{
+                    tabBarVisible: false,
+                  }}
+                />
               </Stack.Group>
             </>
           )}
@@ -151,38 +159,36 @@ function HomeTabs() {
       }}
     >
       <Tab.Screen
-        name="Inventory"
-        component={Drawer}
+        name="Docs"
+        component={Docs}
         options={{
           headerShown: false,
-          tabBarLabel: "Инвентаризация",
-          tabBarIcon: () => {
+          tabBarLabel: "Документооборот",
+          tabBarIcon: ({ size, color }) => {
             return (
               <MaterialCommunityIcon
-                name="format-list-numbered"
-                style={styles.icon}
-                size={25}
-                // style={{ width: 25, height: 25 }}
-                color="#999999"
+                name="file-document-outline"
+                style={[styles.icon, { width: 40, height: 25 }]}
+                size={size}
+                color={color}
               />
             );
           },
         }}
       />
       <Tab.Screen
-        name="Docs"
-        component={Docs}
+        name="Inventory"
+        component={Drawer}
         options={{
           headerShown: false,
-          tabBarLabel: "Документооборот",
-          tabBarIcon: () => {
+          tabBarLabel: "Инвентаризация",
+          tabBarIcon: ({ size, color }) => {
             return (
               <MaterialCommunityIcon
-                name="file-document-outline"
-                style={styles.icon}
-                size={25}
-                // style={{ width: 25, height: 25 }}
-                color="#999999"
+                name="format-list-numbered"
+                style={[styles.icon, { width: 40, height: 25 }]}
+                size={size}
+                color={color}
               />
             );
           },
@@ -202,6 +208,7 @@ function Drawer() {
           name="Инвентаризация"
           component={Inventory}
           options={{
+            headerShown: false,
             drawerIcon: () => (
               <MaterialCommunityIcon
                 name="home"
