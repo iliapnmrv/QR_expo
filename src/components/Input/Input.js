@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, TextInput } from "react-native";
 
 export default function Input({
-  placeholder = "Введите...",
+  placeholder,
   value,
   setValue,
   text,
@@ -13,7 +13,11 @@ export default function Input({
       <View style={styles.formItem}>
         {text ? <Text style={styles.text}>{text}</Text> : null}
         <TextInput
-          placeholder={placeholder}
+          placeholder={
+            placeholder == null
+              ? `Введите ${text.toLowerCase()}...`
+              : placeholder
+          }
           value={value}
           onChangeText={setValue}
           style={styles.input}
@@ -31,6 +35,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderWidth: 1,
+    borderColor: "#F5F5F5",
     borderRadius: 3,
     padding: 10,
   },
