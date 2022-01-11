@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome5";
 
 export default function Input({
   placeholder,
@@ -8,6 +9,8 @@ export default function Input({
   text,
   secure = false,
 }) {
+  const [hidePass, setHidePass] = useState(secure);
+
   return (
     <>
       <View style={styles.formItem}>
@@ -18,11 +21,22 @@ export default function Input({
               ? `Введите ${text.toLowerCase()}...`
               : placeholder
           }
+          autoComplete="on"
           value={value}
           onChangeText={setValue}
           style={styles.input}
-          secureTextEntry={secure}
+          secureTextEntry={hidePass ? true : false}
         />
+
+        {secure ? (
+          <Icon
+            name={hidePass ? "eye-slash" : "eye"}
+            size={18}
+            color="grey"
+            style={{ position: "absolute", right: 10, top: 31 }}
+            onPress={() => setHidePass(!hidePass)}
+          />
+        ) : null}
       </View>
     </>
   );

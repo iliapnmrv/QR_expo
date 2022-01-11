@@ -1,13 +1,13 @@
 import React from "react";
-import {
-  Button,
-  StyleSheet,
-  Text,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome5";
 
-export default function CustomButton({ text, onPress, type = "PRIMARY" }) {
+export default function CustomButton({
+  text,
+  onPress,
+  type = "PRIMARY",
+  icon,
+}) {
   return (
     <>
       <TouchableOpacity
@@ -15,6 +15,9 @@ export default function CustomButton({ text, onPress, type = "PRIMARY" }) {
         activeOpacity={0.65}
         onPress={() => onPress()}
       >
+        {icon ? (
+          <Icon name={icon} size={20} color="#1E90FF" style={styles.icon} />
+        ) : null}
         <Text style={[styles.text, styles[`text_${type}`]]}>{text}</Text>
       </TouchableOpacity>
     </>
@@ -23,6 +26,8 @@ export default function CustomButton({ text, onPress, type = "PRIMARY" }) {
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "row",
+    justifyContent: "center",
     width: "100%",
     padding: 10,
     alignItems: "center",
@@ -40,5 +45,8 @@ const styles = StyleSheet.create({
   },
   text_TERTIARY: {
     color: "gray",
+  },
+  icon: {
+    paddingHorizontal: 20,
   },
 });

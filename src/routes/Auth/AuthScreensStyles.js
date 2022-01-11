@@ -11,11 +11,11 @@ export const styles = StyleSheet.create({
     header: {
         fontSize: 20,
     },
-    input: {
-        width: "100%",
-        height: 40,
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
-    },
+    wrapper: {
+        width: '100%',
+        justifyContent: "center",
+        backgroundColor: "white",
+        padding: 20,
+        borderRadius: 15,
+    }
 });

@@ -230,6 +230,7 @@ function Drawer() {
           name="Журнал"
           component={Log}
           options={{
+            headerShown: false,
             drawerIcon: () => (
               <MaterialCommunityIcon
                 name="format-list-numbered"
@@ -244,6 +245,7 @@ function Drawer() {
           name="В учете"
           component={Inside}
           options={{
+            headerShown: false,
             drawerIcon: () => (
               <MaterialCommunityIcon
                 name="playlist-check"
@@ -258,6 +260,7 @@ function Drawer() {
           name="Не в учете"
           component={NotReg}
           options={{
+            headerShown: false,
             drawerIcon: () => (
               <MaterialCommunityIcon
                 name="playlist-minus"
@@ -272,6 +275,7 @@ function Drawer() {
           name="Сверх учета"
           component={Over}
           options={{
+            headerShown: false,
             drawerIcon: () => (
               <MaterialCommunityIcon
                 name="playlist-plus"
@@ -286,6 +290,7 @@ function Drawer() {
           name="Не выявлено"
           component={NotFound}
           options={{
+            headerShown: false,
             drawerIcon: () => (
               <MaterialCommunityIcon
                 name="playlist-remove"

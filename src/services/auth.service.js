@@ -13,10 +13,12 @@ class AuthService {
             .catch(message => {
                 showMessage({
                     message: `${message}`,
-                    type: "error",
+                    type: "danger",
                 });
             })
-        store.dispatch(setUser(JSON.stringify(registrationData.user), registrationData.accessToken))
+        store.dispatch(setUser(JSON.stringify(registrationData.user)))
+        store.dispatch(setToken(registrationData.accessToken))
+        store.dispatch(setIsSignedin(true))
         return registrationData
     }
 
@@ -28,7 +30,7 @@ class AuthService {
             .catch(message => {
                 showMessage({
                     message: `${message}`,
-                    type: "error",
+                    type: "danger",
                 });
             })
         console.log(loginData);
@@ -48,9 +50,7 @@ class AuthService {
     }
 
     async checkAuth() {
-
         const data = await axios.get(`${API_URL}auth/refresh`, { withCredentials: true }).then(({ data }) => data)
-        console.log(data, "data");
         store.dispatch(setToken(data.accessToken))
         return data
     }

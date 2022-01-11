@@ -1,21 +1,18 @@
+import React, { useState, useEffect } from "react";
+import { StyleSheet } from "react-native";
+import CustomButton from "../../../components/Buttons/CustomButton";
 
-import React, { useState, useEffect } from 'react';
-import { 
-    StyleSheet,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
-
-export default function BackHome(props) {
-    return(
-        <Icon name="home" size={25} color="#1E90FF" onPress={() => props.navigation.goBack()} style={styles.homeIcon} />
-    )
+export default function BackHome({ navigation }) {
+  return (
+    <>
+      <CustomButton
+        type="TERTIARY"
+        text="Вернуться на главную"
+        onPress={() => navigation.goBack()}
+        icon="angle-left"
+      />
+    </>
+  );
 }
 
-const styles = StyleSheet.create({
-    homeIcon: {
-        marginRight: 20,
-        marginTop: 10,
-        marginBottom: 0,
-        alignSelf: 'flex-end',
-    },
-})
+const styles = StyleSheet.create({});

@@ -13,7 +13,7 @@ export default StyleSheet.create({
     itemCell: {
         width: '40%',
         justifyContent: 'center', //Centered horizontally
-        alignItems: 'center', //Centered vertically
+        alignSelf: "stretch",
         flex: 1,
         paddingRight: 10,
         textAlign: 'center',

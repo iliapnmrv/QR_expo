@@ -1,104 +1,119 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
+import React, { useState, useEffect } from "react";
+import {
+  View,
   FlatList,
   Text,
   ActivityIndicator,
   RefreshControl,
-  ScrollView
-} from 'react-native';
+  ScrollView,
+} from "react-native";
 import * as SQLite from "expo-sqlite";
-import BackHome from './BackHome';
-import styles from './Styles/ListStyles'
+import BackHome from "./BackHome";
+import styles from "./Styles/ListStyles";
+import PageHeader from "../../../components/PageHeader/PageHeader";
+import Title from "../../../components/Title/Title";
 
+export default function Over({ navigation }) {
+  const [data, setData] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setLoading] = useState(true);
 
-export default function Over(props) {
-    const [data, setData] = useState(null);
-    const [refreshing, setRefreshing] = useState(false);
-    const [isLoading, setLoading] = useState(true);   
-      
-    const onRefresh = React.useCallback(() => {
-        setRefreshing(true);
-        getData()
-    }, []);
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getData();
+  }, []);
 
-    // Подключение к бд
-    const db = SQLite.openDatabase('qr.db');
+  // Подключение к бд
+  const db = SQLite.openDatabase("qr.db");
 
-    // Получение данный из бд
-    const getData = async () => {
-        try {
-            let result = new Promise(resolve => {
-                db.transaction(
-                    tx => {
-                    tx.executeSql(
-                        `
+  // Получение данный из бд
+  const getData = async () => {
+    try {
+      let result = new Promise((resolve) => {
+        db.transaction((tx) => {
+          tx.executeSql(
+            `
                         SELECT * FROM scanned WHERE status = 3
-                        `, 
-                        [], 
-                        (_, result) => {
-                            if (!result.rows.length) {
-                                resolve(false)
-                            }
-                            let data = result.rows._array
-                            setData(data)
-                            resolve(true)
-                        },
-                        (_, error) => console.log(error)
-                    );
-                    }
-                );
-            })
-            result.then(() => {
-                setRefreshing(false)
-            })
-        } catch (e) {
-            console.log(e)
-        } finally {
-            setLoading(false);
-        }
+                        `,
+            [],
+            (_, result) => {
+              if (!result.rows.length) {
+                resolve(false);
+              }
+              let data = result.rows._array;
+              setData(data);
+              resolve(true);
+            },
+            (_, error) => console.log(error)
+          );
+        });
+      });
+      result.then(() => {
+        setRefreshing(false);
+      });
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    useEffect(() => {
-        getData();
-    }, []);
+  useEffect(() => {
+    getData();
+  }, []);
 
-    let i = 1
+  let i = 1;
 
-    return (
-        <ScrollView 
-            style={{flex: 1}}
-            refreshControl={
-            <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-            />
-            }
+  return (
+    <ScrollView
+      style={{ flex: 1 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <PageHeader text="Сверх учета" />
+
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          backgroundColor: "white",
+          padding: 10,
+          borderTopRightRadius: 30,
+          borderTopLeftRadius: 30,
+          paddingBottom: 20,
+        }}
+      >
+        <BackHome navigation={navigation} />
+        <Title
+          title="Позиции сверх учета инвентаризационной описи"
+          style={styles.sectionHeader}
+        />
+        <ScrollView
+          style={{ flex: 1 }}
+          horizontal={true}
+          persistentScrollbar={true}
+          showsHorizontalScrollIndicator={true}
         >
-            <View>
-                <BackHome navigation={props.navigation} />
-                <Text style={styles.sectionHeader}>Позиции сверх учета инвентаризационной описи</Text>
-            </View>
-            <ScrollView 
-                style={{ flex: 1}}
-                horizontal={true}
-                persistentScrollbar={true}
-                showsHorizontalScrollIndicator={true}
-             >
-                {isLoading ? <ActivityIndicator color="#0000ff"/> : (
-                    <FlatList
-                        data={data}
-                        keyExtractor={item => item.id.toString()}
-                        renderItem={({ item }) => (
-                            <View style={styles.item} >
-                                <Text style={styles.itemCell}>{i++}</Text>
-                                <Text style={[styles.itemCell, styles.itemCenterCell]}>{item.name}</Text>
-                                <Text style={styles.itemCell}>{item.invNom.substr(-5)}</Text>
-                            </View>
-                        )}
-                    />
-                )}
-            </ScrollView>
+          {isLoading ? (
+            <ActivityIndicator color="#0000ff" />
+          ) : (
+            <FlatList
+              data={data}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.item}>
+                  <Text style={styles.itemCell}>{i++}</Text>
+                  <Text style={[styles.itemCell, styles.itemCenterCell]}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.itemCell}>{item.invNom.substr(-5)}</Text>
+                </View>
+              )}
+            />
+          )}
         </ScrollView>
-    );
+      </View>
+    </ScrollView>
+  );
 }
