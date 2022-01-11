@@ -3,15 +3,19 @@ import { SafeAreaView, Text } from "react-native";
 import CustomButton from "components/Buttons/CustomButton";
 
 import Input from "components/Input/Input";
-import authService from "services/auth.service";
+import authService from "services/auth.service.js";
 import { styles } from "./AuthScreensStyles";
+import { showMessage } from "react-native-flash-message";
 
 export default function SignInScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const signIn = async () => {
     const loginData = await authService.login(username, password);
-    console.log(loginData);
+    showMessage({
+      message: `Добро пожаловать, ${loginData.user.login}`,
+      type: "info",
+    });
   };
   return (
     <SafeAreaView style={styles.container}>

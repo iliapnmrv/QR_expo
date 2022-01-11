@@ -8,6 +8,7 @@ import PageHeader from "components/PageHeader/PageHeader";
 import { generalStyles } from "../../styles/base/general";
 import CustomButton from "../../components/Buttons/CustomButton";
 import Title from "../../components/Title/Title";
+import authService from "../../services/auth.service";
 
 function Docs({ navigation }) {
   const { data } = useSelector(({ docs }) => docs.scan);
@@ -26,6 +27,10 @@ function Docs({ navigation }) {
     navigation.navigate("docsEdit", {
       itemData,
     });
+  };
+
+  const logout = async () => {
+    authService.logout();
   };
 
   useEffect(() => {
@@ -76,6 +81,7 @@ function Docs({ navigation }) {
           />
         ) : null}
       </View>
+      <CustomButton text="Выйти из аккаунта" onPress={logout} type="TERTIARY" />
     </ScrollView>
   );
 }

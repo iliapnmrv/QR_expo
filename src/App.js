@@ -51,7 +51,9 @@ function App() {
       const data = await $api.get(`/inventory`).then(({ data }) => data);
       console.log("basic inventory data", data);
     };
-    fetchData();
+    if (isSignedIn) {
+      fetchData();
+    }
 
     const getPermissions = async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -83,7 +85,7 @@ function App() {
     <View style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator>
-          {isSignedIn ? (
+          {!isSignedIn ? (
             // No token found, user isn't signed in
             <>
               <Stack.Screen
@@ -141,7 +143,12 @@ function App() {
         </Stack.Navigator>
       </NavigationContainer>
 
-      <FlashMessage position="top" />
+      <FlashMessage
+        position="top"
+        duration={3000}
+        hideStatusBar={true}
+        floating={true}
+      />
     </View>
   );
 }
