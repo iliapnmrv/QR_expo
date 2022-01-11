@@ -117,8 +117,9 @@ class DBService {
   async insertJSONObj(json) {
     let data = JSON.parse(json);
     showMessage({
-      message: `В инвентаризации ${data.length} строк`,
-      type: "info",
+      message: `Инвентаризация успешно скачана`,
+      description: `В инвентаризации ${data.length} строк`,
+      style: { backgroundColor: "#3B71F3" },
     });
     for (let i = 0; i < data.length; i++) {
       let { id, vedPos, name, place, kolvo, placePriority } = data[i];

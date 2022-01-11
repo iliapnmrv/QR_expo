@@ -166,24 +166,6 @@ function HomeTabs() {
       }}
     >
       <Tab.Screen
-        name="Docs"
-        component={Docs}
-        options={{
-          headerShown: false,
-          tabBarLabel: "Документооборот",
-          tabBarIcon: ({ size, color }) => {
-            return (
-              <MaterialCommunityIcon
-                name="file-document-outline"
-                style={[styles.icon, { width: 40, height: 25 }]}
-                size={size}
-                color={color}
-              />
-            );
-          },
-        }}
-      />
-      <Tab.Screen
         name="Inventory"
         component={Drawer}
         options={{
@@ -193,6 +175,24 @@ function HomeTabs() {
             return (
               <MaterialCommunityIcon
                 name="format-list-numbered"
+                style={[styles.icon, { width: 40, height: 25 }]}
+                size={size}
+                color={color}
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Docs"
+        component={Docs}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Документооборот",
+          tabBarIcon: ({ size, color }) => {
+            return (
+              <MaterialCommunityIcon
+                name="file-document-outline"
                 style={[styles.icon, { width: 40, height: 25 }]}
                 size={size}
                 color={color}
