@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
@@ -9,6 +9,7 @@ export default function Select({
   values,
   enabled = true,
 }) {
+  const [pickerValue, setPickerValue] = useState();
   return (
     <>
       <Text>{text}</Text>
@@ -22,7 +23,10 @@ export default function Select({
       >
         <Picker
           selectedValue={value}
-          onValueChange={onChange}
+          onValueChange={(value) => {
+            onChange(value);
+            setPickerValue(value);
+          }}
           enabled={enabled}
           style={{
             height: 44,
@@ -31,9 +35,18 @@ export default function Select({
             fontSize: 15,
           }}
         >
-          {values.map((item) => {
-            return <Picker.Item label={item.label} value={item.value} />;
-          })}
+          <Picker.Item value="" label={`Введите ${text.toLowerCase()}...`} />
+          {values
+            .sort((a, b) => {
+              if (a.label === b.label) return 0;
+              if (a.label > b.label) return 1;
+              if (a.label < b.label) return -1;
+            })
+            .map((item, i) => {
+              return (
+                <Picker.Item label={item.label} value={item.value} key={i} />
+              );
+            })}
         </Picker>
       </View>
     </>

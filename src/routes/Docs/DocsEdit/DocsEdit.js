@@ -34,6 +34,8 @@ export default function DocsEdit({ route, navigation }) {
 
   const [data, setData] = useState();
 
+  console.log(initialData);
+
   useEffect(() => {
     const getItemData = async () => {
       $api
