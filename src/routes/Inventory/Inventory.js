@@ -7,7 +7,6 @@ import {
   Modal,
   PermissionsAndroid,
 } from "react-native";
-import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import "react-native-gesture-handler";
 import { useDispatch, useSelector } from "react-redux";
@@ -52,7 +51,6 @@ const requestStoragePermission = async () => {
 };
 
 function Inventory({ navigation }) {
-  const db = SQLite.openDatabase("qr.db");
   const dispatch = useDispatch();
 
   const onSessionChangeHandler = (status) => {

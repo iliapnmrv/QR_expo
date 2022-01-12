@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Button,
@@ -9,66 +9,26 @@ import {
   RefreshControl,
   ScrollView,
 } from "react-native";
-import * as SQLite from "expo-sqlite";
 import BackHome from "./BackHome";
 import Title from "../../../components/Title/Title";
 import PageHeader from "../../../components/PageHeader/PageHeader";
+import { getDataFromDB } from "../../../hooks/getDataFromDB";
 
 export default function NotFound({ navigation }) {
-  const [data, setData] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [isLoading, setLoading] = useState(true);
-
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    getData();
-  }, []);
-
-  // Подключение к бд
-  const db = SQLite.openDatabase("qr.db");
-
-  // Получение данный из бд
-  const getData = async () => {
-    try {
-      let result = new Promise((resolve) => {
-        db.transaction((tx) => {
-          tx.executeSql(
-            `
-                        SELECT * FROM qr WHERE kolvo > 0
-                        `,
-            [],
-            (_, result) => {
-              if (!result.rows.length) {
-                resolve(false);
-              }
-              let data = result.rows._array;
-              setData(data);
-              resolve(true);
-            },
-            (_, error) => console.log(error)
-          );
-        });
-      });
-      result.then(() => {
-        setRefreshing(false);
-      });
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getData();
-  }, []);
+  // SELECT * FROM qr WHERE kolvo > 0
+  const {
+    response: data,
+    error,
+    isLoading,
+    getData,
+  } = getDataFromDB("SELECT * FROM qr WHERE kolvo > 0");
 
   return (
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={styles.scrollView}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={isLoading} onRefresh={getData} />
       }
     >
       <PageHeader text="Не выявлено" />
@@ -97,7 +57,7 @@ export default function NotFound({ navigation }) {
             <FlatList
               data={data}
               keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <View style={styles.item}>
                   <Text style={styles.itemCell}>{item.vedPos}</Text>
                   <Text style={[styles.itemCell, styles.itemCenterCell]}>
