@@ -49,7 +49,7 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const data = await $api.get(`/inventory`).then(({ data }) => data);
-      console.log("basic inventory data", data);
+      // console.log("basic inventory data", data);
     };
     if (isSignedIn) {
       fetchData();

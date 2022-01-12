@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView } from "react-native";
 import ScanButton from "components/Buttons/ScanButton";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ScanDataItem from "components/ScanData/Item/ScanDataItem";
 import { styles } from "./styles/styles";
 import PageHeader from "components/PageHeader/PageHeader";
@@ -9,20 +9,24 @@ import { generalStyles } from "../../styles/base/general";
 import CustomButton from "../../components/Buttons/CustomButton";
 import Title from "../../components/Title/Title";
 import authService from "../../services/auth.service";
+import $api from "http/index.js";
+import { setDocsAnalysis } from "../../store/actions/docs/docsScanDataAction";
+import { showMessage } from "react-native-flash-message";
+import {
+  changePersonsData,
+  changeStatusesData,
+  changeStoragesData,
+} from "../../store/actions/infoAction";
 
 function Docs({ navigation }) {
-  const { data } = useSelector(({ docs }) => docs.scan);
-  console.log(data);
+  const dispatch = useDispatch();
+  const { data, analysis } = useSelector(({ docs }) => docs.scan);
   const [invNom, name, model, sernom] = data.split("\n");
   const qrNumber = invNom.slice(-5);
 
   const getItemData = async () => {
     const itemData = {
-      type: invNom[0],
       qr: qrNumber,
-      name,
-      model,
-      sernom,
     };
     navigation.navigate("docsEdit", {
       itemData,
@@ -34,10 +38,65 @@ function Docs({ navigation }) {
   };
 
   useEffect(() => {
-    // name
-    const getAnalysis = async () => {};
+    const getAnalysis = async () => {
+      setDocsAnalysis(null);
+      if (name) {
+        $api
+          .get(`analysis/${name}`)
+          .then(({ data }) => dispatch(setDocsAnalysis(data)))
+          .catch((message) => {
+            showMessage({
+              message: `${message}`,
+              type: "danger",
+            });
+          });
+      } else {
+        showMessage({
+          message: `Возможно, вы отсканировали неподходящий QR код`,
+          type: "info",
+        });
+      }
+    };
     getAnalysis();
   }, [data]);
+
+  useEffect(() => {
+    const getInfo = async () => {
+      const storages = await $api
+        .get(`storages`)
+        .then(({ data }) => data)
+        .catch((message) => {
+          showMessage({
+            message: `${message}`,
+            type: "danger",
+          });
+        });
+      dispatch(changeStoragesData(storages));
+
+      const persons = await $api
+        .get(`persons`)
+        .then(({ data }) => data)
+        .catch((message) => {
+          showMessage({
+            message: `${message}`,
+            type: "danger",
+          });
+        });
+      dispatch(changePersonsData(persons));
+
+      const statuses = await $api
+        .get(`statuses`)
+        .then(({ data }) => data)
+        .catch((message) => {
+          showMessage({
+            message: `${message}`,
+            type: "danger",
+          });
+        });
+      dispatch(changeStatusesData(statuses));
+    };
+    getInfo();
+  }, []);
 
   return (
     <ScrollView>
@@ -60,11 +119,18 @@ function Docs({ navigation }) {
                 header={`Информация QR кода ${qrNumber}`}
                 data={data}
               />
-              <ScanDataItem
-                icon="information-outline"
-                header="Результат анализирования"
-                data="analysis"
-              />
+              {analysis ? (
+                <ScanDataItem
+                  icon="compare-vertical"
+                  header="Результат анализирования"
+                  data={`В наличии: ${analysis?.inStock?.kolvo}
+${
+  analysis?.listed?.kolvo
+    ? `Числится: ${analysis?.listed?.kolvo}`
+    : `Не числится`
+}`}
+                />
+              ) : null}
             </>
           ) : (
             <Text style={{ padding: 20 }}>

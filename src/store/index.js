@@ -7,28 +7,30 @@ import { scanResultReducer } from "./reducers/inventory/scanResultReducer";
 import { modalReducer } from "./reducers/inventory/modalReducer";
 import { authReducer } from "./reducers/authReducer";
 import { docsScanDataReducer } from "./reducers/docs/docsScanDataReducer";
+import { infoReducer } from "./reducers/infoReducer";
 
 const inventoryReducers = combineReducers({
-  session: sessionReducer,
-  scan: scanDataReducer,
-  scanResult: scanResultReducer,
-  modals: modalReducer,
+    session: sessionReducer,
+    scan: scanDataReducer,
+    scanResult: scanResultReducer,
+    modals: modalReducer,
 });
 
 const docsReducers = combineReducers({
-  scan: docsScanDataReducer,
+    scan: docsScanDataReducer,
 });
 
 const rootReducer = combineReducers({
-  inventory: inventoryReducers,
-  docs: docsReducers,
-  auth: authReducer,
+    inventory: inventoryReducers,
+    docs: docsReducers,
+    auth: authReducer,
+    info: infoReducer,
 });
 
 const persistConfig = {
-  key: "root",
-  storage: AsyncStorage,
-  blacklist: [],
+    key: "root",
+    storage: AsyncStorage,
+    blacklist: [],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

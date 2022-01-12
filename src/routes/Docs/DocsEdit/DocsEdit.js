@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,19 +12,42 @@ import Title from "../../../components/Title/Title";
 import { generalStyles } from "../../../styles/base/general";
 import Input from "../../../components/Input/Input";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import $api from "http/index.js";
+import { useDispatch, useSelector } from "react-redux";
+import { Picker } from "@react-native-picker/picker";
+import { setDocsItem } from "../../../store/actions/docs/docsScanDataAction";
 
 export default function DocsEdit({ route, navigation }) {
   const {
-    itemData: { type, qr, name, model, sernom },
+    itemData: { qr },
   } = route.params;
 
-  const [data, setData] = useState({
-    type,
-    qr,
-    name,
-    model,
-    sernom,
-  });
+  const { item } = useSelector(({ docs }) => docs.scan);
+  const { storages, statuses, persons } = useSelector(({ info }) => info);
+
+  const dispatch = useDispatch();
+
+  const [data, setData] = useState();
+
+  console.log("docsItemdata", data);
+
+  useEffect(() => {
+    const getItemData = async () => {
+      $api
+        .get(`total/${qr}`)
+        .then(({ data }) => {
+          dispatch(setDocsItem(data));
+          setData(data);
+        })
+        .catch((message) => {
+          showMessage({
+            message: `${message}`,
+            type: "danger",
+          });
+        });
+    };
+    getItemData();
+  }, []);
 
   const setValues = (value, name) => {
     setData((prevState) => ({ ...prevState, [name]: value }));
@@ -63,21 +86,42 @@ export default function DocsEdit({ route, navigation }) {
             padding: 10,
           }}
         >
-          <Text>Дополнительная информация</Text>
           <Input
-            value={data.qr}
-            text="Номер QR"
-            setValue={(value) => setValues(value, "qr")}
+            value={item?.info}
+            text="Примечания"
+            setValue={(info) => setValues(info, "info")}
           />
+          <Text>Статус</Text>
+          <Picker
+            selectedValue={data?.status}
+            onValueChange={(status) => setValues(status, "status")}
+          >
+            {statuses.map((item) => {
+              return <Picker.Item label={item.label} value={item.value} />;
+            })}
+          </Picker>
+          <Text>МОЛ</Text>
+          <Picker
+            selectedValue={data?.person}
+            onValueChange={(person) => setValues(person, "person")}
+          >
+            {persons.map((item) => {
+              return <Picker.Item label={item.label} value={item.value} />;
+            })}
+          </Picker>
+          <Text>Место хранения</Text>
+          <Picker
+            selectedValue={data?.storage}
+            onValueChange={(storage) => setValues(storage, "storage")}
+          >
+            {storages.map((item) => {
+              return <Picker.Item label={item.label} value={item.value} />;
+            })}
+          </Picker>
           <Input
-            value={data.sernom}
-            text="Серийный номер"
-            setValue={(value) => setValues(value, "sernom")}
-          />
-          <Input
-            value={data.model}
-            text="Модель"
-            setValue={(value) => setValues(value, "model")}
+            value={data?.addinfo}
+            text="Дополнительная информация"
+            setValue={(addinfo) => setValues(addinfo, "addinfo")}
           />
 
           <Text>Информация</Text>

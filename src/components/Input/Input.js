@@ -22,7 +22,7 @@ export default function Input({
               : placeholder
           }
           autoComplete="on"
-          value={value}
+          value={value ? value.toString() : null}
           onChangeText={setValue}
           style={styles.input}
           secureTextEntry={hidePass ? true : false}
