@@ -14,22 +14,25 @@ import Input from "../../../components/Input/Input";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import $api from "http/index.js";
 import { useDispatch, useSelector } from "react-redux";
-import { Picker } from "@react-native-picker/picker";
 import { setDocsItem } from "../../../store/actions/docs/docsScanDataAction";
+import Select from "../../../components/Select/Select";
+import { showMessage } from "react-native-flash-message";
+import { LOGS_CATALOG } from "../../../constants/constants";
 
 export default function DocsEdit({ route, navigation }) {
   const {
     itemData: { qr },
   } = route.params;
 
-  const { item } = useSelector(({ docs }) => docs.scan);
+  const { item: initialData } = useSelector(({ docs }) => docs.scan);
+  const {
+    user: { login, role },
+  } = useSelector(({ auth }) => auth);
   const { storages, statuses, persons } = useSelector(({ info }) => info);
 
   const dispatch = useDispatch();
 
   const [data, setData] = useState();
-
-  console.log("docsItemdata", data);
 
   useEffect(() => {
     const getItemData = async () => {
@@ -53,9 +56,87 @@ export default function DocsEdit({ route, navigation }) {
     setData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const saveData = () => {
-    // сохранение данных на сервер
+  const saveData = async () => {
     navigation.goBack();
+
+    const allInfo = {
+      person: persons,
+      storage: storages,
+      status: statuses,
+    };
+
+    let newItemData = {
+      person: data.person,
+      storage: data.storage,
+      status: data.status,
+      info: data.info,
+      addinfo: data.addinfo,
+    };
+
+    let updatedData = Object.keys(newItemData).reduce((diff, key) => {
+      if (initialData[key] === newItemData[key]) return diff;
+      return {
+        ...diff,
+        [key]: newItemData[key],
+      };
+    }, {});
+    let logs = "",
+      prevState;
+    for (const key in updatedData) {
+      if (allInfo[key]) {
+        if (initialData[key]) {
+          allInfo[key].forEach((elem) => {
+            if (elem.value === initialData[key]) {
+              return (prevState = elem.label);
+            }
+          });
+        }
+        allInfo[key].forEach((elem) => {
+          if (elem.value === updatedData[key]) {
+            logs = ` ${logs} ${LOGS_CATALOG[key]}: ${
+              initialData[key] == null ? "" : prevState
+            } -> ${elem.label},`;
+          }
+        });
+      } else {
+        logs = ` ${logs} ${LOGS_CATALOG[key]}: ${
+          initialData[key] == null ? "" : initialData[key]
+        } -> ${updatedData[key]},`;
+      }
+    }
+
+    console.log(logs.slice(0, -1));
+
+    const updatedLogs = await $api.post(`logs/`, {
+      qr,
+      user: login,
+      text: logs.slice(0, -1),
+    });
+
+    const updatedInfo = await $api.post(`info/${qr}`, {
+      info: data.info,
+    });
+
+    const updatedStatus = await $api.post(`status/${qr}`, {
+      status: data.status,
+    });
+
+    const updatedPerson = await $api.post(`person/${qr}`, {
+      person: data.person,
+    });
+
+    const updatedStorage = await $api.post(`storage/${qr}`, {
+      storage: data.storage,
+    });
+
+    const updatedAddinfo = await $api.post(`addinfo/${qr}`, {
+      storage: data.addinfo,
+    });
+
+    showMessage({
+      message: "Данные успешно обновлены",
+      type: "info",
+    });
   };
 
   return (
@@ -87,44 +168,39 @@ export default function DocsEdit({ route, navigation }) {
           }}
         >
           <Input
-            value={item?.info}
+            value={data?.info}
             text="Примечания"
             setValue={(info) => setValues(info, "info")}
           />
-          <Text>Статус</Text>
-          <Picker
-            selectedValue={data?.status}
-            onValueChange={(status) => setValues(status, "status")}
-          >
-            {statuses.map((item) => {
-              return <Picker.Item label={item.label} value={item.value} />;
-            })}
-          </Picker>
-          <Text>МОЛ</Text>
-          <Picker
-            selectedValue={data?.person}
-            onValueChange={(person) => setValues(person, "person")}
-          >
-            {persons.map((item) => {
-              return <Picker.Item label={item.label} value={item.value} />;
-            })}
-          </Picker>
-          <Text>Место хранения</Text>
-          <Picker
-            selectedValue={data?.storage}
-            onValueChange={(storage) => setValues(storage, "storage")}
-          >
-            {storages.map((item) => {
-              return <Picker.Item label={item.label} value={item.value} />;
-            })}
-          </Picker>
-          <Input
-            value={data?.addinfo}
-            text="Дополнительная информация"
-            setValue={(addinfo) => setValues(addinfo, "addinfo")}
-          />
+          {role === "admin" ? (
+            <Input
+              placeholder="Введите дополнительную информацию..."
+              value={data?.addinfo}
+              text="Дополнительная информация"
+              setValue={(addinfo) => setValues(addinfo, "addinfo")}
+            />
+          ) : null}
 
-          <Text>Информация</Text>
+          <Select
+            text="Статус"
+            enabled={role === "admin" ? true : false}
+            value={data?.status}
+            onChange={(status) => setValues(status, "status")}
+            values={statuses}
+          />
+          <Select
+            text="МОЛ"
+            enabled={role === "admin" ? true : false}
+            value={data?.person}
+            onChange={(person) => setValues(person, "person")}
+            values={persons}
+          />
+          <Select
+            text="Место хранения"
+            value={data?.storage}
+            onChange={(storage) => setValues(storage, "storage")}
+            values={storages}
+          />
         </View>
         <CustomButton text="Сохранить" onPress={saveData} />
       </View>

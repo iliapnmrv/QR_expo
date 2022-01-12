@@ -2,12 +2,10 @@ export const SET_USER = "SET_USERNAME"
 export const SET_TOKEN = "SET_TOKEN"
 export const SET_IS_SIGNEDIN = "SET_IS_SIGNEDIN"
 
-export const setUser = (username = null) => {
+export const setUser = (user = null) => {
     return {
         type: SET_USER,
-        payload: {
-            username,
-        }
+        payload: user
     }
 }
 export const setToken = (payload) => {

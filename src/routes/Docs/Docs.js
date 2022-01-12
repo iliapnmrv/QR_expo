@@ -123,7 +123,7 @@ function Docs({ navigation }) {
                 <ScanDataItem
                   icon="compare-vertical"
                   header="Результат анализирования"
-                  data={`В наличии: ${analysis?.inStock?.kolvo}
+                  data={`В наличии: ${analysis?.inStock.kolvo}
 ${
   analysis?.listed?.kolvo
     ? `Числится: ${analysis?.listed?.kolvo}`
@@ -147,7 +147,7 @@ ${
           />
         ) : null}
       </View>
-      <CustomButton text="Выйти из аккаунта" onPress={logout} type="TERTIARY" />
+      {/* <CustomButton text="Выйти из аккаунта" onPress={logout} type="TERTIARY" /> */}
     </ScrollView>
   );
 }

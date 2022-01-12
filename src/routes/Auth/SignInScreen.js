@@ -36,11 +36,11 @@ export default function SignInScreen({ navigation }) {
           secure={true}
         />
         <CustomButton text="Войти" onPress={signIn} type="PRIMARY" />
-        <CustomButton
+        {/* <CustomButton
           text="Нет аккаунта? Зарегистрируйтесь"
           type="TERTIARY"
           onPress={() => navigation.navigate("SignUp")}
-        />
+        /> */}
       </View>
     </View>
   );

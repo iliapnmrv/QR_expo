@@ -16,7 +16,7 @@ class AuthService {
                     type: "danger",
                 });
             })
-        store.dispatch(setUser(JSON.stringify(registrationData.user)))
+        store.dispatch(setUser(registrationData.user))
         store.dispatch(setToken(registrationData.accessToken))
         store.dispatch(setIsSignedin(true))
         return registrationData
@@ -35,7 +35,7 @@ class AuthService {
             })
         console.log(loginData);
 
-        store.dispatch(setUser(JSON.stringify(loginData.user)))
+        store.dispatch(setUser(loginData.user))
         store.dispatch(setToken(loginData.accessToken))
         store.dispatch(setIsSignedin(true))
 
