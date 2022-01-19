@@ -10,7 +10,10 @@ import CustomButton from "../../components/Buttons/CustomButton";
 import Title from "../../components/Title/Title";
 import authService from "../../services/auth.service";
 import $api from "http/index.js";
-import { setDocsAnalysis } from "../../store/actions/docs/docsScanDataAction";
+import {
+  setDocsAnalysis,
+  setDocsItem,
+} from "../../store/actions/docs/docsScanDataAction";
 import { showMessage } from "react-native-flash-message";
 import {
   changePersonsData,
@@ -20,13 +23,19 @@ import {
 
 function Docs({ navigation }) {
   const dispatch = useDispatch();
-  const { data, analysis } = useSelector(({ docs }) => docs.scan);
+  const { data, item, analysis } = useSelector(({ docs }) => docs.scan);
+  const { storages, statuses, persons } = useSelector(({ info }) => info);
+  const {
+    user: { login, role },
+  } = useSelector(({ auth }) => auth);
   const [invNom, name, model, sernom] = data.split("\n");
-  const qrNumber = invNom.slice(-5);
+  const qr = invNom.slice(-5);
+
+  console.log("item", item);
 
   const getItemData = async () => {
     const itemData = {
-      qr: qrNumber,
+      qr,
     };
     navigation.navigate("docsEdit", {
       itemData,
@@ -38,26 +47,40 @@ function Docs({ navigation }) {
   };
 
   useEffect(() => {
+    if (!name) {
+      showMessage({
+        message: `Возможно, вы отсканировали неподходящий QR код`,
+        type: "info",
+      });
+    }
     const getAnalysis = async () => {
       setDocsAnalysis(null);
-      if (name) {
-        $api
-          .get(`analysis/${name}`)
-          .then(({ data }) => dispatch(setDocsAnalysis(data)))
-          .catch((message) => {
-            showMessage({
-              message: `${message}`,
-              type: "danger",
-            });
+      $api
+        .get(`analysis/${name}`)
+        .then(({ data }) => dispatch(setDocsAnalysis(data)))
+        .catch((message) => {
+          showMessage({
+            message: `${message}`,
+            type: "danger",
           });
-      } else {
-        showMessage({
-          message: `Возможно, вы отсканировали неподходящий QR код`,
-          type: "info",
         });
-      }
     };
     getAnalysis();
+    const getItemData = async () => {
+      setDocsItem(null);
+      $api
+        .get(`total/${qr}`)
+        .then(({ data }) => {
+          dispatch(setDocsItem(data));
+        })
+        .catch((message) => {
+          showMessage({
+            message: `${message}`,
+            type: "danger",
+          });
+        });
+    };
+    getItemData();
   }, [data]);
 
   useEffect(() => {
@@ -99,56 +122,117 @@ function Docs({ navigation }) {
   }, []);
 
   return (
-    <ScrollView>
-      <View style={generalStyles.page}>
-        <PageHeader text="Документооборот" />
-        <ScanButton navigation={navigation} prevScreen="docs" />
-        <Title title="Сканирование" />
+    <>
+      <ScrollView>
+        <View style={[generalStyles.page, { paddingBottom: 30 }]}>
+          <PageHeader text="Документооборот" />
+          <ScanButton navigation={navigation} prevScreen="docs" />
+          <Title title="Сканирование" />
 
-        <View
-          style={{
-            backgroundColor: "white",
-            borderRadius: 15,
-            paddingBottom: 5,
-          }}
-        >
-          {data ? (
-            <>
-              <ScanDataItem
-                icon="information-outline"
-                header={`Информация QR кода ${qrNumber}`}
-                data={data}
-              />
-              {analysis ? (
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 15,
+              paddingBottom: 5,
+            }}
+          >
+            {data ? (
+              <>
                 <ScanDataItem
-                  icon="compare-vertical"
-                  header="Результат анализирования"
-                  data={`В наличии: ${analysis?.inStock.kolvo}
+                  icon="information-outline"
+                  header={`Информация QR кода ${qr}`}
+                  data={data}
+                />
+                {analysis ? (
+                  <ScanDataItem
+                    icon="compare-vertical"
+                    header="Результат анализирования"
+                    data={`В наличии: ${analysis?.inStock?.kolvo}
 ${
   analysis?.listed?.kolvo
     ? `Числится: ${analysis?.listed?.kolvo}`
     : `Не числится`
 }`}
-                />
-              ) : null}
-            </>
-          ) : (
-            <Text style={{ padding: 20 }}>
-              Отсканируйте позицию документооборота, чтобы просмотреть,
-              изменить/добавить информацию
-            </Text>
-          )}
+                  />
+                ) : null}
+                {item.info ||
+                item.addinfo ||
+                item.person ||
+                item.storage ||
+                item.status ? (
+                  <ScanDataItem
+                    icon="information-variant"
+                    header="Информация по позиции"
+                    data={`Примечания: ${
+                      item.info ? item.info : "Примечания отсутствуют"
+                    }
+${
+  role == "admin"
+    ? `Доп. информация: ${item.addinfo ? item.addinfo : "Нет данных"}`
+    : null
+} 
+МОЛ: ${
+                      persons
+                        .map((person) => {
+                          if (person.value == item.person) return person.label;
+                        })
+                        .join("") || "Нет данных"
+                    }
+Место нахождения: ${
+                      storages
+                        .map((storage) => {
+                          if (storage.value == item.storage)
+                            return storage.label;
+                        })
+                        .join("") || "Нет данных"
+                    }
+Статус: ${
+                      statuses
+                        .map((status) => {
+                          if (status.value === item.status) return status.label;
+                        })
+                        .join("") || "Нет данных"
+                    }
+`}
+                  />
+                ) : (
+                  <CustomButton
+                    text="По позиции нет информации. Добавить?"
+                    onPress={getItemData}
+                    type="TERTIARY"
+                  />
+                )}
+              </>
+            ) : (
+              <Text style={{ padding: 20 }}>
+                Отсканируйте позицию документооборота, чтобы просмотреть,
+                изменить/добавить информацию
+              </Text>
+            )}
+          </View>
         </View>
-        {data ? (
+        {/* <CustomButton
+          text="Выйти из аккаунта"
+          onPress={logout}
+          type="TERTIARY"
+        /> */}
+      </ScrollView>
+      {data ? (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            alignSelf: "center",
+          }}
+        >
           <CustomButton
             text="Изменить данные"
             onPress={getItemData}
             type="PRIMARY"
           />
-        ) : null}
-      </View>
-      {/* <CustomButton text="Выйти из аккаунта" onPress={logout} type="TERTIARY" /> */}
-    </ScrollView>
+        </View>
+      ) : null}
+    </>
   );
 }
 

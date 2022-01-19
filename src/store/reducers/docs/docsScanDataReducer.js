@@ -1,9 +1,14 @@
-import { SET_DOCS_ANALYSIS, SET_DOCS_ITEM, SET_DOCS_SCAN_DATA } from "../../actions/docs/docsScanDataAction"
+import { SET_DOCS_ANALYSIS, SET_DOCS_ITEM, SET_DOCS_SCAN_DATA, SET_PREV_SELECT } from "../../actions/docs/docsScanDataAction"
 
 const initialState = {
     data: "",
     analysis: "",
-    item: ""
+    item: "",
+    prevSelect: {
+        person: "",
+        storage: "",
+        status: "",
+    }
 }
 
 export const docsScanDataReducer = (state = initialState, { type, payload }) => {
@@ -14,6 +19,8 @@ export const docsScanDataReducer = (state = initialState, { type, payload }) => 
             return {...state, analysis: payload }
         case SET_DOCS_ITEM:
             return {...state, item: payload }
+        case SET_PREV_SELECT:
+            return {...state, prevSelect: payload }
 
         default:
             return state

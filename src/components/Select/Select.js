@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { View, Text } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { useSelector } from "react-redux";
 
 export default function Select({
   text,
+  name,
   value,
   onChange,
   values,
   enabled = true,
 }) {
-  const [pickerValue, setPickerValue] = useState();
+  const { prevSelect } = useSelector(({ docs }) => docs.scan);
+
   return (
     <>
       <Text>{text}</Text>
@@ -23,10 +26,7 @@ export default function Select({
       >
         <Picker
           selectedValue={value}
-          onValueChange={(value) => {
-            onChange(value);
-            setPickerValue(value);
-          }}
+          onValueChange={(value) => onChange(value)}
           enabled={enabled}
           style={{
             height: 44,
@@ -41,6 +41,9 @@ export default function Select({
               if (a.label === b.label) return 0;
               if (a.label > b.label) return 1;
               if (a.label < b.label) return -1;
+            })
+            .sort((a) => {
+              if (prevSelect[name] === a.value) return -1;
             })
             .map((item, i) => {
               return (

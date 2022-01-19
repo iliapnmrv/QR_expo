@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { View, ScrollView, Alert } from "react-native";
 import CustomButton from "../../../components/Buttons/CustomButton";
 import PageHeader from "../../../components/PageHeader/PageHeader";
 import Title from "../../../components/Title/Title";
@@ -14,7 +8,10 @@ import Input from "../../../components/Input/Input";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import $api from "http/index.js";
 import { useDispatch, useSelector } from "react-redux";
-import { setDocsItem } from "../../../store/actions/docs/docsScanDataAction";
+import {
+  setDocsItem,
+  setPrevSelect,
+} from "../../../store/actions/docs/docsScanDataAction";
 import Select from "../../../components/Select/Select";
 import { showMessage } from "react-native-flash-message";
 import { LOGS_CATALOG } from "../../../constants/constants";
@@ -24,7 +21,7 @@ export default function DocsEdit({ route, navigation }) {
     itemData: { qr },
   } = route.params;
 
-  const { item: initialData } = useSelector(({ docs }) => docs.scan);
+  const { item, prevSelect } = useSelector(({ docs }) => docs.scan);
   const {
     user: { login, role },
   } = useSelector(({ auth }) => auth);
@@ -32,30 +29,65 @@ export default function DocsEdit({ route, navigation }) {
 
   const dispatch = useDispatch();
 
-  const [data, setData] = useState();
-
-  console.log(initialData);
-
-  useEffect(() => {
-    const getItemData = async () => {
-      $api
-        .get(`total/${qr}`)
-        .then(({ data }) => {
-          dispatch(setDocsItem(data));
-          setData(data);
-        })
-        .catch((message) => {
-          showMessage({
-            message: `${message}`,
-            type: "danger",
-          });
-        });
-    };
-    getItemData();
-  }, []);
+  const [data, setData] = useState(item);
 
   const setValues = (value, name) => {
     setData((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const newItemData = {
+    person: data.person,
+    storage: data.storage,
+    status: data.status,
+    info: data.info,
+    addinfo: data.addinfo,
+  };
+
+  const initialData = {
+    person: item.person,
+    storage: item.storage,
+    status: item.status,
+    info: item.info,
+    addinfo: item.addinfo,
+  };
+
+  const hasChanges = () => {
+    if (JSON.stringify(initialData) === JSON.stringify(newItemData)) {
+      showMessage({
+        message: "Информация не была изменена",
+        type: "info",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const confirmActions = () => {
+    const changes = hasChanges();
+    if (changes) {
+      Alert.alert(
+        "Выйти без сохранения?",
+        "Введенные данные не будут сохранены",
+        [
+          {
+            text: "Остаться",
+            style: "cancel",
+          },
+          {
+            text: "Не сохранять",
+            onPress: () => {
+              navigation.goBack();
+              showMessage({
+                message: "Вы не сохранили информацию",
+                type: "info",
+              });
+            },
+          },
+        ]
+      );
+    } else {
+      navigation.goBack();
+    }
   };
 
   const saveData = async () => {
@@ -67,13 +99,20 @@ export default function DocsEdit({ route, navigation }) {
       status: statuses,
     };
 
-    let newItemData = {
-      person: data.person,
-      storage: data.storage,
-      status: data.status,
-      info: data.info,
-      addinfo: data.addinfo,
-    };
+    const changes = hasChanges();
+    if (!changes) {
+      return;
+    }
+
+    dispatch(setDocsItem({ ...item, ...newItemData }));
+
+    dispatch(
+      setPrevSelect({
+        person: data.person == null ? prevSelect.person : data.person,
+        storage: data.storage == null ? prevSelect.storage : data.storage,
+        status: data.status == null ? prevSelect.status : data.status,
+      })
+    );
 
     let updatedData = Object.keys(newItemData).reduce((diff, key) => {
       if (initialData[key] === newItemData[key]) return diff;
@@ -107,8 +146,6 @@ export default function DocsEdit({ route, navigation }) {
       }
     }
 
-    console.log(logs.slice(0, -1));
-
     const updatedLogs = await $api.post(`logs/`, {
       qr,
       user: login,
@@ -132,7 +169,7 @@ export default function DocsEdit({ route, navigation }) {
     });
 
     const updatedAddinfo = await $api.post(`addinfo/${qr}`, {
-      storage: data.addinfo,
+      addinfo: data.addinfo,
     });
 
     showMessage({
@@ -157,7 +194,7 @@ export default function DocsEdit({ route, navigation }) {
             name="times"
             size={30}
             color="#696969"
-            onPress={() => navigation.goBack()}
+            onPress={confirmActions}
             style={{ marginRight: 10 }}
           />
         </View>
@@ -185,6 +222,7 @@ export default function DocsEdit({ route, navigation }) {
 
           <Select
             text="Статус"
+            name="status"
             enabled={role === "admin" ? true : false}
             value={data?.status}
             onChange={(status) => setValues(status, "status")}
@@ -192,6 +230,7 @@ export default function DocsEdit({ route, navigation }) {
           />
           <Select
             text="МОЛ"
+            name="person"
             enabled={role === "admin" ? true : false}
             value={data?.person}
             onChange={(person) => setValues(person, "person")}
@@ -199,6 +238,7 @@ export default function DocsEdit({ route, navigation }) {
           />
           <Select
             text="Место хранения"
+            name="storage"
             value={data?.storage}
             onChange={(storage) => setValues(storage, "storage")}
             values={storages}
