@@ -6,6 +6,7 @@ const initialState = {
     item: "",
     prevSelect: {
         person: "",
+        owner: "",
         storage: "",
         status: "",
     }

@@ -25,7 +25,9 @@ export default function DocsEdit({ route, navigation }) {
   const {
     user: { login, role },
   } = useSelector(({ auth }) => auth);
-  const { storages, statuses, persons } = useSelector(({ info }) => info);
+  const { storages, statuses, persons, owners } = useSelector(
+    ({ info }) => info
+  );
 
   const dispatch = useDispatch();
 
@@ -37,6 +39,7 @@ export default function DocsEdit({ route, navigation }) {
 
   const newItemData = {
     person: data.person,
+    owner: data.owner,
     storage: data.storage,
     status: data.status,
     info: data.info,
@@ -45,6 +48,7 @@ export default function DocsEdit({ route, navigation }) {
 
   const initialData = {
     person: item.person,
+    owner: item.owner,
     storage: item.storage,
     status: item.status,
     info: item.info,
@@ -95,6 +99,7 @@ export default function DocsEdit({ route, navigation }) {
 
     const allInfo = {
       person: persons,
+      owner: owners,
       storage: storages,
       status: statuses,
     };
@@ -109,6 +114,7 @@ export default function DocsEdit({ route, navigation }) {
     dispatch(
       setPrevSelect({
         person: data.person == null ? prevSelect.person : data.person,
+        owner: data.owner == null ? prevSelect.owner : data.owner,
         storage: data.storage == null ? prevSelect.storage : data.storage,
         status: data.status == null ? prevSelect.status : data.status,
       })
@@ -164,6 +170,10 @@ export default function DocsEdit({ route, navigation }) {
       person: data.person,
     });
 
+    const updatedOwner = await $api.post(`owner/${qr}`, {
+      owner: data.owner,
+    });
+
     const updatedStorage = await $api.post(`storage/${qr}`, {
       storage: data.storage,
     });
@@ -179,73 +189,91 @@ export default function DocsEdit({ route, navigation }) {
   };
 
   return (
-    <ScrollView>
-      <View style={generalStyles.page}>
-        <PageHeader text="Изменение информации" />
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <Title title={`Позиция: ${qr}`} />
-          <Icon
-            name="times"
-            size={30}
-            color="#696969"
-            onPress={confirmActions}
-            style={{ marginRight: 10 }}
-          />
-        </View>
-
-        <View
-          style={{
-            backgroundColor: "white",
-            borderRadius: 15,
-            padding: 10,
-          }}
-        >
-          <Input
-            value={data?.info}
-            text="Примечания"
-            setValue={(info) => setValues(info, "info")}
-          />
-          {role === "admin" ? (
-            <Input
-              placeholder="Введите дополнительную информацию..."
-              value={data?.addinfo}
-              text="Дополнительная информация"
-              setValue={(addinfo) => setValues(addinfo, "addinfo")}
+    <>
+      <ScrollView>
+        <View style={[generalStyles.page, { paddingBottom: 60 }]}>
+          <PageHeader text="Изменение информации" />
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Title title={`Позиция: ${qr}`} />
+            <Icon
+              name="times"
+              size={30}
+              color="#696969"
+              onPress={confirmActions}
+              style={{ marginRight: 10 }}
             />
-          ) : null}
+          </View>
 
-          <Select
-            text="Статус"
-            name="status"
-            enabled={role === "admin" ? true : false}
-            value={data?.status}
-            onChange={(status) => setValues(status, "status")}
-            values={statuses}
-          />
-          <Select
-            text="МОЛ"
-            name="person"
-            enabled={role === "admin" ? true : false}
-            value={data?.person}
-            onChange={(person) => setValues(person, "person")}
-            values={persons}
-          />
-          <Select
-            text="Место хранения"
-            name="storage"
-            value={data?.storage}
-            onChange={(storage) => setValues(storage, "storage")}
-            values={storages}
-          />
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 15,
+              padding: 10,
+            }}
+          >
+            <Input
+              value={data?.info}
+              text="Примечания"
+              setValue={(info) => setValues(info, "info")}
+            />
+            {role === "admin" ? (
+              <Input
+                placeholder="Введите дополнительную информацию..."
+                value={data?.addinfo}
+                text="Дополнительная информация"
+                setValue={(addinfo) => setValues(addinfo, "addinfo")}
+              />
+            ) : null}
+
+            <Select
+              text="Статус"
+              name="status"
+              enabled={role === "admin" ? true : false}
+              value={data?.status}
+              onChange={(status) => setValues(status, "status")}
+              values={statuses}
+            />
+            <Select
+              text="МОЛ"
+              name="person"
+              enabled={role === "admin" ? true : false}
+              value={data?.person}
+              onChange={(person) => setValues(person, "person")}
+              values={persons}
+            />
+            <Select
+              text="Владелец"
+              name="owner"
+              enabled={role === "admin" ? true : false}
+              value={data?.owner}
+              onChange={(owner) => setValues(owner, "owner")}
+              values={owners}
+            />
+            <Select
+              text="Место хранения"
+              name="storage"
+              value={data?.storage}
+              onChange={(storage) => setValues(storage, "storage")}
+              values={storages}
+            />
+          </View>
         </View>
+      </ScrollView>
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          alignSelf: "center",
+        }}
+      >
         <CustomButton text="Сохранить" onPress={saveData} />
       </View>
-    </ScrollView>
+    </>
   );
 }

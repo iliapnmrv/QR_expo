@@ -1,9 +1,10 @@
-import { CHANGE_PERSONS_DATA, CHANGE_STATUSES_DATA, CHANGE_STORAGES_DATA } from "../actions/infoAction";
+import { CHANGE_OWNERS_DATA, CHANGE_PERSONS_DATA, CHANGE_STATUSES_DATA, CHANGE_STORAGES_DATA } from "../actions/infoAction";
 
 const defaultState = {
     storages: [],
     statuses: [],
     persons: [],
+    owners: [],
 };
 
 export const infoReducer = (state = defaultState, { type, payload }) => {
@@ -27,6 +28,13 @@ export const infoReducer = (state = defaultState, { type, payload }) => {
                 persons: payload.map((row) => ({
                     label: `${row.person_name}`,
                     value: row.person_id,
+                }))
+            };
+        case CHANGE_OWNERS_DATA:
+            return {...state,
+                owners: payload.map((row) => ({
+                    label: `${row.owner_name}`,
+                    value: row.owner_id,
                 }))
             };
         default:

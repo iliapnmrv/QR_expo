@@ -16,6 +16,7 @@ import {
 } from "../../store/actions/docs/docsScanDataAction";
 import { showMessage } from "react-native-flash-message";
 import {
+  changeOwnersData,
   changePersonsData,
   changeStatusesData,
   changeStoragesData,
@@ -24,7 +25,9 @@ import {
 function Docs({ navigation }) {
   const dispatch = useDispatch();
   const { data, item, analysis } = useSelector(({ docs }) => docs.scan);
-  const { storages, statuses, persons } = useSelector(({ info }) => info);
+  const { storages, statuses, persons, owners } = useSelector(
+    ({ info }) => info
+  );
   const {
     user: { login, role },
   } = useSelector(({ auth }) => auth);
@@ -117,6 +120,17 @@ function Docs({ navigation }) {
           });
         });
       dispatch(changeStatusesData(statuses));
+
+      const owners = await $api
+        .get(`owners`)
+        .then(({ data }) => data)
+        .catch((message) => {
+          showMessage({
+            message: `${message}`,
+            type: "danger",
+          });
+        });
+      dispatch(changeOwnersData(owners));
     };
     getInfo();
   }, []);
@@ -158,6 +172,7 @@ ${
                 {item.info ||
                 item.addinfo ||
                 item.person ||
+                item.owner ||
                 item.storage ||
                 item.status ? (
                   <ScanDataItem
@@ -175,6 +190,13 @@ ${
                       persons
                         .map((person) => {
                           if (person.value == item.person) return person.label;
+                        })
+                        .join("") || "Нет данных"
+                    }
+Владелец: ${
+                      owners
+                        .map((owner) => {
+                          if (owner.value == item.owner) return owner.label;
                         })
                         .join("") || "Нет данных"
                     }
@@ -225,11 +247,7 @@ ${
             alignSelf: "center",
           }}
         >
-          <CustomButton
-            text="Изменить данные"
-            onPress={getItemData}
-            type="PRIMARY"
-          />
+          <CustomButton text="Изменить данные" onPress={getItemData} />
         </View>
       ) : null}
     </>

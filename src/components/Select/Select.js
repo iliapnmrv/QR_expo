@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useSelector } from "react-redux";
+import CustomButton from "../Buttons/CustomButton";
 
 export default function Select({
   text,
@@ -52,6 +53,19 @@ export default function Select({
             })}
         </Picker>
       </View>
+      {value === null ? (
+        <CustomButton
+          type="TERTIARY"
+          text={`Предыдущее значение: ${values
+            .map((item) => {
+              if (prevSelect[name] === item.value) {
+                return item.label;
+              }
+            })
+            .join("")}`}
+          onPress={() => onChange(prevSelect[name])}
+        />
+      ) : null}
     </>
   );
 }

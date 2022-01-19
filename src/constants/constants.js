@@ -34,6 +34,7 @@ export const LOGS_CATALOG = {
     model: "Модель реальная",
     sernom: "Серийный номер",
     person: "МОЛ",
+    owner: "Владелец",
     storage: "Местоположение",
     status: "Статус",
     info: "Примечания",
