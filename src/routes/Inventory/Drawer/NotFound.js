@@ -1,21 +1,16 @@
 import React from "react";
 import {
   View,
-  Button,
   StyleSheet,
   FlatList,
   Text,
   ActivityIndicator,
-  RefreshControl,
   ScrollView,
 } from "react-native";
-import BackHome from "./BackHome";
-import Title from "../../../components/Title/Title";
-import PageHeader from "../../../components/PageHeader/PageHeader";
 import { getDataFromDB } from "../../../hooks/getDataFromDB";
+import DrawerPage from "./DrawerPage";
 
 export default function NotFound({ navigation }) {
-  // SELECT * FROM qr WHERE kolvo > 0
   const {
     response: data,
     error,
@@ -24,53 +19,37 @@ export default function NotFound({ navigation }) {
   } = getDataFromDB("SELECT * FROM qr WHERE kolvo > 0");
 
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={styles.scrollView}
-      refreshControl={
-        <RefreshControl refreshing={isLoading} onRefresh={getData} />
-      }
+    <DrawerPage
+      onRefresh={getData}
+      refreshing={isLoading}
+      header="Не найдено"
+      title="Еще не выявленные позиции"
+      navigation={navigation}
     >
-      <PageHeader text="Не выявлено" />
-
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          backgroundColor: "white",
-          padding: 10,
-          borderTopRightRadius: 30,
-          borderTopLeftRadius: 30,
-          paddingBottom: 20,
-        }}
+      <ScrollView
+        horizontal={true}
+        persistentScrollbar={true}
+        showsHorizontalScrollIndicator={true}
       >
-        <BackHome navigation={navigation} />
-        <Title title="Еще не выявленные позиции" style={styles.sectionHeader} />
-        <ScrollView
-          horizontal={true}
-          persistentScrollbar={true}
-          showsHorizontalScrollIndicator={true}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#0000ff" />
-          ) : (
-            <FlatList
-              data={data}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item, index }) => (
-                <View style={styles.item}>
-                  <Text style={styles.itemCell}>{item.vedPos}</Text>
-                  <Text style={[styles.itemCell, styles.itemCenterCell]}>
-                    {item.name}
-                  </Text>
-                  <Text style={styles.itemCell}>{item.kolvo}</Text>
-                </View>
-              )}
-            />
-          )}
-        </ScrollView>
-      </View>
-    </ScrollView>
+        {isLoading ? (
+          <ActivityIndicator color="#0000ff" />
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item, index }) => (
+              <View style={styles.item}>
+                <Text style={styles.itemCell}>{item.vedpos}</Text>
+                <Text style={[styles.itemCell, styles.itemCenterCell]}>
+                  {item.name}
+                </Text>
+                <Text style={styles.itemCell}>{item.kolvo}</Text>
+              </View>
+            )}
+          />
+        )}
+      </ScrollView>
+    </DrawerPage>
   );
 }
 

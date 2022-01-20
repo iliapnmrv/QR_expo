@@ -6,7 +6,7 @@ export const getDataFromDB = (sql) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const db = SQLite.openDatabase("qr.db");
+  const db = SQLite.openDatabase("inventory.db");
 
   const getData = async () => {
     setIsLoading(true);

@@ -4,14 +4,11 @@ import {
   FlatList,
   Text,
   ActivityIndicator,
-  RefreshControl,
   ScrollView,
 } from "react-native";
-import BackHome from "./BackHome";
 import styles from "./Styles/ListStyles";
-import Title from "../../../components/Title/Title";
-import PageHeader from "../../../components/PageHeader/PageHeader";
 import { getDataFromDB } from "../../../hooks/getDataFromDB";
+import DrawerPage from "./DrawerPage";
 
 export default function NotReg({ navigation }) {
   // SELECT * FROM scanned WHERE status = 2 ORDER BY id DESC
@@ -22,55 +19,37 @@ export default function NotReg({ navigation }) {
     getData,
   } = getDataFromDB("SELECT * FROM scanned WHERE status = 2 ORDER BY id DESC");
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      refreshControl={
-        <RefreshControl refreshing={isLoading} onRefresh={getData} />
-      }
+    <DrawerPage
+      onRefresh={getData}
+      refreshing={isLoading}
+      header="Не в учете"
+      title="Позиции не в учете описи"
+      navigation={navigation}
     >
-      <PageHeader text="Не в учете" />
-
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          backgroundColor: "white",
-          padding: 10,
-          borderTopRightRadius: 30,
-          borderTopLeftRadius: 30,
-          paddingBottom: 20,
-        }}
+      <ScrollView
+        style={{ flex: 1 }}
+        horizontal={true}
+        persistentScrollbar={true}
+        showsHorizontalScrollIndicator={true}
       >
-        <BackHome navigation={navigation} />
-        <Title
-          title="Позиции не в учете инвентаризационной описи"
-          style={styles.sectionHeader}
-        />
-        <ScrollView
-          style={{ flex: 1 }}
-          horizontal={true}
-          persistentScrollbar={true}
-          showsHorizontalScrollIndicator={true}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#0000ff" />
-          ) : (
-            <FlatList
-              data={data}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item, index }) => (
-                <View style={styles.item}>
-                  <Text style={styles.itemCell}>{++index}</Text>
-                  <Text style={[styles.itemCell, styles.itemCenterCell]}>
-                    {item.model}
-                  </Text>
-                  <Text style={styles.itemCell}>{item.invNom.substr(-5)}</Text>
-                </View>
-              )}
-            />
-          )}
-        </ScrollView>
-      </View>
-    </ScrollView>
+        {isLoading ? (
+          <ActivityIndicator color="#0000ff" />
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item, index }) => (
+              <View style={styles.item}>
+                <Text style={styles.itemCell}>{++index}</Text>
+                <Text style={[styles.itemCell, styles.itemCenterCell]}>
+                  {item.model}
+                </Text>
+                <Text style={styles.itemCell}>{item.invNom.substr(-5)}</Text>
+              </View>
+            )}
+          />
+        )}
+      </ScrollView>
+    </DrawerPage>
   );
 }

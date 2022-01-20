@@ -27,28 +27,6 @@ import {
   setSessionDate,
   setSessionStatus,
 } from "../../store/actions/inventory/sessionAction.js";
-import { showMessage, hideMessage } from "react-native-flash-message";
-
-const requestStoragePermission = async () => {
-  let check = await PermissionsAndroid.check(
-    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-  );
-  if (!check) {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("You can use the camera");
-      } else {
-        console.log("Camera permission denied");
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  }
-  return true;
-};
 
 function Inventory({ navigation }) {
   const dispatch = useDispatch();
@@ -70,14 +48,6 @@ function Inventory({ navigation }) {
   const { scanStatus, scanResult } = useSelector(
     ({ inventory }) => inventory.scanResult
   );
-
-  // ------ Сессии
-  // Данные сессии
-
-  // по изменению статуса
-  useEffect(() => {
-    requestStoragePermission();
-  }, []);
 
   return (
     <ScrollView>

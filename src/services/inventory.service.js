@@ -9,7 +9,7 @@ import {
   setRemains,
 } from "../store/actions/inventory/scanDataAction";
 import { toggleScanModal } from "../store/actions/inventory/modalAction";
-const db = SQLite.openDatabase("qr.db");
+const db = SQLite.openDatabase("inventory.db");
 
 export const analyze = async (data) => {
   // анализирование, если такой предмет есть в инвентаризации
@@ -18,7 +18,7 @@ export const analyze = async (data) => {
   let status, pos;
   db.transaction((tx) => {
     tx.executeSql(
-      "SELECT * FROM `qr` WHERE `name` = ? AND `kolvo` > 0 ORDER BY `placePriority`, `kolvo`",
+      "SELECT * FROM `qr` WHERE `name` = ? AND `kolvo` > 0 ORDER BY `placepriority`, `kolvo`",
       [name],
       (_, result) => {
         let check = checkDoubleScan(invNom);
@@ -85,7 +85,7 @@ export const analyze = async (data) => {
               status = 1; // в учете
               store.dispatch(setScanStatus("В учете"));
               store.dispatch(
-                setScanResult(`Позиция: ${row.vedPos}\nМесто: ${row.place}`)
+                setScanResult(`Позиция: ${row.vedpos}\nМесто: ${row.place}`)
               );
               addScanToDB(
                 invNom,
@@ -93,17 +93,17 @@ export const analyze = async (data) => {
                 status,
                 model,
                 serNom,
-                row.vedPos,
+                row.vedpos,
                 row.place,
                 trace
               );
               subtractItem(row.id, name);
             }
             let num = invNom.substr(invNom.length - 5); // номер qr кодa
-            if (row?.vedPos) {
+            if (row?.vedpos) {
               store.dispatch(
                 setPrevPosition(
-                  `Номер QR кода ${num}, позиция: ${row.vedPos}, место: ${
+                  `Номер QR кода ${num}, позиция: ${row.vedpos}, место: ${
                     row.place == undefined ? null : row.place
                   }`
                 )
@@ -207,7 +207,7 @@ const subtractItem = (id, name) => {
           store.dispatch(setRemains(`Позиция закрыта`));
         } else {
           let left = row.kolvo; // оставшееся количество предметов
-          let pos = row.vedPos; // строка в ведомости
+          let pos = row.vedpos; // строка в ведомости
           db.transaction((tx) => {
             tx.executeSql(
               "SELECT * FROM scanned WHERE `name` = ? AND `pos` = ?",

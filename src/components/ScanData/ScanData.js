@@ -35,18 +35,16 @@ export default function ScanData() {
                 data={remains}
               />
             ) : null}
+            <CustomButton
+              onPress={() => analyze(data)}
+              type="PRIMARY"
+              text="Найти в ведомости"
+            />
           </View>
         ) : (
           <Text style={{ padding: 20 }}>Предыдущих сканирований не было</Text>
         )}
       </View>
-      {status ? (
-        <CustomButton
-          onPress={() => analyze(data)}
-          type="PRIMARY"
-          text="Найти в ведомости"
-        />
-      ) : null}
     </>
   );
 }

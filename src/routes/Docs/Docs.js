@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, RefreshControl } from "react-native";
 import ScanButton from "components/Buttons/ScanButton";
 import { useDispatch, useSelector } from "react-redux";
 import ScanDataItem from "components/ScanData/Item/ScanDataItem";
@@ -21,6 +21,7 @@ import {
   changeStatusesData,
   changeStoragesData,
 } from "../../store/actions/infoAction";
+import { setIsSignedin } from "../../store/actions/authAction";
 
 function Docs({ navigation }) {
   const dispatch = useDispatch();
@@ -33,6 +34,8 @@ function Docs({ navigation }) {
   } = useSelector(({ auth }) => auth);
   const [invNom, name, model, sernom] = data.split("\n");
   const qr = invNom.slice(-5);
+
+  const [refreshing, setRefreshing] = React.useState(false);
 
   console.log("item", item);
 
@@ -49,41 +52,47 @@ function Docs({ navigation }) {
     authService.logout();
   };
 
+  const getItemInfo = () => {
+    setRefreshing(true);
+
+    setDocsAnalysis(null);
+    $api
+      .get(`analysis/${name}`)
+      .then(({ data }) => dispatch(setDocsAnalysis(data)))
+      .catch((message) => {
+        showMessage({
+          message: `${message}`,
+          type: "danger",
+        });
+        dispatch(setIsSignedin(false));
+      });
+    setDocsItem(null);
+    $api
+      .get(`total/${qr}`)
+      .then(({ data }) => {
+        dispatch(setDocsItem(data));
+      })
+      .catch((message) => {
+        showMessage({
+          message: `${message}`,
+          type: "danger",
+        });
+        dispatch(setIsSignedin(false));
+      })
+      .finally(() => {
+        setRefreshing(false);
+      });
+  };
+
   useEffect(() => {
     if (!name) {
       showMessage({
         message: `Возможно, вы отсканировали неподходящий QR код`,
         type: "info",
       });
+      return;
     }
-    const getAnalysis = async () => {
-      setDocsAnalysis(null);
-      $api
-        .get(`analysis/${name}`)
-        .then(({ data }) => dispatch(setDocsAnalysis(data)))
-        .catch((message) => {
-          showMessage({
-            message: `${message}`,
-            type: "danger",
-          });
-        });
-    };
-    getAnalysis();
-    const getItemData = async () => {
-      setDocsItem(null);
-      $api
-        .get(`total/${qr}`)
-        .then(({ data }) => {
-          dispatch(setDocsItem(data));
-        })
-        .catch((message) => {
-          showMessage({
-            message: `${message}`,
-            type: "danger",
-          });
-        });
-    };
-    getItemData();
+    getItemInfo();
   }, [data]);
 
   useEffect(() => {
@@ -96,6 +105,7 @@ function Docs({ navigation }) {
             message: `${message}`,
             type: "danger",
           });
+          dispatch(setIsSignedin(false));
         });
       dispatch(changeStoragesData(storages));
 
@@ -137,7 +147,11 @@ function Docs({ navigation }) {
 
   return (
     <>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={getItemInfo} />
+        }
+      >
         <View style={[generalStyles.page, { paddingBottom: 30 }]}>
           <PageHeader text="Документооборот" />
           <ScanButton navigation={navigation} prevScreen="docs" />

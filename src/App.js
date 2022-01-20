@@ -47,14 +47,6 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await $api.get(`/inventory`).then(({ data }) => data);
-      // console.log("basic inventory data", data);
-    };
-    if (isSignedIn) {
-      fetchData();
-    }
-
     const getPermissions = async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status);
@@ -62,7 +54,6 @@ function App() {
     getPermissions();
   }, []);
 
-  // Check permission & show view
   if (hasPermission === null) {
     return (
       <View style={styles.container}>
