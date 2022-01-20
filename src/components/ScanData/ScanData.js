@@ -1,9 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
-import { analyze } from "services/inventory.service.js";
 import ScanDataItem from "./Item/ScanDataItem";
-import CustomButton from "../Buttons/CustomButton";
 
 export default function ScanData() {
   const { status } = useSelector(({ inventory }) => inventory.session);
@@ -35,14 +33,9 @@ export default function ScanData() {
                 data={remains}
               />
             ) : null}
-            <CustomButton
-              onPress={() => analyze(data)}
-              type="PRIMARY"
-              text="Найти в ведомости"
-            />
           </View>
         ) : (
-          <Text style={{ padding: 20 }}>Предыдущих сканирований не было</Text>
+          <Text style={{ padding: 20 }}> Предыдущих сканирований не было </Text>
         )}
       </View>
     </>

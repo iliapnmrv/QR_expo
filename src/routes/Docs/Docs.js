@@ -35,7 +35,7 @@ function Docs({ navigation }) {
   const [invNom, name, model, sernom] = data.split("\n");
   const qr = invNom.slice(-5);
 
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   console.log("item", item);
 
@@ -152,7 +152,7 @@ function Docs({ navigation }) {
           <RefreshControl refreshing={refreshing} onRefresh={getItemInfo} />
         }
       >
-        <View style={[generalStyles.page, { paddingBottom: 30 }]}>
+        <View style={[generalStyles.page, { paddingBottom: 64 }]}>
           <PageHeader text="Документооборот" />
           <ScanButton navigation={navigation} prevScreen="docs" />
           <Title title="Сканирование" />
@@ -161,7 +161,6 @@ function Docs({ navigation }) {
             style={{
               backgroundColor: "white",
               borderRadius: 15,
-              paddingBottom: 5,
             }}
           >
             {data ? (
@@ -228,8 +227,7 @@ ${
                           if (status.value === item.status) return status.label;
                         })
                         .join("") || "Нет данных"
-                    }
-`}
+                    }`}
                   />
                 ) : (
                   <CustomButton
@@ -259,6 +257,8 @@ ${
             position: "absolute",
             bottom: 0,
             alignSelf: "center",
+            width: "100%",
+            paddingHorizontal: 15,
           }}
         >
           <CustomButton text="Изменить данные" onPress={getItemData} />
