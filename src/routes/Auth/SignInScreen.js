@@ -8,21 +8,31 @@ import { styles } from "./AuthScreensStyles";
 import { showMessage } from "react-native-flash-message";
 import PageHeader from "../../components/PageHeader/PageHeader";
 
-export default function SignInScreen({ navigation }) {
+export default function SignInScreen() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const signIn = async () => {
-    if (!password || !username) {
-      return showMessage({
-        message: `Заполните оба поля`,
+    try {
+      if (!password || !username) {
+        return showMessage({
+          message: `Заполните оба поля`,
+          type: "danger",
+        });
+      }
+      const loginData = await authService.login(username, password);
+      if (loginData?.message) {
+        throw loginData;
+      }
+      showMessage({
+        message: `Добро пожаловать, ${loginData.user.login}`,
+        type: "info",
+      });
+    } catch (e) {
+      showMessage({
+        message: `${e.message}`,
         type: "danger",
       });
     }
-    const loginData = await authService.login(username, password);
-    showMessage({
-      message: `Добро пожаловать, ${loginData.user.login}`,
-      type: "info",
-    });
   };
   return (
     <View style={styles.container}>

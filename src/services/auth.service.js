@@ -6,40 +6,33 @@ import { store } from '../store';
 import { setIsSignedin, setToken } from '../store/actions/authAction';
 class AuthService {
     async registration(login, password) {
-        const registrationData = await $api.post('auth/registration/', {
+        try {
+            const registrationData = await $api.post('auth/registration/', {
                 login,
                 password
             }).then(({ data }) => data)
-            .catch(message => {
-                showMessage({
-                    message: `${message}`,
-                    type: "danger",
-                });
-            })
-        store.dispatch(setUser(registrationData.user))
-        store.dispatch(setToken(registrationData.accessToken))
-        store.dispatch(setIsSignedin(true))
-        return registrationData
+            store.dispatch(setUser(registrationData.user))
+            store.dispatch(setToken(registrationData.accessToken))
+            store.dispatch(setIsSignedin(true))
+            return registrationData
+        } catch (e) {
+            return e.response.data
+        }
     }
 
     async login(login, password) {
-        const loginData = await $api.post('auth/login/', {
+        try {
+            const loginData = await $api.post('auth/login/', {
                 login,
                 password
             }).then(({ data }) => data)
-            .catch(message => {
-                showMessage({
-                    message: `${message}`,
-                    type: "danger",
-                });
-            })
-        console.log(loginData);
-
-        store.dispatch(setUser(loginData.user))
-        store.dispatch(setToken(loginData.accessToken))
-        store.dispatch(setIsSignedin(true))
-
-        return loginData
+            store.dispatch(setUser(loginData.user))
+            store.dispatch(setToken(loginData.accessToken))
+            store.dispatch(setIsSignedin(true))
+            return loginData
+        } catch (e) {
+            return e.response.data
+        }
     }
 
     async logout() {

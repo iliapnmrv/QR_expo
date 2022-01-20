@@ -5502,11 +5502,6 @@
     "wrap-ansi" "^7.0.0"
     "xdl" "59.2.22"
 
-"expo-clipboard@~2.1.0":
-  "integrity" "sha512-wJLATd1roEUsatx+GNREBtS8g5vkPWS/0jsLoaPTDVjBVib7RgavaMHj5Wob430qujg+leQmnhPViFk1BXzLYw=="
-  "resolved" "https://registry.npmjs.org/expo-clipboard/-/expo-clipboard-2.1.0.tgz"
-  "version" "2.1.0"
-
 "expo-constants@~13.0.0":
   "integrity" "sha512-DwElzs1k6KljlZln/X2O9b5K4bXlDk8nzF5nzSLgI+Ibg/xUoIL5QKM41Y9RDJfTzlDlV7nmeS/Xar+nP5KjMA=="
   "resolved" "https://registry.npmjs.org/expo-constants/-/expo-constants-13.0.0.tgz"
@@ -5557,7 +5552,7 @@
   dependencies:
     "expo-json-utils" "~0.2.0"
 
-"expo-media-library@*", "expo-media-library@~14.0.0":
+"expo-media-library@*":
   "integrity" "sha512-rbrFSLxpmhKqvWivjpMXhAOu0D0sRhu2UNc+SJntXJwsLYx7Mzh9N8pk2kU7iLTPR2YYfxOGW7HyFj18+OB6QQ=="
   "resolved" "https://registry.npmjs.org/expo-media-library/-/expo-media-library-14.0.0.tgz"
   "version" "14.0.0"
