@@ -21,7 +21,6 @@
         "events": "^3.3.0",
         "expo": "^44.0.0",
         "expo-barcode-scanner": "~11.2.0",
-        "expo-cameraroll": "^1.1.0",
         "expo-cli": "5.0.3",
         "expo-constants": "~13.0.0",
         "expo-permissions": "~13.1.0",

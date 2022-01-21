@@ -5433,11 +5433,6 @@
     "@expo/config-plugins" "^4.0.2"
     "expo-image-loader" "~3.1.0"
 
-"expo-cameraroll@^1.1.0":
-  "integrity" "sha512-sUkKuKtepUmS16xToXzyZCD4n2isoRk6MerNxNfym2hLSGQuJ4eJK6mSu3CsReTycZSKbXTBg3tOtKrEE9UTRQ=="
-  "resolved" "https://registry.npmjs.org/expo-cameraroll/-/expo-cameraroll-1.1.0.tgz"
-  "version" "1.1.0"
-
 "expo-cli@5.0.3":
   "integrity" "sha512-Wou4IPj/V2VggX6k818WnU9Gz/JMgPln02282tQAvmouvkYInXwLG8IFkRqHJdt25nJvz9xrN7RATzn4IFcMWg=="
   "resolved" "https://registry.npmjs.org/expo-cli/-/expo-cli-5.0.3.tgz"
@@ -5551,13 +5546,6 @@
   "version" "0.2.2"
   dependencies:
     "expo-json-utils" "~0.2.0"
-
-"expo-media-library@*":
-  "integrity" "sha512-rbrFSLxpmhKqvWivjpMXhAOu0D0sRhu2UNc+SJntXJwsLYx7Mzh9N8pk2kU7iLTPR2YYfxOGW7HyFj18+OB6QQ=="
-  "resolved" "https://registry.npmjs.org/expo-media-library/-/expo-media-library-14.0.0.tgz"
-  "version" "14.0.0"
-  dependencies:
-    "@expo/config-plugins" "^4.0.2"
 
 "expo-modules-autolinking@~0.4.0":
   "integrity" "sha512-GRGHbQ4b/aOtEup/oA6YVS7OOBKqU4sNLhoiTkEJWXmYDRERZiRvp8N2krQtn54y5PqucftqlBrMbdCinTouqg=="
