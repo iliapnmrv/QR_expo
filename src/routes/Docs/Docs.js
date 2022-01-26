@@ -48,16 +48,12 @@ function Docs({ navigation }) {
     });
   };
 
-  const logout = async () => {
-    authService.logout();
-  };
-
   const getItemInfo = () => {
     setRefreshing(true);
 
     setDocsAnalysis(null);
     $api
-      .get(`analysis/${name}`)
+      .post(`analysis/`, { name })
       .then(({ data }) => dispatch(setDocsAnalysis(data)))
       .catch((message) => {
         showMessage({
@@ -245,11 +241,6 @@ ${
             )}
           </View>
         </View>
-        {/* <CustomButton
-          text="Выйти из аккаунта"
-          onPress={logout}
-          type="TERTIARY"
-        /> */}
       </ScrollView>
       {data ? (
         <View

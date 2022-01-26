@@ -1,20 +1,24 @@
 import axios from "axios";
-import { setToken } from "../store/actions/authAction";
+import { setIsSignedin, setToken } from "../store/actions/authAction";
 import { store } from "../store";
 
-// export const API_URL = `http://localhost:8000/api/`;
+export let API_URL;
 
-export const API_URL = "http://192.168.26.75:8000/api/";
+store.subscribe(() => {
+  API_URL = store.getState().settings.ip;
+});
 
 const $api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
+  timeout: 1000 * 3,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 $api.interceptors.request.use((config) => {
+  config.baseURL = API_URL;
   config.headers.authorization = `Bearer ${store.getState().auth.token}`;
   return config;
 });
@@ -28,7 +32,7 @@ $api.interceptors.response.use(
     const originalRequest = error.config;
     console.log(originalRequest);
     console.log(error.response);
-    if (error.response.status == 401 && error.config) {
+    if (error.response?.status == 401 && error?.config) {
       try {
         const data = await axios
           .get(`${API_URL}auth/refresh`, { withCredentials: true })
@@ -36,6 +40,7 @@ $api.interceptors.response.use(
         store.dispatch(setToken(data.accessToken));
         return $api.request(originalRequest);
       } catch (e) {
+        store.dispatch(setIsSignedin(false));
         console.log("Не авторизован");
       }
     }

@@ -5,18 +5,11 @@ import { StyleSheet, Text, View, Button } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 
 import { NavigationContainer } from "@react-navigation/native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import "react-native-gesture-handler";
-import Inside from "./routes/Inventory/Drawer/Inside.js";
-import Over from "./routes/Inventory/Drawer/Over.js";
-import Inventory from "./routes/Inventory/Inventory.js";
-import Log from "./routes/Inventory/Drawer/Log.js";
-import NotReg from "./routes/Inventory/Drawer/NotReg.js";
-import NotFound from "./routes/Inventory/Drawer/NotFound.js";
 import BarCode from "./components/QRScanner/QRScanner.js";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { store, persistor } from "./store/index.js";
@@ -24,9 +17,11 @@ import Docs from "./routes/Docs/Docs.js";
 import { PersistGate } from "redux-persist/integration/react";
 import FlashMessage from "react-native-flash-message";
 import SignInScreen from "./routes/Auth/SignInScreen.js";
-import $api from "./http/index.js";
+import $api, { API_URL } from "./http/index.js";
 import SignUpScreen from "./routes/Auth/SignUpScreen.js";
 import DocsEdit from "./routes/Docs/DocsEdit/DocsEdit.js";
+import Drawer from "./routes/Inventory/Drawer/Drawer.js";
+import Settings from "./routes/Settings/Settings.js";
 
 const AppWrapper = () => {
   return (
@@ -42,9 +37,8 @@ function App() {
   const [hasPermission, setHasPermission] = useState("null");
 
   const { username, isSignedIn } = useSelector(({ auth }) => auth);
-  console.log("isSignedIn", isSignedIn);
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   useEffect(() => {
     const getPermissions = async () => {
@@ -77,7 +71,6 @@ function App() {
       <NavigationContainer>
         <Stack.Navigator>
           {!isSignedIn ? (
-            // No token found, user isn't signed in
             <>
               <Stack.Screen
                 name="SignIn"
@@ -97,6 +90,13 @@ function App() {
                   // When logging out, a pop animation feels intuitive
                   // You can remove this if you want the default 'push' animation
                   // animationTypeForReplace: state.isSignout ? "pop" : "push",
+                }}
+              />
+              <Stack.Screen
+                name="Settings"
+                component={Settings}
+                options={{
+                  headerShown: false,
                 }}
               />
             </>
@@ -193,107 +193,6 @@ function HomeTabs() {
         }}
       />
     </Tab.Navigator>
-  );
-}
-
-function Drawer() {
-  const Drawer = createDrawerNavigator();
-
-  return (
-    <Drawer.Navigator>
-      <Drawer.Group>
-        <Drawer.Screen
-          name="Инвентаризация"
-          component={Inventory}
-          options={{
-            headerShown: false,
-            drawerIcon: () => (
-              <MaterialCommunityIcon
-                name="home"
-                style={styles.icon}
-                size={25}
-                color="#909090"
-              />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="Журнал"
-          component={Log}
-          options={{
-            headerShown: false,
-            drawerIcon: () => (
-              <MaterialCommunityIcon
-                name="format-list-numbered"
-                style={styles.icon}
-                size={25}
-                color="#909090"
-              />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="В учете"
-          component={Inside}
-          options={{
-            headerShown: false,
-            drawerIcon: () => (
-              <MaterialCommunityIcon
-                name="playlist-check"
-                style={styles.icon}
-                size={25}
-                color="#909090"
-              />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="Не в учете"
-          component={NotReg}
-          options={{
-            headerShown: false,
-            drawerIcon: () => (
-              <MaterialCommunityIcon
-                name="playlist-minus"
-                style={styles.icon}
-                size={25}
-                color="#909090"
-              />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="Сверх учета"
-          component={Over}
-          options={{
-            headerShown: false,
-            drawerIcon: () => (
-              <MaterialCommunityIcon
-                name="playlist-plus"
-                style={styles.icon}
-                size={25}
-                color="#909090"
-              />
-            ),
-          }}
-        />
-        <Drawer.Screen
-          name="Не выявлено"
-          component={NotFound}
-          options={{
-            headerShown: false,
-            drawerIcon: () => (
-              <MaterialCommunityIcon
-                name="playlist-remove"
-                style={styles.icon}
-                size={25}
-                color="#909090"
-              />
-            ),
-          }}
-        />
-      </Drawer.Group>
-    </Drawer.Navigator>
   );
 }
 

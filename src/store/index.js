@@ -8,6 +8,7 @@ import { modalReducer } from "./reducers/inventory/modalReducer";
 import { authReducer } from "./reducers/authReducer";
 import { docsScanDataReducer } from "./reducers/docs/docsScanDataReducer";
 import { infoReducer } from "./reducers/infoReducer";
+import { settingsReducer } from "./reducers/settingsReducer";
 
 const inventoryReducers = combineReducers({
     session: sessionReducer,
@@ -25,6 +26,7 @@ const rootReducer = combineReducers({
     docs: docsReducers,
     auth: authReducer,
     info: infoReducer,
+    settings: settingsReducer,
 });
 
 const persistConfig = {

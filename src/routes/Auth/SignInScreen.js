@@ -7,8 +7,9 @@ import authService from "services/auth.service.js";
 import { styles } from "./AuthScreensStyles";
 import { showMessage } from "react-native-flash-message";
 import PageHeader from "../../components/PageHeader/PageHeader";
+import { API_URL } from "../../http";
 
-export default function SignInScreen() {
+export default function SignInScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const signIn = async () => {
@@ -28,10 +29,17 @@ export default function SignInScreen() {
         type: "info",
       });
     } catch (e) {
-      showMessage({
-        message: `${e.message}`,
-        type: "danger",
-      });
+      if (e.name === "TypeError") {
+        showMessage({
+          message: `Прошло 3 секунды с момента запроса. Проверьте правильность введенного ip адреса: ${API_URL}`,
+          type: "danger",
+        });
+      } else {
+        showMessage({
+          message: `${e.message}`,
+          type: "danger",
+        });
+      }
     }
   };
   return (
@@ -52,6 +60,11 @@ export default function SignInScreen() {
           onPress={() => navigation.navigate("SignUp")}
         /> */}
       </View>
+      <CustomButton
+        text="Настройки"
+        type="TERTIARY"
+        onPress={() => navigation.navigate("Settings")}
+      />
     </View>
   );
 }

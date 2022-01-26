@@ -25,7 +25,6 @@ export default function DrawerPage({
       <View
         style={{
           flex: 1,
-          justifyContent: "center",
           backgroundColor: "white",
           padding: 10,
           borderTopRightRadius: 30,
