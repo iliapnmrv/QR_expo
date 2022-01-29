@@ -1,5 +1,6 @@
-![inventory](https://github.com/iliapnmrv/inventory/blob/main/assets/inventory.jpg?raw=true)
-![docs](https://github.com/iliapnmrv/inventory/blob/main/assets/docs.png?raw=true)
+| Inventory page  | Docs page |
+| ------------- | ------------- |
+| <img src="https://github.com/iliapnmrv/inventory/blob/main/assets/inventory.jpg?raw=true" alt="docs" width="200"/>  | <img src="https://github.com/iliapnmrv/inventory/blob/main/assets/docs.png?raw=true" alt="inventory" width="200"/>  |
 
 # Inventory
 QR code scanner that helps to speed up and simplify the inventory checking process. 
