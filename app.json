@@ -2,7 +2,7 @@
     "expo": {
         "name": "Инвентаризация",
         "slug": "Inventory",
-        "version": "2.1",
+        "version": "2.2",
         "orientation": "portrait",
         "icon": "./assets/inventory.png",
         "splash": {
@@ -13,9 +13,7 @@
         "updates": {
             "fallbackToCacheTimeout": 0
         },
-        "assetBundlePatterns": [
-            "**/*"
-        ],
+        "assetBundlePatterns": ["**/*"],
         "ios": {
             "supportsTablet": true
         },
@@ -25,7 +23,7 @@
                 "backgroundColor": "#FFFFFF"
             },
             "package": "com.inventory.appname",
-            "versionCode": 11,
+            "versionCode": 12,
             "permissions": ["CAMERA"]
         },
         "web": {

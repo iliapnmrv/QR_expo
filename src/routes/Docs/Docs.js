@@ -53,7 +53,7 @@ function Docs({ navigation }) {
 
     setDocsAnalysis(null);
     $api
-      .post(`analysis/`, { name })
+      .post(`analysis/`, { name, model })
       .then(({ data }) => dispatch(setDocsAnalysis(data)))
       .catch((message) => {
         showMessage({

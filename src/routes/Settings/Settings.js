@@ -7,6 +7,7 @@ import Input from "../../components/Input/Input";
 import PageHeader from "../../components/PageHeader/PageHeader";
 import { setIP } from "../../store/actions/settingsAction";
 import { styles } from "../Auth/AuthScreensStyles";
+import * as Application from "expo-application";
 
 export default function Settings({ navigation }) {
   const { ip: savedIP } = useSelector(({ settings }) => settings);
@@ -33,6 +34,9 @@ export default function Settings({ navigation }) {
           </View>
           <CustomButton text="Сохранить" onPress={saveChanges} type="PRIMARY" />
         </View>
+        <Text style={{ marginTop: 10 }}>
+          Версия приложения: {Application.nativeApplicationVersion}
+        </Text>
       </View>
     </>
   );

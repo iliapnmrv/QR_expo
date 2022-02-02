@@ -1,8 +1,8 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Users\iponomarev\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add react-native-reanimated@next react-native-gesture-handlers
+  C:\Program Files\nodejs\node.exe C:\Users\iponomarev\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add expo-application@~4.0.1
 
 PATH: 
-  C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Python39\Scripts\;C:\Python39\;C:\Python27\;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\ATI Technologies\ATI.ACE\Core-Static;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;C:\Program Files\Java\jdk1.8.0_211\bin;C:\Program Files\Git\cmd;C:\Program Files\OpenJDK\openjdk-8u302-b08\bin;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Users\iponomarev\AppData\Local\Microsoft\WindowsApps;C:\Users\iponomarev\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\iponomarev\AppData\Roaming\npm;C:\OpenServer\modules\php\PHP_7.1;C:\Users\iponomarev\AppData\Local\ComposerSetup\bin;C:\Users\iponomarev\AppData\Roaming\Composer\vendor\bin;C:\sqlite;C:\Users\iponomarev\AppData\Local\Android\Sdk\platform-tools;
+  C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Python39\Scripts\;C:\Python39\;C:\Python27\;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\ATI Technologies\ATI.ACE\Core-Static;C:\ProgramData\chocolatey\bin;C:\Program Files\Java\jdk1.8.0_211\bin;C:\Program Files\Git\cmd;C:\Program Files\OpenJDK\openjdk-8u302-b08\bin;C:\Users\iponomarev\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Program Files\MySQL\MySQL Shell 8.0\bin\;C:\Users\iponomarev\AppData\Local\Microsoft\WindowsApps;C:\Users\iponomarev\AppData\Local\Programs\Microsoft VS Code\bin;C:\OpenServer\modules\php\PHP_7.1;C:\Users\iponomarev\AppData\Local\ComposerSetup\bin;C:\Users\iponomarev\AppData\Roaming\Composer\vendor\bin;C:\sqlite;C:\Users\iponomarev\AppData\Local\Android\Sdk\platform-tools;C:\Users\iponomarev\AppData\Roaming\npm;C:\Users\iponomarev\AppData\Roaming\nvm;C:\Program Files\nodejs
 
 Yarn version: 
   1.22.11
@@ -14,17 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/react-native-gesture-handlers: Not found
-      at Request.params.callback [as _callback] (C:\Users\iponomarev\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:66992:18)
-      at Request.self.callback (C:\Users\iponomarev\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140763:22)
-      at Request.emit (node:events:390:28)
-      at Request.<anonymous> (C:\Users\iponomarev\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141735:10)
-      at Request.emit (node:events:390:28)
-      at IncomingMessage.<anonymous> (C:\Users\iponomarev\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141657:12)
-      at Object.onceWrapper (node:events:509:28)
-      at IncomingMessage.emit (node:events:402:35)
-      at endReadableNT (node:internal/streams/readable:1343:12)
-      at processTicksAndRejections (node:internal/process/task_queues:83:21)
+  Error: ENOENT: no such file or directory, lstat 'C:\Users\iponomarev\android\github\inventory\node_modules\acorn'
 
 npm manifest: 
   {
@@ -39,22 +29,19 @@ npm manifest:
       "dependencies": {
           "@expo/ngrok": "4.1.0",
           "@react-native-async-storage/async-storage": "~1.15.0",
+          "@react-native-picker/picker": "^2.2.1",
           "@react-navigation/bottom-tabs": "^6.0.9",
           "@react-navigation/drawer": "^6.1.6",
           "@react-navigation/native": "^6.0.5",
           "@react-navigation/native-stack": "^6.2.3",
           "@react-navigation/stack": "^6.0.10",
+          "axios": "^0.24.0",
           "babel-preset-react-native": "2.1.0",
-          "body-parser": "^1.19.0",
           "events": "^3.3.0",
           "expo": "^44.0.0",
           "expo-barcode-scanner": "~11.2.0",
-          "expo-cameraroll": "^1.1.0",
           "expo-cli": "5.0.3",
-          "expo-clipboard": "~2.1.0",
           "expo-constants": "~13.0.0",
-          "expo-file-system": "~13.1.0",
-          "expo-media-library": "~14.0.0",
           "expo-permissions": "~13.1.0",
           "expo-sqlite": "~10.1.0",
           "expo-status-bar": "~1.2.0",
@@ -65,6 +52,8 @@ npm manifest:
           "react-native": "0.64.3",
           "react-native-barcode-mask": "^1.2.4",
           "react-native-config": "^1.4.3",
+          "react-native-device-info": "^8.4.8",
+          "react-native-flash-message": "^0.2.0",
           "react-native-gesture-handler": "~2.1.0",
           "react-native-reanimated": "~2.3.1",
           "react-native-safe-area-context": "3.3.2",
@@ -74,6 +63,7 @@ npm manifest:
           "react-native-web": "0.17.1",
           "react-redux": "^7.2.5",
           "redux": "^4.1.1",
+          "redux-persist": "^5.6.12",
           "use-force-update": "^1.0.7"
       },
       "devDependencies": {
@@ -1850,6 +1840,11 @@ Lockfile:
       "sudo-prompt" "^9.0.0"
       "wcwidth" "^1.0.1"
   
+  "@react-native-picker/picker@^2.2.1":
+    "integrity" "sha512-EC7yv22QLHlTfnbC1ez9IUdXTOh1W31x96Oir0PfskSGFFJMWWdLTg4VrcE2DsGLzbfjjkBk123c173vf2a5MQ=="
+    "resolved" "https://registry.npmjs.org/@react-native-picker/picker/-/picker-2.2.1.tgz"
+    "version" "2.2.1"
+  
   "@react-native/assets@1.0.0":
     "integrity" "sha512-KrwSpS1tKI70wuKl68DwJZYEvXktDHdZMG0k2AXD/rJVSlB23/X2CB2cutVR0HwNMJIal9HOUOBB2rVfa6UGtQ=="
     "resolved" "https://registry.npmjs.org/@react-native/assets/-/assets-1.0.0.tgz"
@@ -2782,6 +2777,13 @@ Lockfile:
     "resolved" "https://registry.npmjs.org/aws4/-/aws4-1.11.0.tgz"
     "version" "1.11.0"
   
+  "axios@^0.24.0":
+    "integrity" "sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA=="
+    "resolved" "https://registry.npmjs.org/axios/-/axios-0.24.0.tgz"
+    "version" "0.24.0"
+    dependencies:
+      "follow-redirects" "^1.14.4"
+  
   "axios@0.21.1":
     "integrity" "sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA=="
     "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.1.tgz"
@@ -3435,22 +3437,6 @@ Lockfile:
     "resolved" "https://registry.npmjs.org/bn.js/-/bn.js-5.2.0.tgz"
     "version" "5.2.0"
   
-  "body-parser@^1.19.0", "body-parser@1.19.0":
-    "integrity" "sha512-dhEPs72UPbDnAQJ9ZKMNTP6ptJaionhP5cBb541nXPlW60Jepo9RV/a4fX4XWW9CuFNK22krhrj1+rgzifNCsw=="
-    "resolved" "https://registry.npmjs.org/body-parser/-/body-parser-1.19.0.tgz"
-    "version" "1.19.0"
-    dependencies:
-      "bytes" "3.1.0"
-      "content-type" "~1.0.4"
-      "debug" "2.6.9"
-      "depd" "~1.1.2"
-      "http-errors" "1.7.2"
-      "iconv-lite" "0.4.24"
-      "on-finished" "~2.3.0"
-      "qs" "6.7.0"
-      "raw-body" "2.4.0"
-      "type-is" "~1.6.17"
-  
   "body-parser@1.18.3":
     "integrity" "sha1-WykhmP/dVTs6DyDe0FkrlWlVyLQ="
     "resolved" "https://registry.npmjs.org/body-parser/-/body-parser-1.18.3.tgz"
@@ -3466,6 +3452,22 @@ Lockfile:
       "qs" "6.5.2"
       "raw-body" "2.3.3"
       "type-is" "~1.6.16"
+  
+  "body-parser@1.19.0":
+    "integrity" "sha512-dhEPs72UPbDnAQJ9ZKMNTP6ptJaionhP5cBb541nXPlW60Jepo9RV/a4fX4XWW9CuFNK22krhrj1+rgzifNCsw=="
+    "resolved" "https://registry.npmjs.org/body-parser/-/body-parser-1.19.0.tgz"
+    "version" "1.19.0"
+    dependencies:
+      "bytes" "3.1.0"
+      "content-type" "~1.0.4"
+      "debug" "2.6.9"
+      "depd" "~1.1.2"
+      "http-errors" "1.7.2"
+      "iconv-lite" "0.4.24"
+      "on-finished" "~2.3.0"
+      "qs" "6.7.0"
+      "raw-body" "2.4.0"
+      "type-is" "~1.6.17"
   
   "body-parser@1.19.1":
     "integrity" "sha512-8ljfQi5eBk8EJfECMrgqNGWPEY5jWP+1IzkzkGdFFEwFQZZyaZ21UqdaHktgiMlH0xLHqIFtE/u2OYE5dOtViA=="
@@ -5510,11 +5512,6 @@ Lockfile:
       "@expo/config-plugins" "^4.0.2"
       "expo-image-loader" "~3.1.0"
   
-  "expo-cameraroll@^1.1.0":
-    "integrity" "sha512-sUkKuKtepUmS16xToXzyZCD4n2isoRk6MerNxNfym2hLSGQuJ4eJK6mSu3CsReTycZSKbXTBg3tOtKrEE9UTRQ=="
-    "resolved" "https://registry.npmjs.org/expo-cameraroll/-/expo-cameraroll-1.1.0.tgz"
-    "version" "1.1.0"
-  
   "expo-cli@5.0.3":
     "integrity" "sha512-Wou4IPj/V2VggX6k818WnU9Gz/JMgPln02282tQAvmouvkYInXwLG8IFkRqHJdt25nJvz9xrN7RATzn4IFcMWg=="
     "resolved" "https://registry.npmjs.org/expo-cli/-/expo-cli-5.0.3.tgz"
@@ -5579,11 +5576,6 @@ Lockfile:
       "wrap-ansi" "^7.0.0"
       "xdl" "59.2.22"
   
-  "expo-clipboard@~2.1.0":
-    "integrity" "sha512-wJLATd1roEUsatx+GNREBtS8g5vkPWS/0jsLoaPTDVjBVib7RgavaMHj5Wob430qujg+leQmnhPViFk1BXzLYw=="
-    "resolved" "https://registry.npmjs.org/expo-clipboard/-/expo-clipboard-2.1.0.tgz"
-    "version" "2.1.0"
-  
   "expo-constants@~13.0.0":
     "integrity" "sha512-DwElzs1k6KljlZln/X2O9b5K4bXlDk8nzF5nzSLgI+Ibg/xUoIL5QKM41Y9RDJfTzlDlV7nmeS/Xar+nP5KjMA=="
     "resolved" "https://registry.npmjs.org/expo-constants/-/expo-constants-13.0.0.tgz"
@@ -5633,13 +5625,6 @@ Lockfile:
     "version" "0.2.2"
     dependencies:
       "expo-json-utils" "~0.2.0"
-  
-  "expo-media-library@*", "expo-media-library@~14.0.0":
-    "integrity" "sha512-rbrFSLxpmhKqvWivjpMXhAOu0D0sRhu2UNc+SJntXJwsLYx7Mzh9N8pk2kU7iLTPR2YYfxOGW7HyFj18+OB6QQ=="
-    "resolved" "https://registry.npmjs.org/expo-media-library/-/expo-media-library-14.0.0.tgz"
-    "version" "14.0.0"
-    dependencies:
-      "@expo/config-plugins" "^4.0.2"
   
   "expo-modules-autolinking@~0.4.0":
     "integrity" "sha512-GRGHbQ4b/aOtEup/oA6YVS7OOBKqU4sNLhoiTkEJWXmYDRERZiRvp8N2krQtn54y5PqucftqlBrMbdCinTouqg=="
@@ -6114,7 +6099,7 @@ Lockfile:
       "inherits" "^2.0.3"
       "readable-stream" "^2.3.6"
   
-  "follow-redirects@^1.0.0", "follow-redirects@^1.10.0":
+  "follow-redirects@^1.0.0", "follow-redirects@^1.10.0", "follow-redirects@^1.14.4":
     "integrity" "sha512-fhUl5EwSJbbl8AR+uYL2KQDxLkdSjZGR36xy46AO7cOMTrCMON6Sa28FmAnC2tRTDbd/Uuzz3aJBv7EBN7JH8A=="
     "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.14.6.tgz"
     "version" "1.14.6"
@@ -10718,6 +10703,19 @@ Lockfile:
     "resolved" "https://registry.npmjs.org/react-native-config/-/react-native-config-1.4.3.tgz"
     "version" "1.4.3"
   
+  "react-native-device-info@^8.4.8":
+    "integrity" "sha512-92676ZWHZHsPM/EW1ulgb2MuVfjYfMWRTWMbLcrCsipkcMaZ9Traz5mpsnCS7KZpsOksnvUinzDIjsct2XGc6Q=="
+    "resolved" "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-8.4.8.tgz"
+    "version" "8.4.8"
+  
+  "react-native-flash-message@^0.2.0":
+    "integrity" "sha512-hntGa5tq6TvO6LuCMQaO+r18sWY8T3aXBr4TvXvsbrCWazWZdG9P+oALp5UsvRkk/Vtr2fQ1pT5dG+9AM/RXyQ=="
+    "resolved" "https://registry.npmjs.org/react-native-flash-message/-/react-native-flash-message-0.2.0.tgz"
+    "version" "0.2.0"
+    dependencies:
+      "prop-types" "^15.7.2"
+      "react-native-iphone-x-helper" "^1.3.1"
+  
   "react-native-gesture-handler@*", "react-native-gesture-handler@>= 1.0.0", "react-native-gesture-handler@~2.1.0":
     "integrity" "sha512-vF4yEUrV5GMBioTkvf5Le1l3N/52dSLBnNMFC+kZ4hssnRoXB0hEQ0ReUkZckRB5L3nbHBhAyjySEtFPx4nyEA=="
     "resolved" "https://registry.npmjs.org/react-native-gesture-handler/-/react-native-gesture-handler-2.1.0.tgz"
@@ -10728,6 +10726,11 @@ Lockfile:
       "invariant" "^2.2.4"
       "lodash" "^4.17.21"
       "prop-types" "^15.7.2"
+  
+  "react-native-iphone-x-helper@^1.3.1":
+    "integrity" "sha512-HOf0jzRnq2/aFUcdCJ9w9JGzN3gdEg0zFE4FyYlp4jtidqU03D5X7ZegGKfT1EWteR0gPBGp9ye5T5FvSWi9Yg=="
+    "resolved" "https://registry.npmjs.org/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.3.1.tgz"
+    "version" "1.3.1"
   
   "react-native-reanimated@>= 1.0.0", "react-native-reanimated@~2.3.1":
     "integrity" "sha512-nzjVqwkB8eeyPKT2KoiA9EEz17ZMFSGMoOTC17Z9b5nE2Z4ZHjHM5EKhY0TlwzXFUuJAE9PhOfxF0wIO/maZSA=="
@@ -10787,7 +10790,7 @@ Lockfile:
       "normalize-css-color" "^1.0.2"
       "prop-types" "^15.6.0"
   
-  "react-native@*", "react-native@^0.0.0-0 || ^0.60.6 || ^0.61.5 || ^0.62.2 || ^0.63.2 || ^0.64.0 || ^0.65.0 || ^0.66.0 || 1000.0.0", "react-native@>=0.14.0", "react-native@>=0.64.0-rc.0 || 0.0.0-*", "react-native@0.64.3":
+  "react-native@*", "react-native@^0.0.0-0 || ^0.60.6 || ^0.61.5 || ^0.62.2 || ^0.63.2 || ^0.64.0 || ^0.65.0 || ^0.66.0 || 1000.0.0", "react-native@>=0.14.0", "react-native@>=0.42.0", "react-native@>=0.57", "react-native@>=0.64.0-rc.0 || 0.0.0-*", "react-native@0.64.3":
     "integrity" "sha512-2OEU74U0Ek1/WeBzPbg6XDsCfjF/9fhrNX/5TFgEiBKd5mNc9LOZ/OlMmkb7iues/ZZ/oc51SbEfLRQdcW0fVw=="
     "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.64.3.tgz"
     "version" "0.64.3"
@@ -10858,7 +10861,7 @@ Lockfile:
       "global" "^4.3.0"
       "react-proxy" "^1.1.7"
   
-  "react@*", "react@^16.8.0 || ^17.0.0", "react@^16.8.3 || ^17", "react@^17.0.0", "react@>=17.0.1", "react@17.0.1":
+  "react@*", "react@^16.8.0 || ^17.0.0", "react@^16.8.3 || ^17", "react@^17.0.0", "react@>=17.0.1", "react@16 || 17", "react@17.0.1":
     "integrity" "sha512-lG9c9UuMHdcAexXtigOZLX8exLWkW0Ku29qPRU8uhF2R9BN96dLCt0psvzPLlHc5OWkgymP3qwTRgbnw5BKx3w=="
     "resolved" "https://registry.npmjs.org/react/-/react-17.0.1.tgz"
     "version" "17.0.1"
@@ -10960,7 +10963,12 @@ Lockfile:
     dependencies:
       "minimatch" "3.0.4"
   
-  "redux@^4.0.0", "redux@^4.1.1":
+  "redux-persist@^5.6.12":
+    "integrity" "sha512-be7czsCMuCH4wYAEUIvLbGaKeaQN4uCmxGImYneS05mo8XruCGFlRhuLUfEr+ytXLYUJtKzFAPcUbM3SDXzHWQ=="
+    "resolved" "https://registry.npmjs.org/redux-persist/-/redux-persist-5.6.12.tgz"
+    "version" "5.6.12"
+  
+  "redux@^4.0.0", "redux@^4.1.1", "redux@>3.0.0":
     "integrity" "sha512-hZQZdDEM25UY2P493kPYuKqviVwZ58lEmGQNeQ+gXa+U0gYPUBf7NKYazbe3m+bs/DzM/ahN12DbF+NG8i0CWw=="
     "resolved" "https://registry.npmjs.org/redux/-/redux-4.1.1.tgz"
     "version" "4.1.1"
